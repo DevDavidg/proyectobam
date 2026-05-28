@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors & IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Cursor (keep project rules)
+.cursor/*
+!.cursor/rules/
+
+# TypeScript / tooling cache
+.cache/
+.turbo/
+.eslintcache
+
+# Test coverage
+coverage/
+
+# --- Project-specific ---
+
+# FFDec decompiler (local tooling, not part of the app)
+.tmp_ffdec/
+.tmp_ffdec.zip
+.tmp_ffdec_dump.txt
+
+# Asset download script temp dirs
+.tmp/
+tmp/
+
+# Staging folders for 3D / Blender workflows
+pasarablend3d/
+pasaramodelos3d/
+
+# Reference subproject (separate repo; do not track here)
+MANDATORYGUIDEPROJECT/
+
+# Downloaded sample asset packs (regenerate: npm run download:assets)
+public/assets/models/gltf-sample-assets/
+public/assets/models/gltf-sample-models/
+public/assets/models/gltf-sample-environments/
+public/assets/models/drei-assets/
+
+# Archives in project root (e.g. downloaded tooling)
+/*.zip

@@ -1,0 +1,84 @@
+{
+  "source": "tmp\\townhall_l1_source.png",
+  "output_sprite": "public\\assets\\structures\\townhall_l1.png",
+  "original_size": [
+    1024,
+    558
+  ],
+  "cropped_size": [
+    860,
+    547
+  ],
+  "bbox_in_original": [
+    142,
+    8,
+    1002,
+    555
+  ],
+  "coverage_ratio": 0.436,
+  "anchor_in_sprite": [
+    442,
+    546
+  ],
+  "base_width_px": 688,
+  "average_color_hex": "#76715c",
+  "average_brightness_0_1": 0.4218,
+  "palette": [
+    {
+      "hex": "#87784f",
+      "rgb": [
+        135,
+        120,
+        79
+      ],
+      "weight": 0.2429
+    },
+    {
+      "hex": "#564b54",
+      "rgb": [
+        86,
+        75,
+        84
+      ],
+      "weight": 0.2233
+    },
+    {
+      "hex": "#383132",
+      "rgb": [
+        56,
+        49,
+        50
+      ],
+      "weight": 0.21
+    },
+    {
+      "hex": "#a7887f",
+      "rgb": [
+        167,
+        136,
+        127
+      ],
+      "weight": 0.1734
+    },
+    {
+      "hex": "#cfd1c4",
+      "rgb": [
+        207,
+        209,
+        196
+      ],
+      "weight": 0.0949
+    },
+    {
+      "hex": "#60ec34",
+      "rgb": [
+        96,
+        236,
+        52
+      ],
+      "weight": 0.0554
+    }
+  ],
+  "bg_removal_method": "flood-fill-lab",
+  "notes": []
+}

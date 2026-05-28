@@ -1,0 +1,40 @@
+{
+  "name": "proyectobam",
+  "version": "0.1.0",
+  "description": "A modern, web-based, local-first Isometric Base-Building & Strategy game inspired by the classics of the 2010s social gaming era. Built entirely with TypeScript, WebGL (Three.js), and modern web frameworks, avoiding heavy commercial game engines.",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "download:assets": "vite-node scripts/download-assets.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@react-three/postprocessing": "^3.0.4",
+    "adm-zip": "^0.5.17",
+    "bitecs": "^0.4.0",
+    "miniplex": "^2.0.0",
+    "postprocessing": "^6.39.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "three": "^0.181.1",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/adm-zip": "^0.5.8",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.14",
+    "vite-node": "^6.0.0"
+  }
+}

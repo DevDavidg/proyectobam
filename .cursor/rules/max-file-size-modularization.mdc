@@ -1,0 +1,38 @@
+---
+description: Mandatory modularization when a source file exceeds 600 lines
+alwaysApply: true
+---
+
+# Mandatory File Size Rule (+600 LOC)
+
+## Non-negotiable policy
+
+- If any source file exceeds 600 lines, modularization is mandatory.
+- Do not keep adding features in the oversized file.
+- Create a dedicated folder for that file's domain and split by responsibility.
+
+## Required implementation steps
+
+1. Create a folder next to the original file using kebab-case naming.
+2. Move logic into focused modules (state, selectors, actions, utils, types, constants, UI helpers, etc.).
+3. Keep the existing public API/exports stable, or provide a compatibility barrel that preserves imports.
+4. Verify behavior parity: no functional regressions allowed.
+5. Keep each new module small and cohesive; avoid creating another oversized file.
+
+## Definition of done (mandatory)
+
+- Build succeeds.
+- Existing tests pass.
+- If tests are missing, add regression tests for the split behavior before/while refactoring.
+- Runtime behavior remains identical from the user perspective.
+- Imports are updated without breaking consumers.
+
+## Example
+
+- `state/game-store.ts` grows beyond 600 lines.
+- Create `state/game-store/` and split into modules like:
+  - `game-store.state.ts`
+  - `game-store.actions.ts`
+  - `game-store.selectors.ts`
+  - `game-store.persistence.ts`
+  - `index.ts` (compatibility exports)

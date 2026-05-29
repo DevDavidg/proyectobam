@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+import type { Material } from 'three';
 import { getBoxGeometry, getCylinderGeometry, getSphereGeometry } from '../../building-visual/geometry-cache';
 import { HATCHERY_PALETTE } from '../palette';
 import {
@@ -13,7 +14,7 @@ import {
 type DomeBodyProps = {
   domeRef: RefObject<import('three').Mesh | null>;
   bronzeBandRef: RefObject<import('three').Mesh | null>;
-  createMaterial: (fallbackColor: string, token: 'gold' | 'iron' | 'wood' | 'goo' | 'stone') => React.ReactElement;
+  createMaterial: (fallbackColor: string, token: 'gold' | 'iron' | 'wood' | 'goo' | 'stone') => Material;
 };
 
 export const DomeBody = ({ domeRef, bronzeBandRef, createMaterial }: DomeBodyProps) => (
@@ -24,9 +25,7 @@ export const DomeBody = ({ domeRef, bronzeBandRef, createMaterial }: DomeBodyPro
     </mesh>
 
     <mesh ref={bronzeBandRef} castShadow receiveShadow position={[0, 0.13, 0]}>
-      <primitive attach="geometry" object={getCylinderGeometry(0.98, 1.06, 0.24, 40)} />
-      {createMaterial(HATCHERY_PALETTE.bronze, 'gold')}
-    </mesh>
+      <primitive attach="geometry" object={getCylinderGeometry(0.98, 1.06, 0.24, 40)} /></mesh>
 
     <group scale={[1, DOME_SQUASH_Y, 1]} position={[0, DOME_CENTER_Y - DOME_CENTER_Y * DOME_SQUASH_Y + 0.04, 0]}>
       <mesh ref={domeRef} castShadow receiveShadow position={[0, DOME_CENTER_Y / DOME_SQUASH_Y, 0]}>

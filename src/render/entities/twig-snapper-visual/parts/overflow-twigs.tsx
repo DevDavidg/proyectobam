@@ -19,10 +19,8 @@ export const OverflowTwigs = ({ createMaterial, groupRef }: OverflowTwigsProps) 
         position={[twig.x, twig.y, twig.z]}
         rotation={[twig.tiltX, twig.rotationY, Math.PI / 2 + twig.tiltZ]}
         visible={false}
-      >
-        <cylinderGeometry args={[twig.thickness, twig.thickness * 0.7, twig.length, 8]} />
-        {createMaterial(tonePaletteTwig(twig.tone), 'wood')}
-      </mesh>
+       material={createMaterial(tonePaletteTwig(twig.tone), 'wood')}>
+        <cylinderGeometry args={[twig.thickness, twig.thickness * 0.7, twig.length, 8]} /></mesh>
     ))}
   </group>
 );

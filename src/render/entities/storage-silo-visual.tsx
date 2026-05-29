@@ -1,7 +1,6 @@
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
-import type { ReactElement } from 'react';
-import type { Group } from 'three';
+import type { Group, Material } from 'three';
 import type { BuildingStatus } from '../../core/types/building';
 
 type MaterialToken = 'gold' | 'iron' | 'wood' | 'goo' | 'stone';
@@ -14,7 +13,7 @@ type StorageSiloVisualProps = {
   hp?: number;
   maxHp?: number;
   storageFillRatio?: number;
-  createMaterial: (fallbackColor: string, token: MaterialToken) => ReactElement;
+  createMaterial: (fallbackColor: string, token: MaterialToken) => Material;
 };
 
 type SiloState = 'filling' | 'normal' | 'damaged' | 'destroyed';
@@ -60,85 +59,59 @@ export const StorageSiloVisual = ({
   if (visualState === 'destroyed') {
     return (
       <group position={[0, 0.03, 0]} rotation={[0.1, 0.25, -0.2]}>
-        <mesh castShadow receiveShadow position={[0, 0.08, 0]}>
-          <boxGeometry args={[baseRadius * 2.2, 0.12, baseRadius * 1.3]} />
-          {createMaterial('#8a928f', 'stone')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[0.04, 0.11, 0]}>
-          <cylinderGeometry args={[0.15, 0.2, 0.18, 10]} />
-          {createMaterial('#c9bbb2', 'wood')}
-        </mesh>
+        <mesh castShadow receiveShadow position={[0, 0.08, 0]} material={createMaterial('#8a928f', 'stone')}>
+          <boxGeometry args={[baseRadius * 2.2, 0.12, baseRadius * 1.3]} /></mesh>
+        <mesh castShadow receiveShadow position={[0.04, 0.11, 0]} material={createMaterial('#c9bbb2', 'wood')}>
+          <cylinderGeometry args={[0.15, 0.2, 0.18, 10]} /></mesh>
       </group>
     );
   }
 
   return (
     <group>
-      <mesh castShadow receiveShadow position={[0, 0.14, 0]}>
-        <boxGeometry args={[baseRadius * 2.1, 0.14, baseRadius * 2.1]} />
-        {createMaterial('#6a726f', 'stone')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, 0.14, 0]} material={createMaterial('#6a726f', 'stone')}>
+        <boxGeometry args={[baseRadius * 2.1, 0.14, baseRadius * 2.1]} /></mesh>
 
       <group ref={sackRef} position={[0, 0.48, 0]}>
-        <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[0.23, 0.29, 0.72, 12]} />
-          {createMaterial('#cfc6bf', 'wood')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[0, 0.34, 0]}>
-          <sphereGeometry args={[0.2, 12, 10]} />
-          {createMaterial('#d9d1c8', 'wood')}
-        </mesh>
+        <mesh castShadow receiveShadow material={createMaterial('#cfc6bf', 'wood')}>
+          <cylinderGeometry args={[0.23, 0.29, 0.72, 12]} /></mesh>
+        <mesh castShadow receiveShadow position={[0, 0.34, 0]} material={createMaterial('#d9d1c8', 'wood')}>
+          <sphereGeometry args={[0.2, 12, 10]} /></mesh>
       </group>
 
       <group ref={topRef} position={[0, 0.88, 0]}>
-        <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[0.22, 0.25, 0.12, 12]} />
-          {createMaterial('#cc9a3e', 'gold')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[0, 0.1, 0]}>
-          <sphereGeometry args={[0.06, 10, 10]} />
-          {createMaterial('#e1b85a', 'gold')}
-        </mesh>
+        <mesh castShadow receiveShadow material={createMaterial('#cc9a3e', 'gold')}>
+          <cylinderGeometry args={[0.22, 0.25, 0.12, 12]} /></mesh>
+        <mesh castShadow receiveShadow position={[0, 0.1, 0]} material={createMaterial('#e1b85a', 'gold')}>
+          <sphereGeometry args={[0.06, 10, 10]} /></mesh>
       </group>
 
       {[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sz], index) => (
         <group key={`silo-post-${index}`} position={[sx * (baseRadius + 0.16), 0.36, sz * (baseRadius + 0.16)]}>
-          <mesh castShadow receiveShadow>
-            <cylinderGeometry args={[0.04, 0.05, 0.78, 8]} />
-            {createMaterial('#b88c3e', 'gold')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[0, -0.42, 0]}>
-            <sphereGeometry args={[0.05, 8, 8]} />
-            {createMaterial('#8b969d', 'stone')}
-          </mesh>
+          <mesh castShadow receiveShadow material={createMaterial('#b88c3e', 'gold')}>
+            <cylinderGeometry args={[0.04, 0.05, 0.78, 8]} /></mesh>
+          <mesh castShadow receiveShadow position={[0, -0.42, 0]} material={createMaterial('#8b969d', 'stone')}>
+            <sphereGeometry args={[0.05, 8, 8]} /></mesh>
         </group>
       ))}
 
       {visualState === 'damaged' ? (
         <group rotation={[0.08, 0, -0.1]}>
-          <mesh castShadow receiveShadow position={[0.18, 0.58, -0.14]} rotation={[0.2, 0.4, 0.1]}>
-            <boxGeometry args={[0.14, 0.08, 0.12]} />
-            {createMaterial('#727a84', 'stone')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[-0.16, 0.28, 0.16]} rotation={[0.1, 0.2, 0.5]}>
-            <cylinderGeometry args={[0.035, 0.035, 0.22, 8]} />
-            {createMaterial('#8d949d', 'iron')}
-          </mesh>
+          <mesh castShadow receiveShadow position={[0.18, 0.58, -0.14]} rotation={[0.2, 0.4, 0.1]} material={createMaterial('#727a84', 'stone')}>
+            <boxGeometry args={[0.14, 0.08, 0.12]} /></mesh>
+          <mesh castShadow receiveShadow position={[-0.16, 0.28, 0.16]} rotation={[0.1, 0.2, 0.5]} material={createMaterial('#8d949d', 'iron')}>
+            <cylinderGeometry args={[0.035, 0.035, 0.22, 8]} /></mesh>
         </group>
       ) : null}
 
       {visualState === 'filling' ? (
-        <mesh castShadow receiveShadow position={[0.26, 0.86, 0.02]}>
-          <torusGeometry args={[0.08 + fillRatio * 0.08, 0.015, 8, 14]} />
-          {createMaterial('#b5bcc7', 'iron')}
-        </mesh>
+        <mesh castShadow receiveShadow position={[0.26, 0.86, 0.02]} material={createMaterial('#b5bcc7', 'iron')}>
+          <torusGeometry args={[0.08 + fillRatio * 0.08, 0.015, 8, 14]} /></mesh>
       ) : null}
 
       {level >= 7 ? (
-        <mesh castShadow receiveShadow position={[-0.24, 0.82, 0]} rotation={[0, Math.PI / 2, 0]}>
-          <cylinderGeometry args={[0.02, 0.02, 0.28, 8]} />
-          {createMaterial('#9ea7b3', 'iron')}
-        </mesh>
+        <mesh castShadow receiveShadow position={[-0.24, 0.82, 0]} rotation={[0, Math.PI / 2, 0]} material={createMaterial('#9ea7b3', 'iron')}>
+          <cylinderGeometry args={[0.02, 0.02, 0.28, 8]} /></mesh>
       ) : null}
     </group>
   );

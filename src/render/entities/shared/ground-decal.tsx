@@ -22,9 +22,7 @@ export const GroundDecal = ({
   const meshPosition = position ?? [0, y, 0];
 
   return (
-    <mesh receiveShadow position={meshPosition} rotation={[-Math.PI / 2, 0, 0]}>
-      <circleGeometry args={[radius, segments]} />
-      {createMaterial(color, token)}
-    </mesh>
+    <mesh receiveShadow position={meshPosition} rotation={[-Math.PI / 2, 0, 0]} material={createMaterial(color, token)}>
+      <circleGeometry args={[radius, segments]} /></mesh>
   );
 };

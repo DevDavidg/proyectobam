@@ -1,9 +1,9 @@
-import type { ReactElement } from 'react';
+import type { Material } from 'three';
 import type { BuildingStatus } from '../../../core/types/building';
 
 export type MaterialToken = 'gold' | 'iron' | 'wood' | 'goo' | 'stone';
 
-export type MaterialFactory = (fallbackColor: string, token: MaterialToken) => ReactElement;
+export type MaterialFactory = (fallbackColor: string, token: MaterialToken) => Material;
 
 export type CreateMaterial = MaterialFactory;
 

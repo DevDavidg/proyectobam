@@ -1,4 +1,5 @@
-import { useMemo, type ReactElement } from 'react';
+import { useMemo } from 'react';
+import type { Material } from 'three';
 import {
   getBoxGeometry,
   getCylinderGeometry,
@@ -8,7 +9,7 @@ import {
 import { getRoundedBoxGeometry } from './geometries';
 import type { MaterialToken } from './types';
 
-type CreateMaterial = (fallbackColor: string, token: MaterialToken) => ReactElement;
+type CreateMaterial = (fallbackColor: string, token: MaterialToken) => Material;
 
 const STRAP_THICKNESS = 0.04;
 
@@ -99,13 +100,11 @@ export const ScrapStraps = ({
               receiveShadow
               position={[width / 2 - STRAP_THICKNESS / 2 + 0.002, positionY, strap.offsetU]}
               rotation={[0, 0, strap.rotation]}
-            >
+             material={createMaterial(color, token)}>
               <primitive
                 attach='geometry'
                 object={getBoxGeometry(STRAP_THICKNESS, strap.strapHeight, strap.strapWidth)}
-              />
-              {createMaterial(color, token)}
-            </mesh>
+              /></mesh>
           );
         }
         if (strap.side === 'neg-x') {
@@ -116,13 +115,11 @@ export const ScrapStraps = ({
               receiveShadow
               position={[-width / 2 + STRAP_THICKNESS / 2 - 0.002, positionY, strap.offsetU]}
               rotation={[0, 0, strap.rotation]}
-            >
+             material={createMaterial(color, token)}>
               <primitive
                 attach='geometry'
                 object={getBoxGeometry(STRAP_THICKNESS, strap.strapHeight, strap.strapWidth)}
-              />
-              {createMaterial(color, token)}
-            </mesh>
+              /></mesh>
           );
         }
         if (strap.side === 'pos-z') {
@@ -133,13 +130,11 @@ export const ScrapStraps = ({
               receiveShadow
               position={[strap.offsetU, positionY, depth / 2 - STRAP_THICKNESS / 2 + 0.002]}
               rotation={[0, 0, strap.rotation]}
-            >
+             material={createMaterial(color, token)}>
               <primitive
                 attach='geometry'
                 object={getBoxGeometry(strap.strapWidth, strap.strapHeight, STRAP_THICKNESS)}
-              />
-              {createMaterial(color, token)}
-            </mesh>
+              /></mesh>
           );
         }
         return (
@@ -149,13 +144,11 @@ export const ScrapStraps = ({
             receiveShadow
             position={[strap.offsetU, positionY, -depth / 2 + STRAP_THICKNESS / 2 - 0.002]}
             rotation={[0, 0, strap.rotation]}
-          >
+           material={createMaterial(color, token)}>
             <primitive
               attach='geometry'
               object={getBoxGeometry(strap.strapWidth, strap.strapHeight, STRAP_THICKNESS)}
-            />
-            {createMaterial(color, token)}
-          </mesh>
+            /></mesh>
         );
       })}
     </group>
@@ -246,10 +239,8 @@ export const PerimeterRivetTrack = ({
           position={[entry.position[0], height, entry.position[1]]}
           rotation={[0, entry.rotationY, 0]}
           scale={[1, 0.4, 1]}
-        >
-          <primitive attach='geometry' object={getSphereGeometry(rivetRadius, 8, 8)} />
-          {createMaterial(color, token)}
-        </mesh>
+         material={createMaterial(color, token)}>
+          <primitive attach='geometry' object={getSphereGeometry(rivetRadius, 8, 8)} /></mesh>
       ))}
     </group>
   );
@@ -297,10 +288,8 @@ export const CylinderRivetRing = ({
           position={entry.position}
           rotation={[0, entry.rotationY, 0]}
           scale={[1, 0.4, 1]}
-        >
-          <primitive attach='geometry' object={getSphereGeometry(rivetRadius, 8, 8)} />
-          {createMaterial(color, token)}
-        </mesh>
+         material={createMaterial(color, token)}>
+          <primitive attach='geometry' object={getSphereGeometry(rivetRadius, 8, 8)} /></mesh>
       ))}
     </group>
   );
@@ -329,20 +318,16 @@ export const MechanicalGauge = ({
 }: MechanicalGaugeProps) => {
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      <mesh castShadow receiveShadow position={[0, 0, -0.018]}>
+      <mesh castShadow receiveShadow position={[0, 0, -0.018]} material={createMaterial(bodyColor, 'iron')}>
         <primitive
           attach='geometry'
           object={getCylinderGeometry(dialRadius * 1.18, dialRadius * 1.18, 0.035, 18)}
-        />
-        {createMaterial(bodyColor, 'iron')}
-      </mesh>
-      <mesh castShadow receiveShadow position={[0, 0, 0.005]}>
+        /></mesh>
+      <mesh castShadow receiveShadow position={[0, 0, 0.005]} material={createMaterial(dialColor, 'stone')}>
         <primitive
           attach='geometry'
           object={getCylinderGeometry(dialRadius, dialRadius, 0.018, 22)}
-        />
-        {createMaterial(dialColor, 'stone')}
-      </mesh>
+        /></mesh>
       <mesh
         castShadow
         receiveShadow
@@ -352,17 +337,13 @@ export const MechanicalGauge = ({
           0.018,
         ]}
         rotation={[0, 0, needleAngle]}
-      >
+       material={createMaterial(bodyColor, 'iron')}>
         <primitive
           attach='geometry'
           object={getBoxGeometry(needleLength, 0.012, 0.008)}
-        />
-        {createMaterial(bodyColor, 'iron')}
-      </mesh>
-      <mesh castShadow receiveShadow position={[0, 0, 0.022]}>
-        <primitive attach='geometry' object={getSphereGeometry(0.018, 8, 8)} />
-        {createMaterial(bodyColor, 'iron')}
-      </mesh>
+        /></mesh>
+      <mesh castShadow receiveShadow position={[0, 0, 0.022]} material={createMaterial(bodyColor, 'iron')}>
+        <primitive attach='geometry' object={getSphereGeometry(0.018, 8, 8)} /></mesh>
     </group>
   );
 };
@@ -394,48 +375,40 @@ export const OrganicElbowPipe = ({
 }: OrganicElbowPipeProps) => {
   return (
     <group position={origin} rotation={[0, rotationY, 0]}>
-      <mesh castShadow receiveShadow position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+      <mesh castShadow receiveShadow position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={createMaterial(flangeColor, 'gold')}>
         <primitive
           attach='geometry'
           object={getCylinderGeometry(flangeRadius, flangeRadius, flangeThickness, 18)}
-        />
-        {createMaterial(flangeColor, 'gold')}
-      </mesh>
+        /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[flangeThickness * 0.6 + tubeRadius * 0.1, -arcRadius * 0.5, 0]}
         rotation={[Math.PI / 2, 0, 0]}
-      >
+       material={createMaterial(pipeColor, pipeToken)}>
         <primitive
           attach='geometry'
           object={getTorusGeometry(arcRadius, tubeRadius, 8, 18, Math.PI / 2)}
-        />
-        {createMaterial(pipeColor, pipeToken)}
-      </mesh>
+        /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[arcRadius + flangeThickness * 0.6, -arcRadius - 0.04, 0]}
-      >
+       material={createMaterial(pipeColor, pipeToken)}>
         <primitive
           attach='geometry'
           object={getCylinderGeometry(tubeRadius * 1.05, tubeRadius * 1.05, 0.18, 12)}
-        />
-        {createMaterial(pipeColor, pipeToken)}
-      </mesh>
+        /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[arcRadius + flangeThickness * 0.6, -arcRadius + 0.04, 0]}
         rotation={[Math.PI / 2, 0, 0]}
-      >
+       material={createMaterial(flangeColor, 'gold')}>
         <primitive
           attach='geometry'
           object={getTorusGeometry(tubeRadius * 1.35, tubeRadius * 0.45, 8, 14)}
-        />
-        {createMaterial(flangeColor, 'gold')}
-      </mesh>
+        /></mesh>
     </group>
   );
 };
@@ -462,12 +435,10 @@ export const BeveledShell = ({
   createMaterial,
 }: BeveledShellProps) => {
   return (
-    <mesh castShadow receiveShadow position={[0, pivotY, 0]}>
+    <mesh castShadow receiveShadow position={[0, pivotY, 0]} material={createMaterial(color, token)}>
       <primitive
         attach='geometry'
         object={getRoundedBoxGeometry(width, height, depth, cornerRadius ? { cornerRadius } : undefined)}
-      />
-      {createMaterial(color, token)}
-    </mesh>
+      /></mesh>
   );
 };

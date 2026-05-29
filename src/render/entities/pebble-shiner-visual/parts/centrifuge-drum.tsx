@@ -85,10 +85,8 @@ export const CentrifugeDrum = ({
               Math.sin(pebble.angle) * pebble.r,
             ]}
             rotation={[pebble.rotation, pebble.rotation * 0.7, 0]}
-          >
-            <icosahedronGeometry args={[pebble.size, 0]} />
-            {createMaterial(pebble.tone, 'stone')}
-          </mesh>
+           material={createMaterial(pebble.tone, 'stone')}>
+            <icosahedronGeometry args={[pebble.size, 0]} /></mesh>
         ))}
 
         {/* Faint translucent mesh shell so the cage reads as a perforated cylinder */}
@@ -111,9 +109,7 @@ export const CentrifugeDrum = ({
             position={[offset, 0, 0]}
             rotation={[0, Math.PI / 2, 0]}
           >
-            <torusGeometry args={[radius + 0.004, 0.012, 8, 32]} />
-            {createMaterial(PALETTE.drumMeshHighlight, 'iron')}
-          </mesh>
+            <torusGeometry args={[radius + 0.004, 0.012, 8, 32]} /></mesh>
         ))}
 
         {/* Axial mesh bars forming the perforated cage */}
@@ -127,10 +123,8 @@ export const CentrifugeDrum = ({
               Math.cos(bar.angle) * (radius + 0.001),
               Math.sin(bar.angle) * (radius + 0.001),
             ]}
-          >
-            <boxGeometry args={[length * 0.9, 0.011, 0.011]} />
-            {createMaterial(PALETTE.drumMeshShadow, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.drumMeshShadow, 'iron')}>
+            <boxGeometry args={[length * 0.9, 0.011, 0.011]} /></mesh>
         ))}
 
         {/* Solid metal end caps (drum heads) */}
@@ -139,48 +133,36 @@ export const CentrifugeDrum = ({
           receiveShadow
           position={[length / 2 + 0.005, 0, 0]}
           rotation={[0, 0, Math.PI / 2]}
-        >
-          <cylinderGeometry args={[radius + 0.03, radius + 0.03, 0.07, 28]} />
-          {createMaterial(PALETTE.drumEndCap, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.drumEndCap, 'iron')}>
+          <cylinderGeometry args={[radius + 0.03, radius + 0.03, 0.07, 28]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[length / 2 + 0.042, 0, 0]}
           rotation={[0, 0, Math.PI / 2]}
-        >
-          <cylinderGeometry args={[radius + 0.022, radius + 0.022, 0.015, 28]} />
-          {createMaterial(PALETTE.drumEndCapHighlight, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.drumEndCapHighlight, 'iron')}>
+          <cylinderGeometry args={[radius + 0.022, radius + 0.022, 0.015, 28]} /></mesh>
 
         <mesh
           castShadow
           receiveShadow
           position={[-length / 2 - 0.005, 0, 0]}
           rotation={[0, 0, Math.PI / 2]}
-        >
-          <cylinderGeometry args={[radius + 0.03, radius + 0.03, 0.07, 28]} />
-          {createMaterial(PALETTE.drumEndCap, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.drumEndCap, 'iron')}>
+          <cylinderGeometry args={[radius + 0.03, radius + 0.03, 0.07, 28]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[-length / 2 - 0.042, 0, 0]}
           rotation={[0, 0, Math.PI / 2]}
-        >
-          <cylinderGeometry args={[radius + 0.022, radius + 0.022, 0.015, 28]} />
-          {createMaterial(PALETTE.drumEndCapHighlight, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.drumEndCapHighlight, 'iron')}>
+          <cylinderGeometry args={[radius + 0.022, radius + 0.022, 0.015, 28]} /></mesh>
 
         {/* Hub bolts on the end caps that spin with the drum */}
-        <mesh castShadow receiveShadow position={[length / 2 + 0.05, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[radius * 0.34, radius * 0.34, 0.04, 16]} />
-          {createMaterial(PALETTE.drumEndCapShadow, 'iron')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[-length / 2 - 0.05, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[radius * 0.34, radius * 0.34, 0.04, 16]} />
-          {createMaterial(PALETTE.drumEndCapShadow, 'iron')}
-        </mesh>
+        <mesh castShadow receiveShadow position={[length / 2 + 0.05, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.drumEndCapShadow, 'iron')}>
+          <cylinderGeometry args={[radius * 0.34, radius * 0.34, 0.04, 16]} /></mesh>
+        <mesh castShadow receiveShadow position={[-length / 2 - 0.05, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.drumEndCapShadow, 'iron')}>
+          <cylinderGeometry args={[radius * 0.34, radius * 0.34, 0.04, 16]} /></mesh>
       </group>
     </group>
   );

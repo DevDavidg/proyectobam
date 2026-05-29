@@ -1,7 +1,6 @@
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
-import type { ReactElement } from 'react';
-import { Color, type Group, type Mesh, type MeshToonMaterial } from 'three';
+import { Color, type Group, type Material, type Mesh, type MeshToonMaterial } from 'three';
 import { getCylinderGeometry, getTorusGeometry } from '../building-visual/geometry-cache';
 import { OPENING_RADIUS, OPENING_Y } from './constants';
 import { HATCHERY_PALETTE } from './palette';
@@ -17,7 +16,7 @@ type HatcheryVisualProps = {
   footprintX: number;
   footprintZ: number;
   hatcheryBusy: boolean;
-  createMaterial: (fallbackColor: string, token: MaterialToken) => ReactElement;
+  createMaterial: (fallbackColor: string, token: MaterialToken) => Material;
 };
 
 const RED_HEAT_COLOR = new Color('#ff5a32');
@@ -82,9 +81,7 @@ export const HatcheryVisual = ({ footprintX, footprintZ, hatcheryBusy, createMat
       </mesh>
 
       <mesh castShadow receiveShadow position={[0, OPENING_Y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <primitive attach="geometry" object={getTorusGeometry(OPENING_RADIUS, 0.05, 16, 40)} />
-        {createMaterial(HATCHERY_PALETTE.bronzeLight, 'gold')}
-      </mesh>
+        <primitive attach="geometry" object={getTorusGeometry(OPENING_RADIUS, 0.05, 16, 40)} /></mesh>
 
       <InternalGears openingY={OPENING_Y} gearsRef={internalGearsRef} />
 

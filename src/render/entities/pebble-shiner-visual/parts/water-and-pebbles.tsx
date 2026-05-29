@@ -29,18 +29,12 @@ export const WaterAndPebbles = ({
   sparkleRef,
 }: WaterAndPebblesProps) => (
   <group>
-    <mesh receiveShadow position={[0, dim.baseLift + 0.04, 0]}>
-      <boxGeometry args={[dim.innerHalfX * 2, 0.02, dim.innerHalfZ * 2]} />
-      {createMaterial(PALETTE.waterDeep, 'goo')}
-    </mesh>
-    <mesh ref={waterRef} receiveShadow position={[0, dim.waterY, 0]}>
-      <boxGeometry args={[dim.innerHalfX * 2 - 0.02, 0.04, dim.innerHalfZ * 2 - 0.02]} />
-      {createMaterial(PALETTE.waterSurface, 'goo')}
-    </mesh>
-    <mesh receiveShadow position={[0, dim.waterY + 0.024, 0]}>
-      <boxGeometry args={[dim.innerHalfX * 2 - 0.18, 0.005, dim.innerHalfZ * 2 - 0.16]} />
-      {createMaterial(PALETTE.waterSurfaceHighlight, 'goo')}
-    </mesh>
+    <mesh receiveShadow position={[0, dim.baseLift + 0.04, 0]} material={createMaterial(PALETTE.waterDeep, 'goo')}>
+      <boxGeometry args={[dim.innerHalfX * 2, 0.02, dim.innerHalfZ * 2]} /></mesh>
+    <mesh ref={waterRef} receiveShadow position={[0, dim.waterY, 0]} material={createMaterial(PALETTE.waterSurface, 'goo')}>
+      <boxGeometry args={[dim.innerHalfX * 2 - 0.02, 0.04, dim.innerHalfZ * 2 - 0.02]} /></mesh>
+    <mesh receiveShadow position={[0, dim.waterY + 0.024, 0]} material={createMaterial(PALETTE.waterSurfaceHighlight, 'goo')}>
+      <boxGeometry args={[dim.innerHalfX * 2 - 0.18, 0.005, dim.innerHalfZ * 2 - 0.16]} /></mesh>
 
     <group ref={pebblesRef} position={[0, dim.waterY - 0.02, 0]}>
       {interiorPebbles.map((shape) => (
@@ -50,10 +44,8 @@ export const WaterAndPebbles = ({
           receiveShadow
           position={[shape.x, 0, shape.z]}
           rotation={[shape.rotation * 0.4, shape.rotation, shape.rotation * 0.2]}
-        >
-          <boxGeometry args={[shape.size, shape.size * 0.7, shape.size]} />
-          {createMaterial(tonePalette(shape.tone), 'stone')}
-        </mesh>
+         material={createMaterial(tonePalette(shape.tone), 'stone')}>
+          <boxGeometry args={[shape.size, shape.size * 0.7, shape.size]} /></mesh>
       ))}
     </group>
 
@@ -64,10 +56,8 @@ export const WaterAndPebbles = ({
           position={[p.x, dim.waterY + 0.06, p.z]}
           rotation={[Math.PI / 4, idx, idx * 0.5]}
           visible={false}
-        >
-          <boxGeometry args={[0.022, 0.022, 0.022]} />
-          {createMaterial(PALETTE.sparkle, 'gold')}
-        </mesh>
+         material={createMaterial(PALETTE.sparkle, 'gold')}>
+          <boxGeometry args={[0.022, 0.022, 0.022]} /></mesh>
       ))}
     </group>
   </group>

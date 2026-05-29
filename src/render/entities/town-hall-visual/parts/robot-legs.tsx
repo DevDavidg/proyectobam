@@ -55,87 +55,51 @@ const SingleLeg = ({ dim, createMaterial, signX, signZ }: LegProps) => {
 
   return (
     <group>
-      <mesh castShadow receiveShadow position={[0, hipY, 0]}>
-        <boxGeometry args={[hipSize, hipHeight, hipSize]} />
-        {createMaterial(PALETTE.legPiston, 'iron')}
-      </mesh>
-      <mesh position={[signX * (hipSize / 2 + 0.002), hipY, 0]}>
-        <boxGeometry args={[0.005, hipHeight * 0.92, hipSize * 0.94]} />
-        {createMaterial(PALETTE.legPistonShadow, 'iron')}
-      </mesh>
-      <mesh position={[0, hipY, signZ * (hipSize / 2 + 0.002)]}>
-        <boxGeometry args={[hipSize * 0.94, hipHeight * 0.92, 0.005]} />
-        {createMaterial(PALETTE.legPistonShadow, 'iron')}
-      </mesh>
-      <mesh position={[0, hipY + hipHeight / 2 + 0.002, 0]}>
-        <boxGeometry args={[hipSize + 0.012, 0.012, hipSize + 0.012]} />
-        {createMaterial(PALETTE.legPistonLight, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, hipY, 0]} material={createMaterial(PALETTE.legPiston, 'iron')}>
+        <boxGeometry args={[hipSize, hipHeight, hipSize]} /></mesh>
+      <mesh position={[signX * (hipSize / 2 + 0.002), hipY, 0]} material={createMaterial(PALETTE.legPistonShadow, 'iron')}>
+        <boxGeometry args={[0.005, hipHeight * 0.92, hipSize * 0.94]} /></mesh>
+      <mesh position={[0, hipY, signZ * (hipSize / 2 + 0.002)]} material={createMaterial(PALETTE.legPistonShadow, 'iron')}>
+        <boxGeometry args={[hipSize * 0.94, hipHeight * 0.92, 0.005]} /></mesh>
+      <mesh position={[0, hipY + hipHeight / 2 + 0.002, 0]} material={createMaterial(PALETTE.legPistonLight, 'iron')}>
+        <boxGeometry args={[hipSize + 0.012, 0.012, hipSize + 0.012]} /></mesh>
 
-      <mesh castShadow position={[0, hipY - hipHeight / 2 + 0.005, 0]}>
-        <cylinderGeometry args={[pistonRadius * 1.2, pistonRadius * 1.05, 0.04, 12]} />
-        {createMaterial(PALETTE.legJoint, 'iron')}
-      </mesh>
+      <mesh castShadow position={[0, hipY - hipHeight / 2 + 0.005, 0]} material={createMaterial(PALETTE.legJoint, 'iron')}>
+        <cylinderGeometry args={[pistonRadius * 1.2, pistonRadius * 1.05, 0.04, 12]} /></mesh>
 
-      <mesh castShadow receiveShadow position={[0, pistonY, 0]}>
-        <cylinderGeometry args={[pistonRadius, pistonRadius, pistonHeight, 14]} />
-        {createMaterial(PALETTE.legHydraulic, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, pistonY, 0]} material={createMaterial(PALETTE.legHydraulic, 'iron')}>
+        <cylinderGeometry args={[pistonRadius, pistonRadius, pistonHeight, 14]} /></mesh>
 
-      <mesh castShadow position={[0, innerPistonY, 0]}>
-        <cylinderGeometry args={[innerPistonRadius, innerPistonRadius, innerPistonHeight, 14]} />
-        {createMaterial(PALETTE.legPistonLight, 'iron')}
-      </mesh>
+      <mesh castShadow position={[0, innerPistonY, 0]} material={createMaterial(PALETTE.legPistonLight, 'iron')}>
+        <cylinderGeometry args={[innerPistonRadius, innerPistonRadius, innerPistonHeight, 14]} /></mesh>
 
-      <mesh position={[0, innerPistonY + innerPistonHeight / 2 - 0.002, 0]}>
-        <cylinderGeometry args={[innerPistonRadius + 0.006, innerPistonRadius + 0.006, 0.012, 14]} />
-        {createMaterial(PALETTE.legPiston, 'iron')}
-      </mesh>
+      <mesh position={[0, innerPistonY + innerPistonHeight / 2 - 0.002, 0]} material={createMaterial(PALETTE.legPiston, 'iron')}>
+        <cylinderGeometry args={[innerPistonRadius + 0.006, innerPistonRadius + 0.006, 0.012, 14]} /></mesh>
 
-      <mesh castShadow position={[0, ankleY + ankleHeight / 2, 0]}>
-        <cylinderGeometry args={[ankleRadius, ankleRadius * 0.85, ankleHeight, 12]} />
-        {createMaterial(PALETTE.legJoint, 'iron')}
-      </mesh>
+      <mesh castShadow position={[0, ankleY + ankleHeight / 2, 0]} material={createMaterial(PALETTE.legJoint, 'iron')}>
+        <cylinderGeometry args={[ankleRadius, ankleRadius * 0.85, ankleHeight, 12]} /></mesh>
 
-      <mesh castShadow position={[0.04, ankleY + ankleHeight * 0.4, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.014, 0.014, 0.025, 8]} />
-        {createMaterial(PALETTE.legBoltDark, 'iron')}
-      </mesh>
-      <mesh castShadow position={[-0.04, ankleY + ankleHeight * 0.4, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.014, 0.014, 0.025, 8]} />
-        {createMaterial(PALETTE.legBoltDark, 'iron')}
-      </mesh>
+      <mesh castShadow position={[0.04, ankleY + ankleHeight * 0.4, 0]} rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.legBoltDark, 'iron')}>
+        <cylinderGeometry args={[0.014, 0.014, 0.025, 8]} /></mesh>
+      <mesh castShadow position={[-0.04, ankleY + ankleHeight * 0.4, 0]} rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.legBoltDark, 'iron')}>
+        <cylinderGeometry args={[0.014, 0.014, 0.025, 8]} /></mesh>
 
-      <mesh castShadow receiveShadow position={[0, footY, 0]}>
-        <boxGeometry args={[footWidth, footHeight, footDepth]} />
-        {createMaterial(PALETTE.legFootPad, 'iron')}
-      </mesh>
-      <mesh position={[0, footY + footHeight / 2 + 0.001, 0]}>
-        <boxGeometry args={[footWidth + 0.006, 0.008, footDepth + 0.006]} />
-        {createMaterial(PALETTE.legFootPadEdge, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, footY, 0]} material={createMaterial(PALETTE.legFootPad, 'iron')}>
+        <boxGeometry args={[footWidth, footHeight, footDepth]} /></mesh>
+      <mesh position={[0, footY + footHeight / 2 + 0.001, 0]} material={createMaterial(PALETTE.legFootPadEdge, 'iron')}>
+        <boxGeometry args={[footWidth + 0.006, 0.008, footDepth + 0.006]} /></mesh>
 
-      <mesh receiveShadow position={[0, footPadY, 0]}>
-        <boxGeometry args={[footPadWidth, footPadHeight, footPadDepth]} />
-        {createMaterial(PALETTE.legPiston, 'iron')}
-      </mesh>
+      <mesh receiveShadow position={[0, footPadY, 0]} material={createMaterial(PALETTE.legPiston, 'iron')}>
+        <boxGeometry args={[footPadWidth, footPadHeight, footPadDepth]} /></mesh>
 
-      <mesh position={[insetX, footY + footHeight / 2 + 0.0005, insetZ]}>
-        <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} />
-        {createMaterial(PALETTE.legBoltDark, 'iron')}
-      </mesh>
-      <mesh position={[-insetX, footY + footHeight / 2 + 0.0005, insetZ]}>
-        <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} />
-        {createMaterial(PALETTE.legBoltDark, 'iron')}
-      </mesh>
-      <mesh position={[insetX, footY + footHeight / 2 + 0.0005, -insetZ]}>
-        <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} />
-        {createMaterial(PALETTE.legBoltDark, 'iron')}
-      </mesh>
-      <mesh position={[-insetX, footY + footHeight / 2 + 0.0005, -insetZ]}>
-        <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} />
-        {createMaterial(PALETTE.legBoltDark, 'iron')}
-      </mesh>
+      <mesh position={[insetX, footY + footHeight / 2 + 0.0005, insetZ]} material={createMaterial(PALETTE.legBoltDark, 'iron')}>
+        <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} /></mesh>
+      <mesh position={[-insetX, footY + footHeight / 2 + 0.0005, insetZ]} material={createMaterial(PALETTE.legBoltDark, 'iron')}>
+        <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} /></mesh>
+      <mesh position={[insetX, footY + footHeight / 2 + 0.0005, -insetZ]} material={createMaterial(PALETTE.legBoltDark, 'iron')}>
+        <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} /></mesh>
+      <mesh position={[-insetX, footY + footHeight / 2 + 0.0005, -insetZ]} material={createMaterial(PALETTE.legBoltDark, 'iron')}>
+        <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} /></mesh>
     </group>
   );
 };

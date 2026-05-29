@@ -86,7 +86,7 @@ export const BuildingVisual = ({
           createMaterial={createMaterial}
           pivotY={0.4}
         />
-        <mesh castShadow receiveShadow position={[0, 1, 0]}>
+        <mesh castShadow receiveShadow position={[0, 1, 0]} material={createMaterial("#b67852", "wood")}>
           <primitive
             attach="geometry"
             object={getConeGeometry(
@@ -94,9 +94,7 @@ export const BuildingVisual = ({
               0.7,
               6,
             )}
-          />
-          {createMaterial("#b67852", "wood")}
-        </mesh>
+          /></mesh>
         <PerimeterRivetTrack
           width={footprintX}
           depth={footprintZ}
@@ -124,7 +122,7 @@ export const BuildingVisual = ({
     const baseRadius = isMortar ? 1.05 : 0.84;
     return (
       <group>
-        <mesh castShadow receiveShadow position={[0, 0.5, 0]}>
+        <mesh castShadow receiveShadow position={[0, 0.5, 0]} material={createMaterial("#6b7280", "iron")}>
           <primitive
             attach="geometry"
             object={
@@ -132,9 +130,7 @@ export const BuildingVisual = ({
                 ? getCylinderGeometry(0.9, 1.05, 1, 12)
                 : getCylinderGeometry(0.72, 0.84, 0.9, 10)
             }
-          />
-          {createMaterial("#6b7280", "iron")}
-        </mesh>
+          /></mesh>
         <CylinderRivetRing
           radius={baseRadius * 0.92}
           height={0.18}
@@ -151,7 +147,7 @@ export const BuildingVisual = ({
           color="#1f1a14"
           createMaterial={createMaterial}
         />
-        <mesh castShadow receiveShadow position={[0, 1.15, 0]}>
+        <mesh castShadow receiveShadow position={[0, 1.15, 0]} material={createMaterial("#a2aab7", "iron")}>
           <primitive
             attach="geometry"
             object={
@@ -159,14 +155,12 @@ export const BuildingVisual = ({
                 ? getCylinderGeometry(0.62, 0.48, 0.75, 10)
                 : getCylinderGeometry(0.42, 0.42, 0.72, 10)
             }
-          />
-          {createMaterial("#a2aab7", "iron")}
-        </mesh>
+          /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[isMortar ? 0.62 : 0.56, 1.35, 0]}
-        >
+         material={createMaterial("#d1d5db", "iron")}>
           <primitive
             attach="geometry"
             object={
@@ -174,9 +168,7 @@ export const BuildingVisual = ({
                 ? getCylinderGeometry(0.2, 0.2, 1.25, 10)
                 : getCylinderGeometry(0.12, 0.12, 0.92, 10)
             }
-          />
-          {createMaterial("#d1d5db", "iron")}
-        </mesh>
+          /></mesh>
         <MechanicalGauge
           position={[isMortar ? -0.78 : -0.6, 0.62, isMortar ? 0.2 : 0.18]}
           rotationY={Math.PI / 5}
@@ -378,13 +370,11 @@ export const BuildingVisual = ({
         createMaterial={createMaterial}
         pivotY={0.4}
       />
-      <mesh castShadow receiveShadow position={[0, 1.05, 0]}>
+      <mesh castShadow receiveShadow position={[0, 1.05, 0]} material={createMaterial(collectorColor, "goo")}>
         <primitive
           attach="geometry"
           object={getCylinderGeometry(0.52, 0.52, 0.72, 12)}
-        />
-        {createMaterial(collectorColor, "goo")}
-      </mesh>
+        /></mesh>
       <CylinderRivetRing
         radius={0.55}
         height={0.78}
@@ -402,7 +392,7 @@ export const BuildingVisual = ({
         createMaterial={createMaterial}
       />
       {level >= 2 ? (
-        <mesh castShadow receiveShadow position={[0, 1.75, 0]}>
+        <mesh castShadow receiveShadow position={[0, 1.75, 0]} material={createMaterial("#f8fafc", "stone")}>
           <primitive
             attach="geometry"
             object={getSphereGeometry(
@@ -410,9 +400,7 @@ export const BuildingVisual = ({
               12,
               12,
             )}
-          />
-          {createMaterial("#f8fafc", "stone")}
-        </mesh>
+          /></mesh>
       ) : null}
       <PerimeterRivetTrack
         width={footprintX}
@@ -456,13 +444,11 @@ export const BuildingVisual = ({
         receiveShadow
         position={[0, 0.02, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
-      >
+       material={createMaterial("#3f2a1a", "wood")}>
         <primitive
           attach="geometry"
           object={getCircleGeometry(Math.max(0.9, footprintX * 0.45), 24)}
-        />
-        {createMaterial("#3f2a1a", "wood")}
-      </mesh>
+        /></mesh>
     </group>
   );
 };

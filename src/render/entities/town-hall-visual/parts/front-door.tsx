@@ -35,32 +35,28 @@ export const FrontDoor = forwardRef<Group, FrontDoorProps>(({ dim, createMateria
           dim.doorY + dim.doorHeight / 2 + TOP_FRAME_THICKNESS / 2,
           frameZ,
         ]}
-      >
+       material={createMaterial(PALETTE.doorFrame, 'iron')}>
         <boxGeometry
           args={[
             dim.doorWidth + FRAME_THICKNESS * 2,
             TOP_FRAME_THICKNESS,
             dim.doorDepth,
           ]}
-        />
-        {createMaterial(PALETTE.doorFrame, 'iron')}
-      </mesh>
+        /></mesh>
       <mesh
         position={[
           0,
           dim.doorY + dim.doorHeight / 2 + TOP_FRAME_THICKNESS - 0.005,
           frameZ + dim.doorDepth / 2 + 0.001,
         ]}
-      >
+       material={createMaterial(PALETTE.trimDark, 'iron')}>
         <boxGeometry
           args={[
             dim.doorWidth + FRAME_THICKNESS * 2 + 0.005,
             0.014,
             0.005,
           ]}
-        />
-        {createMaterial(PALETTE.trimDark, 'iron')}
-      </mesh>
+        /></mesh>
 
       <mesh
         castShadow
@@ -70,10 +66,8 @@ export const FrontDoor = forwardRef<Group, FrontDoorProps>(({ dim, createMateria
           dim.doorY,
           frameZ,
         ]}
-      >
-        <boxGeometry args={[FRAME_THICKNESS, dim.doorHeight, dim.doorDepth]} />
-        {createMaterial(PALETTE.doorFrame, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.doorFrame, 'iron')}>
+        <boxGeometry args={[FRAME_THICKNESS, dim.doorHeight, dim.doorDepth]} /></mesh>
       <mesh
         castShadow
         receiveShadow
@@ -82,56 +76,44 @@ export const FrontDoor = forwardRef<Group, FrontDoorProps>(({ dim, createMateria
           dim.doorY,
           frameZ,
         ]}
-      >
-        <boxGeometry args={[FRAME_THICKNESS, dim.doorHeight, dim.doorDepth]} />
-        {createMaterial(PALETTE.doorFrame, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.doorFrame, 'iron')}>
+        <boxGeometry args={[FRAME_THICKNESS, dim.doorHeight, dim.doorDepth]} /></mesh>
 
       <mesh
         castShadow
         position={[-dim.doorWidth / 2 - FRAME_THICKNESS / 2, dim.doorY + dim.doorHeight * 0.32, frameZ + dim.doorDepth / 2 + 0.005]}
-      >
-        <cylinderGeometry args={[0.024, 0.024, 0.026, 10]} />
-        {createMaterial(PALETTE.boltDark, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.boltDark, 'iron')}>
+        <cylinderGeometry args={[0.024, 0.024, 0.026, 10]} /></mesh>
       <mesh
         castShadow
         position={[-dim.doorWidth / 2 - FRAME_THICKNESS / 2, dim.doorY - dim.doorHeight * 0.34, frameZ + dim.doorDepth / 2 + 0.005]}
-      >
-        <cylinderGeometry args={[0.024, 0.024, 0.026, 10]} />
-        {createMaterial(PALETTE.boltDark, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.boltDark, 'iron')}>
+        <cylinderGeometry args={[0.024, 0.024, 0.026, 10]} /></mesh>
 
       <mesh
         castShadow
         receiveShadow
         position={[0, dim.baseLift + SILL_THICKNESS / 2, frameZ + dim.doorDepth * 0.5]}
-      >
+       material={createMaterial(PALETTE.doorFrame, 'iron')}>
         <boxGeometry
           args={[
             dim.doorWidth + FRAME_THICKNESS * 2 + 0.06,
             SILL_THICKNESS,
             dim.doorDepth + 0.16,
           ]}
-        />
-        {createMaterial(PALETTE.doorFrame, 'iron')}
-      </mesh>
+        /></mesh>
       <mesh
         position={[0, dim.baseLift + SILL_THICKNESS - 0.005, frameZ + dim.doorDepth * 0.5 + 0.04]}
-      >
-        <boxGeometry args={[dim.doorWidth + 0.04, 0.012, 0.05]} />
-        {createMaterial(PALETTE.trimDark, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.trimDark, 'iron')}>
+        <boxGeometry args={[dim.doorWidth + 0.04, 0.012, 0.05]} /></mesh>
 
       <group
         ref={doorHingeRef}
         position={[hingeX, dim.doorY, frameZ + doorBodyZRelative]}
       >
         <group position={[doorCenterRelativeX, 0, 0]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[dim.doorWidth, dim.doorHeight, doorBodyDepth]} />
-            {createMaterial(PALETTE.doorWood, 'wood')}
-          </mesh>
+          <mesh castShadow receiveShadow material={createMaterial(PALETTE.doorWood, 'wood')}>
+            <boxGeometry args={[dim.doorWidth, dim.doorHeight, doorBodyDepth]} /></mesh>
 
           {Array.from({ length: plankCount - 1 }).map((_, idx) => {
             const localY = -dim.doorHeight / 2 + plankHeight * (idx + 1);
@@ -139,70 +121,50 @@ export const FrontDoor = forwardRef<Group, FrontDoorProps>(({ dim, createMateria
               <mesh
                 key={`door-plank-line-${idx}`}
                 position={[0, localY, doorBodyDepth / 2 + 0.002]}
-              >
-                <boxGeometry args={[dim.doorWidth - 0.04, 0.012, 0.005]} />
-                {createMaterial(PALETTE.doorPlanks, 'wood')}
-              </mesh>
+               material={createMaterial(PALETTE.doorPlanks, 'wood')}>
+                <boxGeometry args={[dim.doorWidth - 0.04, 0.012, 0.005]} /></mesh>
             );
           })}
 
-          <mesh position={[-dim.doorWidth / 2 + 0.06, 0, doorBodyDepth / 2 + 0.002]}>
-            <boxGeometry args={[0.018, dim.doorHeight - 0.06, 0.006]} />
-            {createMaterial(PALETTE.doorPlanks, 'wood')}
-          </mesh>
-          <mesh position={[dim.doorWidth / 2 - 0.06, 0, doorBodyDepth / 2 + 0.002]}>
-            <boxGeometry args={[0.018, dim.doorHeight - 0.06, 0.006]} />
-            {createMaterial(PALETTE.doorPlanks, 'wood')}
-          </mesh>
+          <mesh position={[-dim.doorWidth / 2 + 0.06, 0, doorBodyDepth / 2 + 0.002]} material={createMaterial(PALETTE.doorPlanks, 'wood')}>
+            <boxGeometry args={[0.018, dim.doorHeight - 0.06, 0.006]} /></mesh>
+          <mesh position={[dim.doorWidth / 2 - 0.06, 0, doorBodyDepth / 2 + 0.002]} material={createMaterial(PALETTE.doorPlanks, 'wood')}>
+            <boxGeometry args={[0.018, dim.doorHeight - 0.06, 0.006]} /></mesh>
 
           <mesh
             castShadow
             position={[0, dim.doorHeight / 2 - 0.05, doorBodyDepth / 2 + 0.001]}
-          >
-            <boxGeometry args={[dim.doorWidth - 0.02, 0.04, 0.012]} />
-            {createMaterial(PALETTE.doorWoodLight, 'wood')}
-          </mesh>
+           material={createMaterial(PALETTE.doorWoodLight, 'wood')}>
+            <boxGeometry args={[dim.doorWidth - 0.02, 0.04, 0.012]} /></mesh>
           <mesh
             castShadow
             position={[0, -dim.doorHeight / 2 + 0.05, doorBodyDepth / 2 + 0.001]}
-          >
-            <boxGeometry args={[dim.doorWidth - 0.02, 0.04, 0.012]} />
-            {createMaterial(PALETTE.doorWoodLight, 'wood')}
-          </mesh>
+           material={createMaterial(PALETTE.doorWoodLight, 'wood')}>
+            <boxGeometry args={[dim.doorWidth - 0.02, 0.04, 0.012]} /></mesh>
 
-          <mesh position={[0, -0.04, doorBodyDepth / 2 + 0.001]}>
-            <boxGeometry args={[dim.doorWidth * 0.85, 0.085, 0.006]} />
-            {createMaterial(PALETTE.doorShadow, 'wood')}
-          </mesh>
+          <mesh position={[0, -0.04, doorBodyDepth / 2 + 0.001]} material={createMaterial(PALETTE.doorShadow, 'wood')}>
+            <boxGeometry args={[dim.doorWidth * 0.85, 0.085, 0.006]} /></mesh>
 
           <mesh
             castShadow
             position={[dim.doorWidth / 2 - 0.1, -0.05, doorBodyDepth / 2 + 0.018]}
-          >
-            <sphereGeometry args={[0.024, 12, 12]} />
-            {createMaterial(PALETTE.doorHandle, 'gold')}
-          </mesh>
+           material={createMaterial(PALETTE.doorHandle, 'gold')}>
+            <sphereGeometry args={[0.024, 12, 12]} /></mesh>
           <mesh
             position={[dim.doorWidth / 2 - 0.1, -0.05, doorBodyDepth / 2 + 0.011]}
-          >
-            <cylinderGeometry args={[0.014, 0.014, 0.018, 10]} />
-            {createMaterial(PALETTE.doorShadow, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.doorShadow, 'iron')}>
+            <cylinderGeometry args={[0.014, 0.014, 0.018, 10]} /></mesh>
 
           <mesh
             castShadow
             position={[dim.doorWidth / 2 - 0.18, dim.doorHeight / 2 - 0.18, doorBodyDepth / 2 + 0.005]}
-          >
-            <boxGeometry args={[0.04, 0.04, 0.012]} />
-            {createMaterial(PALETTE.boltShine, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.boltShine, 'iron')}>
+            <boxGeometry args={[0.04, 0.04, 0.012]} /></mesh>
           <mesh
             castShadow
             position={[dim.doorWidth / 2 - 0.18, -dim.doorHeight / 2 + 0.18, doorBodyDepth / 2 + 0.005]}
-          >
-            <boxGeometry args={[0.04, 0.04, 0.012]} />
-            {createMaterial(PALETTE.boltShine, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.boltShine, 'iron')}>
+            <boxGeometry args={[0.04, 0.04, 0.012]} /></mesh>
 
           <FrontDoorReinforcement
             dim={dim}
@@ -216,24 +178,18 @@ export const FrontDoor = forwardRef<Group, FrontDoorProps>(({ dim, createMateria
               <mesh
                 castShadow
                 position={[0, dim.doorHeight * 0.32, doorBodyDepth / 2 + 0.006]}
-              >
-                <boxGeometry args={[dim.doorWidth * 0.6, dim.doorHeight * 0.16, 0.014]} />
-                {createMaterial(PALETTE.windowFrame, 'iron')}
-              </mesh>
-              <mesh position={[0, dim.doorHeight * 0.32, doorBodyDepth / 2 + 0.014]}>
+               material={createMaterial(PALETTE.windowFrame, 'iron')}>
+                <boxGeometry args={[dim.doorWidth * 0.6, dim.doorHeight * 0.16, 0.014]} /></mesh>
+              <mesh position={[0, dim.doorHeight * 0.32, doorBodyDepth / 2 + 0.014]} material={createMaterial(PALETTE.windowFrameShadow, 'iron')}>
                 <boxGeometry args={[dim.doorWidth * 0.5, dim.doorHeight * 0.1, 0.012]} />
                 <meshBasicMaterial color={PALETTE.windowGlassGlow} toneMapped={false} />
               </mesh>
               <mesh position={[0, dim.doorHeight * 0.32, doorBodyDepth / 2 + 0.018]}>
-                <boxGeometry args={[dim.doorWidth * 0.5, 0.008, 0.012]} />
-                {createMaterial(PALETTE.windowFrameShadow, 'iron')}
-              </mesh>
+                <boxGeometry args={[dim.doorWidth * 0.5, 0.008, 0.012]} /></mesh>
               <mesh
                 position={[0, dim.doorHeight * 0.32 + dim.doorHeight * 0.08, doorBodyDepth / 2 + 0.008]}
-              >
-                <boxGeometry args={[dim.doorWidth * 0.62, 0.012, 0.012]} />
-                {createMaterial(PALETTE.windowFrameLight, 'iron')}
-              </mesh>
+               material={createMaterial(PALETTE.windowFrameLight, 'iron')}>
+                <boxGeometry args={[dim.doorWidth * 0.62, 0.012, 0.012]} /></mesh>
             </group>
           ) : null}
         </group>

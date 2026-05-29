@@ -47,70 +47,50 @@ const SinglePipe = ({
 
   return (
     <group position={[offsetX, 0, 0]}>
-      <mesh receiveShadow position={[0, l3PipeStartY, pipeStartZ - 0.005]}>
+      <mesh receiveShadow position={[0, l3PipeStartY, pipeStartZ - 0.005]} material={createMaterial(PALETTE.pipeShadow, 'iron')}>
         <cylinderGeometry
           args={[l3PipeRadius * 1.08, l3PipeRadius * 1.08, l3PipeRadius * 0.4, 16]}
-        />
-        {createMaterial(PALETTE.pipeShadow, 'iron')}
-      </mesh>
+        /></mesh>
 
       <mesh
         castShadow
         receiveShadow
         position={[0, l3PipeStartY, horizontalCenterZ]}
         rotation={[Math.PI / 2, 0, 0]}
-      >
-        <cylinderGeometry args={[l3PipeRadius, l3PipeRadius, forwardLength, 18]} />
-        {createMaterial(PALETTE.pipeBody, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.pipeBody, 'iron')}>
+        <cylinderGeometry args={[l3PipeRadius, l3PipeRadius, forwardLength, 18]} /></mesh>
       <mesh
         position={[l3PipeRadius * 0.32, l3PipeStartY + l3PipeRadius * 0.45, horizontalCenterZ]}
         rotation={[Math.PI / 2, 0, 0]}
-      >
+       material={createMaterial(PALETTE.pipeRim, 'iron')}>
         <cylinderGeometry
           args={[l3PipeRadius * 0.34, l3PipeRadius * 0.34, forwardLength * 0.95, 14]}
-        />
-        {createMaterial(PALETTE.pipeRim, 'iron')}
-      </mesh>
+        /></mesh>
 
-      <mesh castShadow receiveShadow position={[0, l3PipeStartY, elbowZ]}>
-        <sphereGeometry args={[l3PipeRadius * 1.18, 18, 14]} />
-        {createMaterial(PALETTE.pipeBody, 'iron')}
-      </mesh>
-      <mesh position={[0, l3PipeStartY + l3PipeRadius * 0.45, elbowZ - l3PipeRadius * 0.4]}>
-        <sphereGeometry args={[l3PipeRadius * 0.4, 10, 8]} />
-        {createMaterial(PALETTE.pipeRim, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, l3PipeStartY, elbowZ]} material={createMaterial(PALETTE.pipeBody, 'iron')}>
+        <sphereGeometry args={[l3PipeRadius * 1.18, 18, 14]} /></mesh>
+      <mesh position={[0, l3PipeStartY + l3PipeRadius * 0.45, elbowZ - l3PipeRadius * 0.4]} material={createMaterial(PALETTE.pipeRim, 'iron')}>
+        <sphereGeometry args={[l3PipeRadius * 0.4, 10, 8]} /></mesh>
 
-      <mesh castShadow receiveShadow position={[0, verticalCenterY, elbowZ]}>
-        <cylinderGeometry args={[l3PipeRadius * 0.95, l3PipeRadius * 0.95, verticalLength, 16]} />
-        {createMaterial(PALETTE.pipeBody, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, verticalCenterY, elbowZ]} material={createMaterial(PALETTE.pipeBody, 'iron')}>
+        <cylinderGeometry args={[l3PipeRadius * 0.95, l3PipeRadius * 0.95, verticalLength, 16]} /></mesh>
       <mesh
         position={[l3PipeRadius * 0.4, verticalCenterY, elbowZ - l3PipeRadius * 0.05]}
-      >
-        <boxGeometry args={[l3PipeRadius * 0.16, verticalLength * 0.92, l3PipeRadius * 0.18]} />
-        {createMaterial(PALETTE.pipeRim, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.pipeRim, 'iron')}>
+        <boxGeometry args={[l3PipeRadius * 0.16, verticalLength * 0.92, l3PipeRadius * 0.18]} /></mesh>
 
-      <mesh castShadow receiveShadow position={[0, l3PipeFloorY, elbowZ]}>
-        <cylinderGeometry args={[l3PipeRadius * 1.1, l3PipeRadius * 1.22, l3PipeRadius * 0.5, 16]} />
-        {createMaterial(PALETTE.pipeShadow, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, l3PipeFloorY, elbowZ]} material={createMaterial(PALETTE.pipeShadow, 'iron')}>
+        <cylinderGeometry args={[l3PipeRadius * 1.1, l3PipeRadius * 1.22, l3PipeRadius * 0.5, 16]} /></mesh>
       <mesh
         position={[0, l3PipeFloorY - l3PipeRadius * 0.28, elbowZ]}
         rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <circleGeometry args={[l3PipeRadius * 0.74, 16]} />
-        {createMaterial(PALETTE.pipeInside, 'goo')}
-      </mesh>
+       material={createMaterial(PALETTE.pipeInside, 'goo')}>
+        <circleGeometry args={[l3PipeRadius * 0.74, 16]} /></mesh>
 
       <group ref={dripsRef} position={[0, l3PipeFloorY - l3PipeRadius * 0.28, elbowZ]}>
         {drips.map((drip) => (
-          <mesh key={drip.id} castShadow receiveShadow position={[0, 0, 0]}>
-            <sphereGeometry args={[drip.size, 8, 8]} />
-            {createMaterial(PALETTE.puttyDripBright, 'goo')}
-          </mesh>
+          <mesh key={drip.id} castShadow receiveShadow position={[0, 0, 0]} material={createMaterial(PALETTE.puttyDripBright, 'goo')}>
+            <sphereGeometry args={[drip.size, 8, 8]} /></mesh>
         ))}
       </group>
     </group>
@@ -140,101 +120,75 @@ export const BottomPipes = ({
       ))}
 
       <group ref={puddleRef} position={[0, l3PuddleY, l3PuddleZ]}>
-        <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[cubeSize * 0.55, 36]} />
-          {createMaterial(PALETTE.puddleDeep, 'goo')}
-        </mesh>
-        <mesh receiveShadow position={[0, 0.0015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[cubeSize * 0.46, 32]} />
-          {createMaterial(PALETTE.puddleMid, 'goo')}
-        </mesh>
-        <mesh receiveShadow position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[cubeSize * 0.34, 28]} />
-          {createMaterial(PALETTE.puddleBright, 'goo')}
-        </mesh>
+        <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.puddleDeep, 'goo')}>
+          <circleGeometry args={[cubeSize * 0.55, 36]} /></mesh>
+        <mesh receiveShadow position={[0, 0.0015, 0]} rotation={[-Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.puddleMid, 'goo')}>
+          <circleGeometry args={[cubeSize * 0.46, 32]} /></mesh>
+        <mesh receiveShadow position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.puddleBright, 'goo')}>
+          <circleGeometry args={[cubeSize * 0.34, 28]} /></mesh>
         <mesh
           position={[-cubeSize * 0.08, 0.0042, -cubeSize * 0.06]}
           rotation={[-Math.PI / 2, 0, 0.18]}
-        >
-          <circleGeometry args={[cubeSize * 0.16, 18]} />
-          {createMaterial(PALETTE.puddleShine, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleShine, 'goo')}>
+          <circleGeometry args={[cubeSize * 0.16, 18]} /></mesh>
 
-        <mesh castShadow receiveShadow position={[0, cubeSize * 0.05, 0]} scale={[1.3, 0.55, 1.3]}>
-          <sphereGeometry args={[cubeSize * 0.2, 20, 14]} />
-          {createMaterial(PALETTE.puddleMid, 'goo')}
-        </mesh>
+        <mesh castShadow receiveShadow position={[0, cubeSize * 0.05, 0]} scale={[1.3, 0.55, 1.3]} material={createMaterial(PALETTE.puddleMid, 'goo')}>
+          <sphereGeometry args={[cubeSize * 0.2, 20, 14]} /></mesh>
         <mesh
           position={[-cubeSize * 0.07, cubeSize * 0.085, -cubeSize * 0.02]}
           rotation={[0, 0.2, 0]}
           scale={[1.1, 0.5, 1.1]}
-        >
-          <sphereGeometry args={[cubeSize * 0.1, 14, 12]} />
-          {createMaterial(PALETTE.puddleShine, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleShine, 'goo')}>
+          <sphereGeometry args={[cubeSize * 0.1, 14, 12]} /></mesh>
 
         <mesh
           castShadow
           receiveShadow
           position={[cubeSize * 0.42, cubeSize * 0.014, cubeSize * 0.18]}
           scale={[1, 0.4, 1]}
-        >
-          <sphereGeometry args={[cubeSize * 0.085, 10, 8]} />
-          {createMaterial(PALETTE.puddleMid, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleMid, 'goo')}>
+          <sphereGeometry args={[cubeSize * 0.085, 10, 8]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[-cubeSize * 0.46, cubeSize * 0.012, cubeSize * 0.12]}
           scale={[1, 0.35, 1]}
-        >
-          <sphereGeometry args={[cubeSize * 0.078, 10, 8]} />
-          {createMaterial(PALETTE.puddleDeep, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleDeep, 'goo')}>
+          <sphereGeometry args={[cubeSize * 0.078, 10, 8]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[cubeSize * 0.18, cubeSize * 0.012, cubeSize * 0.42]}
           scale={[1, 0.4, 1]}
-        >
-          <sphereGeometry args={[cubeSize * 0.07, 10, 8]} />
-          {createMaterial(PALETTE.puddleBright, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleBright, 'goo')}>
+          <sphereGeometry args={[cubeSize * 0.07, 10, 8]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[-cubeSize * 0.22, cubeSize * 0.012, -cubeSize * 0.36]}
           scale={[1, 0.35, 1]}
-        >
-          <sphereGeometry args={[cubeSize * 0.065, 10, 8]} />
-          {createMaterial(PALETTE.puddleMid, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleMid, 'goo')}>
+          <sphereGeometry args={[cubeSize * 0.065, 10, 8]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[cubeSize * 0.32, cubeSize * 0.014, -cubeSize * 0.32]}
           scale={[1, 0.4, 1]}
-        >
-          <sphereGeometry args={[cubeSize * 0.075, 10, 8]} />
-          {createMaterial(PALETTE.puddleDeep, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleDeep, 'goo')}>
+          <sphereGeometry args={[cubeSize * 0.075, 10, 8]} /></mesh>
 
         <mesh
           receiveShadow
           position={[cubeSize * 0.5, 0.001, -cubeSize * 0.1]}
           rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <circleGeometry args={[cubeSize * 0.07, 14]} />
-          {createMaterial(PALETTE.puddleDeep, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleDeep, 'goo')}>
+          <circleGeometry args={[cubeSize * 0.07, 14]} /></mesh>
         <mesh
           receiveShadow
           position={[-cubeSize * 0.55, 0.001, -cubeSize * 0.06]}
           rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <circleGeometry args={[cubeSize * 0.06, 14]} />
-          {createMaterial(PALETTE.puddleDeep, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.puddleDeep, 'goo')}>
+          <circleGeometry args={[cubeSize * 0.06, 14]} /></mesh>
       </group>
     </group>
   );

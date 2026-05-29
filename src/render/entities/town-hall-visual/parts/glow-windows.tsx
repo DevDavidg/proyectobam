@@ -86,10 +86,8 @@ export const GlowWindows = ({ dim, createMaterial, weight }: GlowWindowsProps) =
                 slot.height,
                 surfaceZ + outwardZ * frameOffset,
               ]}
-            >
-              <boxGeometry args={frameSize} />
-              {createMaterial(PALETTE.windowFrame, 'iron')}
-            </mesh>
+             material={createMaterial(PALETTE.windowFrame, 'iron')}>
+              <boxGeometry args={frameSize} /></mesh>
 
             <mesh
               position={[
@@ -97,10 +95,8 @@ export const GlowWindows = ({ dim, createMaterial, weight }: GlowWindowsProps) =
                 slot.height + outerH / 2 - 0.007,
                 surfaceZ + outwardZ * frameOffset,
               ]}
-            >
-              <boxGeometry args={frameLitSize} />
-              {createMaterial(PALETTE.windowFrameLight, 'iron')}
-            </mesh>
+             material={createMaterial(PALETTE.windowFrameLight, 'iron')}>
+              <boxGeometry args={frameLitSize} /></mesh>
 
             <mesh
               position={[
@@ -108,10 +104,8 @@ export const GlowWindows = ({ dim, createMaterial, weight }: GlowWindowsProps) =
                 slot.height - outerH / 2 + 0.006,
                 surfaceZ + outwardZ * frameOffset,
               ]}
-            >
-              <boxGeometry args={frameShadowSize} />
-              {createMaterial(PALETTE.windowFrameShadow, 'iron')}
-            </mesh>
+             material={createMaterial(PALETTE.windowFrameShadow, 'iron')}>
+              <boxGeometry args={frameShadowSize} /></mesh>
 
             <mesh
               position={[
@@ -119,10 +113,8 @@ export const GlowWindows = ({ dim, createMaterial, weight }: GlowWindowsProps) =
                 slot.height,
                 surfaceZ + outwardZ * (frameOffset + 0.0005),
               ]}
-            >
-              <boxGeometry args={innerSize} />
-              {createMaterial(PALETTE.windowGlassDark, 'iron')}
-            </mesh>
+             material={createMaterial(PALETTE.windowGlassDark, 'iron')}>
+              <boxGeometry args={innerSize} /></mesh>
 
             <mesh
               position={[
@@ -130,7 +122,7 @@ export const GlowWindows = ({ dim, createMaterial, weight }: GlowWindowsProps) =
                 slot.height,
                 surfaceZ + outwardZ * glassOffset,
               ]}
-            >
+             material={createMaterial(PALETTE.windowFrameShadow, 'iron')}>
               <boxGeometry args={glassSize} />
               <meshBasicMaterial color={PALETTE.windowGlassGlow} toneMapped={false} />
             </mesh>
@@ -142,9 +134,7 @@ export const GlowWindows = ({ dim, createMaterial, weight }: GlowWindowsProps) =
                 surfaceZ + outwardZ * (glassOffset + 0.001),
               ]}
             >
-              <boxGeometry args={horizontalSash} />
-              {createMaterial(PALETTE.windowFrameShadow, 'iron')}
-            </mesh>
+              <boxGeometry args={horizontalSash} /></mesh>
 
             {cornerBolts.map(([bx, by], boltIdx) => {
               const boltX = isFrontBack ? bx : 0;
@@ -159,10 +149,8 @@ export const GlowWindows = ({ dim, createMaterial, weight }: GlowWindowsProps) =
                     surfaceZ + outwardZ * (frameOffset + 0.001) + boltZ,
                   ]}
                   rotation={isFrontBack ? [Math.PI / 2, 0, 0] : [0, 0, Math.PI / 2]}
-                >
-                  <cylinderGeometry args={[0.013, 0.013, 0.014, 8]} />
-                  {createMaterial(PALETTE.boltDark, 'iron')}
-                </mesh>
+                 material={createMaterial(PALETTE.boltDark, 'iron')}>
+                  <cylinderGeometry args={[0.013, 0.013, 0.014, 8]} /></mesh>
               );
             })}
           </Fragment>

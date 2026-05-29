@@ -44,52 +44,36 @@ export const CentrifugeFrame = ({
       {pillarXs.map((x) =>
         [-innerZ, innerZ].map((z, zIndex) => (
           <group key={`leg-${x.toFixed(3)}-${zIndex}`} position={[x, dim.frameBottomY + dim.frameHeight / 2, z]}>
-            <mesh castShadow receiveShadow>
-              <boxGeometry args={[LEG_THICKNESS, dim.frameHeight, LEG_THICKNESS]} />
-              {createMaterial(PALETTE.hopperStone, 'stone')}
-            </mesh>
-            <mesh receiveShadow position={[LEG_THICKNESS / 2 + 0.0005, 0, 0]}>
-              <boxGeometry args={[0.001, dim.frameHeight - 0.04, LEG_THICKNESS - 0.01]} />
-              {createMaterial(PALETTE.hopperStoneLight, 'stone')}
-            </mesh>
-            <mesh receiveShadow position={[-LEG_THICKNESS / 2 - 0.0005, 0, 0]}>
-              <boxGeometry args={[0.001, dim.frameHeight - 0.04, LEG_THICKNESS - 0.01]} />
-              {createMaterial(PALETTE.hopperStoneDark, 'stone')}
-            </mesh>
+            <mesh castShadow receiveShadow material={createMaterial(PALETTE.hopperStone, 'stone')}>
+              <boxGeometry args={[LEG_THICKNESS, dim.frameHeight, LEG_THICKNESS]} /></mesh>
+            <mesh receiveShadow position={[LEG_THICKNESS / 2 + 0.0005, 0, 0]} material={createMaterial(PALETTE.hopperStoneLight, 'stone')}>
+              <boxGeometry args={[0.001, dim.frameHeight - 0.04, LEG_THICKNESS - 0.01]} /></mesh>
+            <mesh receiveShadow position={[-LEG_THICKNESS / 2 - 0.0005, 0, 0]} material={createMaterial(PALETTE.hopperStoneDark, 'stone')}>
+              <boxGeometry args={[0.001, dim.frameHeight - 0.04, LEG_THICKNESS - 0.01]} /></mesh>
             {/* Cap + foot blocks */}
-            <mesh castShadow receiveShadow position={[0, dim.frameHeight / 2 + 0.035, 0]}>
-              <boxGeometry args={[LEG_THICKNESS + 0.05, 0.06, LEG_THICKNESS + 0.05]} />
-              {createMaterial(PALETTE.hopperRim, 'stone')}
-            </mesh>
-            <mesh castShadow receiveShadow position={[0, -dim.frameHeight / 2 + 0.025, 0]}>
-              <boxGeometry args={[LEG_THICKNESS + 0.05, 0.05, LEG_THICKNESS + 0.05]} />
-              {createMaterial(PALETTE.hopperStoneDark, 'stone')}
-            </mesh>
+            <mesh castShadow receiveShadow position={[0, dim.frameHeight / 2 + 0.035, 0]} material={createMaterial(PALETTE.hopperRim, 'stone')}>
+              <boxGeometry args={[LEG_THICKNESS + 0.05, 0.06, LEG_THICKNESS + 0.05]} /></mesh>
+            <mesh castShadow receiveShadow position={[0, -dim.frameHeight / 2 + 0.025, 0]} material={createMaterial(PALETTE.hopperStoneDark, 'stone')}>
+              <boxGeometry args={[LEG_THICKNESS + 0.05, 0.05, LEG_THICKNESS + 0.05]} /></mesh>
           </group>
         )),
       )}
 
       {/* Gray top rails (front + back) that the bearings + drums rest on */}
       {[-innerZ, innerZ].map((z, index) => (
-        <mesh key={`top-rail-${index}`} castShadow receiveShadow position={[0, beamY, z]}>
-          <boxGeometry args={[dim.frameWidth, BEAM_THICKNESS, LEG_THICKNESS]} />
-          {createMaterial(PALETTE.hopperStoneLight, 'stone')}
-        </mesh>
+        <mesh key={`top-rail-${index}`} castShadow receiveShadow position={[0, beamY, z]} material={createMaterial(PALETTE.hopperStoneLight, 'stone')}>
+          <boxGeometry args={[dim.frameWidth, BEAM_THICKNESS, LEG_THICKNESS]} /></mesh>
       ))}
       {/* Cross top rails at the ends to tie front/back */}
       {[pillarXs[0], pillarXs[pillarXs.length - 1]].map((x, index) => (
-        <mesh key={`top-cross-${index}`} castShadow receiveShadow position={[x, beamY, 0]}>
-          <boxGeometry args={[LEG_THICKNESS, BEAM_THICKNESS, dim.frameDepth]} />
-          {createMaterial(PALETTE.hopperStone, 'stone')}
-        </mesh>
+        <mesh key={`top-cross-${index}`} castShadow receiveShadow position={[x, beamY, 0]} material={createMaterial(PALETTE.hopperStone, 'stone')}>
+          <boxGeometry args={[LEG_THICKNESS, BEAM_THICKNESS, dim.frameDepth]} /></mesh>
       ))}
 
       {/* Lower gray stringers (front + back) */}
       {[-innerZ, innerZ].map((z, index) => (
-        <mesh key={`low-rail-${index}`} castShadow receiveShadow position={[0, lowBeamY, z]}>
-          <boxGeometry args={[dim.frameWidth - LEG_THICKNESS, BEAM_THICKNESS * 0.85, LEG_THICKNESS * 0.85]} />
-          {createMaterial(PALETTE.hopperStone, 'stone')}
-        </mesh>
+        <mesh key={`low-rail-${index}`} castShadow receiveShadow position={[0, lowBeamY, z]} material={createMaterial(PALETTE.hopperStone, 'stone')}>
+          <boxGeometry args={[dim.frameWidth - LEG_THICKNESS, BEAM_THICKNESS * 0.85, LEG_THICKNESS * 0.85]} /></mesh>
       ))}
 
       {/* WOOD X-braces — one per bay, on front and back faces */}
@@ -104,18 +88,12 @@ export const CentrifugeFrame = ({
               key={`xbrace-${bayIndex}-${zIndex}`}
               position={[bay.center, dim.frameBottomY + dim.frameHeight / 2, z]}
             >
-              <mesh castShadow receiveShadow rotation={[0, 0, diagAngle]}>
-                <boxGeometry args={[diagLength, BRACE_THICKNESS, BRACE_THICKNESS]} />
-                {createMaterial(PALETTE.frameWoodLight, 'wood')}
-              </mesh>
-              <mesh castShadow receiveShadow rotation={[0, 0, -diagAngle]}>
-                <boxGeometry args={[diagLength, BRACE_THICKNESS, BRACE_THICKNESS]} />
-                {createMaterial(PALETTE.frameWoodMid, 'wood')}
-              </mesh>
-              <mesh castShadow receiveShadow>
-                <boxGeometry args={[BRACE_THICKNESS * 1.4, BRACE_THICKNESS * 1.4, BRACE_THICKNESS * 0.7]} />
-                {createMaterial(PALETTE.frameWoodEdge, 'wood')}
-              </mesh>
+              <mesh castShadow receiveShadow rotation={[0, 0, diagAngle]} material={createMaterial(PALETTE.frameWoodLight, 'wood')}>
+                <boxGeometry args={[diagLength, BRACE_THICKNESS, BRACE_THICKNESS]} /></mesh>
+              <mesh castShadow receiveShadow rotation={[0, 0, -diagAngle]} material={createMaterial(PALETTE.frameWoodMid, 'wood')}>
+                <boxGeometry args={[diagLength, BRACE_THICKNESS, BRACE_THICKNESS]} /></mesh>
+              <mesh castShadow receiveShadow material={createMaterial(PALETTE.frameWoodEdge, 'wood')}>
+                <boxGeometry args={[BRACE_THICKNESS * 1.4, BRACE_THICKNESS * 1.4, BRACE_THICKNESS * 0.7]} /></mesh>
             </group>
           );
         }),

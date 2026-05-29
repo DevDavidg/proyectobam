@@ -47,37 +47,27 @@ export const InteriorChamber = ({ dim, createMaterial }: InteriorChamberProps) =
 
   return (
     <group>
-      <mesh receiveShadow position={[doorCenterX, doorBottomY + interiorHeight / 2, interiorBackZ]}>
-        <boxGeometry args={[interiorWidth, interiorHeight, 0.012]} />
-        {createMaterial(PALETTE.interiorWall, 'iron')}
-      </mesh>
+      <mesh receiveShadow position={[doorCenterX, doorBottomY + interiorHeight / 2, interiorBackZ]} material={createMaterial(PALETTE.interiorWall, 'iron')}>
+        <boxGeometry args={[interiorWidth, interiorHeight, 0.012]} /></mesh>
 
       <mesh
         receiveShadow
         position={[leftWallX, doorBottomY + interiorHeight / 2, (interiorBackZ + interiorFrontZ) / 2]}
-      >
-        <boxGeometry args={[sideWallThickness, interiorHeight, sideWallDepth]} />
-        {createMaterial(PALETTE.interiorWallLight, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.interiorWallLight, 'iron')}>
+        <boxGeometry args={[sideWallThickness, interiorHeight, sideWallDepth]} /></mesh>
       <mesh
         receiveShadow
         position={[rightWallX, doorBottomY + interiorHeight / 2, (interiorBackZ + interiorFrontZ) / 2]}
-      >
-        <boxGeometry args={[sideWallThickness, interiorHeight, sideWallDepth]} />
-        {createMaterial(PALETTE.interiorWallLight, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.interiorWallLight, 'iron')}>
+        <boxGeometry args={[sideWallThickness, interiorHeight, sideWallDepth]} /></mesh>
 
-      <mesh receiveShadow position={[doorCenterX, lintelY, (interiorBackZ + interiorFrontZ) / 2]}>
-        <boxGeometry args={[interiorWidth + sideWallThickness * 2, lintelHeight, sideWallDepth]} />
-        {createMaterial(PALETTE.interiorWall, 'iron')}
-      </mesh>
+      <mesh receiveShadow position={[doorCenterX, lintelY, (interiorBackZ + interiorFrontZ) / 2]} material={createMaterial(PALETTE.interiorWall, 'iron')}>
+        <boxGeometry args={[interiorWidth + sideWallThickness * 2, lintelHeight, sideWallDepth]} /></mesh>
 
-      <mesh receiveShadow position={[doorCenterX, thresholdY, (interiorBackZ + interiorFrontZ) / 2]}>
-        <boxGeometry args={[interiorWidth, thresholdHeight, sideWallDepth]} />
-        {createMaterial(PALETTE.interiorFloor, 'stone')}
-      </mesh>
+      <mesh receiveShadow position={[doorCenterX, thresholdY, (interiorBackZ + interiorFrontZ) / 2]} material={createMaterial(PALETTE.interiorFloor, 'stone')}>
+        <boxGeometry args={[interiorWidth, thresholdHeight, sideWallDepth]} /></mesh>
 
-      <mesh position={[doorCenterX, glowY, glowZ]}>
+      <mesh position={[doorCenterX, glowY, glowZ]} material={createMaterial(PALETTE.anvilBase, 'iron')}>
         <planeGeometry args={[glowWidth, glowHeight]} />
         <meshBasicMaterial color={PALETTE.forgeEmber} toneMapped={false} />
       </mesh>
@@ -95,50 +85,34 @@ export const InteriorChamber = ({ dim, createMaterial }: InteriorChamberProps) =
         receiveShadow
         position={[anvilX, anvilY, anvilZ]}
       >
-        <boxGeometry args={[anvilWidth, anvilHeight * 0.35, anvilDepth]} />
-        {createMaterial(PALETTE.anvilBase, 'iron')}
-      </mesh>
+        <boxGeometry args={[anvilWidth, anvilHeight * 0.35, anvilDepth]} /></mesh>
       <mesh
         castShadow
         position={[anvilX, anvilY + anvilHeight * 0.5, anvilZ]}
-      >
-        <boxGeometry args={[anvilWidth * 0.85, anvilHeight * 0.4, anvilDepth * 0.7]} />
-        {createMaterial(PALETTE.anvilBase, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.anvilBase, 'iron')}>
+        <boxGeometry args={[anvilWidth * 0.85, anvilHeight * 0.4, anvilDepth * 0.7]} /></mesh>
       <mesh
         castShadow
         position={[anvilX, anvilY + anvilHeight * 0.95, anvilZ]}
-      >
-        <boxGeometry args={[anvilWidth * 1.15, anvilHeight * 0.35, anvilDepth]} />
-        {createMaterial(PALETTE.anvilTop, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.anvilTop, 'iron')}>
+        <boxGeometry args={[anvilWidth * 1.15, anvilHeight * 0.35, anvilDepth]} /></mesh>
       <mesh
         position={[anvilX - anvilWidth * 0.6, anvilY + anvilHeight * 0.95, anvilZ]}
-      >
-        <boxGeometry args={[anvilWidth * 0.42, anvilHeight * 0.22, anvilDepth * 0.85]} />
-        {createMaterial(PALETTE.anvilHorn, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.anvilHorn, 'iron')}>
+        <boxGeometry args={[anvilWidth * 0.42, anvilHeight * 0.22, anvilDepth * 0.85]} /></mesh>
 
-      <mesh castShadow receiveShadow position={[benchX, benchY, benchZ]}>
-        <boxGeometry args={[benchWidth, benchHeight, 0.06]} />
-        {createMaterial(PALETTE.workbenchWood, 'wood')}
-      </mesh>
-      <mesh position={[benchX, benchY + benchHeight * 0.6, benchZ + 0.001]}>
-        <boxGeometry args={[benchWidth * 0.95, benchHeight * 0.18, 0.05]} />
-        {createMaterial(PALETTE.workbenchWoodLight, 'wood')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[benchX, benchY, benchZ]} material={createMaterial(PALETTE.workbenchWood, 'wood')}>
+        <boxGeometry args={[benchWidth, benchHeight, 0.06]} /></mesh>
+      <mesh position={[benchX, benchY + benchHeight * 0.6, benchZ + 0.001]} material={createMaterial(PALETTE.workbenchWoodLight, 'wood')}>
+        <boxGeometry args={[benchWidth * 0.95, benchHeight * 0.18, 0.05]} /></mesh>
       <mesh
         position={[benchX + benchWidth * 0.3, benchY + benchHeight * 1.1, benchZ + 0.001]}
-      >
-        <boxGeometry args={[0.025, 0.08, 0.025]} />
-        {createMaterial(PALETTE.workbenchWoodLight, 'wood')}
-      </mesh>
+       material={createMaterial(PALETTE.workbenchWoodLight, 'wood')}>
+        <boxGeometry args={[0.025, 0.08, 0.025]} /></mesh>
       <mesh
         position={[benchX - benchWidth * 0.18, benchY + benchHeight * 1.05, benchZ + 0.001]}
-      >
-        <boxGeometry args={[0.05, 0.07, 0.02]} />
-        {createMaterial(PALETTE.boltShine, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.boltShine, 'iron')}>
+        <boxGeometry args={[0.05, 0.07, 0.02]} /></mesh>
 
       <pointLight
         position={[doorCenterX, glowY + 0.1, glowZ + 0.04]}

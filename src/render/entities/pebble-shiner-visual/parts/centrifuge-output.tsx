@@ -35,31 +35,19 @@ type SandMoundProps = {
 
 const SandMound = ({ x, z, scale, createMaterial }: SandMoundProps) => (
   <group position={[x, 0, z]} scale={scale}>
-    <mesh castShadow receiveShadow position={[0, 0.05, 0]}>
-      <coneGeometry args={[0.24, 0.13, 16, 1, false]} />
-      {createMaterial(PALETTE.dustPileBase, 'stone')}
-    </mesh>
-    <mesh receiveShadow position={[-0.05, 0.06, -0.03]}>
-      <coneGeometry args={[0.15, 0.1, 12]} />
-      {createMaterial(PALETTE.dustPileLight, 'stone')}
-    </mesh>
-    <mesh receiveShadow position={[0.07, 0.04, 0.05]}>
-      <coneGeometry args={[0.11, 0.06, 12]} />
-      {createMaterial(PALETTE.dustPileShadow, 'stone')}
-    </mesh>
+    <mesh castShadow receiveShadow position={[0, 0.05, 0]} material={createMaterial(PALETTE.dustPileBase, 'stone')}>
+      <coneGeometry args={[0.24, 0.13, 16, 1, false]} /></mesh>
+    <mesh receiveShadow position={[-0.05, 0.06, -0.03]} material={createMaterial(PALETTE.dustPileLight, 'stone')}>
+      <coneGeometry args={[0.15, 0.1, 12]} /></mesh>
+    <mesh receiveShadow position={[0.07, 0.04, 0.05]} material={createMaterial(PALETTE.dustPileShadow, 'stone')}>
+      <coneGeometry args={[0.11, 0.06, 12]} /></mesh>
     {/* Scattered grains at the base */}
-    <mesh receiveShadow position={[0.18, 0.012, 0.06]}>
-      <sphereGeometry args={[0.025, 6, 5]} />
-      {createMaterial(PALETTE.dustPileBase, 'stone')}
-    </mesh>
-    <mesh receiveShadow position={[-0.2, 0.01, -0.04]}>
-      <sphereGeometry args={[0.02, 6, 5]} />
-      {createMaterial(PALETTE.dustPileShadow, 'stone')}
-    </mesh>
-    <mesh receiveShadow position={[0, 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      <ringGeometry args={[0.0, 0.3, 18]} />
-      {createMaterial(PALETTE.dustPileShadow, 'stone')}
-    </mesh>
+    <mesh receiveShadow position={[0.18, 0.012, 0.06]} material={createMaterial(PALETTE.dustPileBase, 'stone')}>
+      <sphereGeometry args={[0.025, 6, 5]} /></mesh>
+    <mesh receiveShadow position={[-0.2, 0.01, -0.04]} material={createMaterial(PALETTE.dustPileShadow, 'stone')}>
+      <sphereGeometry args={[0.02, 6, 5]} /></mesh>
+    <mesh receiveShadow position={[0, 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.dustPileShadow, 'stone')}>
+      <ringGeometry args={[0.0, 0.3, 18]} /></mesh>
   </group>
 );
 
@@ -81,10 +69,8 @@ export const CentrifugeOutput = ({
       <SandMound x={dim.hopperCenterX + 0.02} z={dim.dustPileZ} scale={1.0} createMaterial={createMaterial} />
       <group ref={hopperDustRef} position={[dim.hopperCenterX + 0.02, hopperDustTopY, dim.dustPileZ - 0.04]}>
         {hopperDrops.map((drop) => (
-          <mesh key={drop.id} position={[drop.x, 0, drop.z]}>
-            <sphereGeometry args={[drop.size, 6, 4]} />
-            {createMaterial(PALETTE.dustPileLight, 'stone')}
-          </mesh>
+          <mesh key={drop.id} position={[drop.x, 0, drop.z]} material={createMaterial(PALETTE.dustPileLight, 'stone')}>
+            <sphereGeometry args={[drop.size, 6, 4]} /></mesh>
         ))}
       </group>
 
@@ -92,10 +78,8 @@ export const CentrifugeOutput = ({
       <SandMound x={dim.outputRocksX} z={dim.dustPileZ * 0.4} scale={0.8} createMaterial={createMaterial} />
       <group ref={endDustRef} position={[dim.outputRocksX, endDustTopY, dim.dustPileZ * 0.4 - 0.03]}>
         {endDrops.map((drop) => (
-          <mesh key={drop.id} position={[drop.x, 0, drop.z]}>
-            <sphereGeometry args={[drop.size, 6, 4]} />
-            {createMaterial(PALETTE.dustPileBase, 'stone')}
-          </mesh>
+          <mesh key={drop.id} position={[drop.x, 0, drop.z]} material={createMaterial(PALETTE.dustPileBase, 'stone')}>
+            <sphereGeometry args={[drop.size, 6, 4]} /></mesh>
         ))}
       </group>
     </group>

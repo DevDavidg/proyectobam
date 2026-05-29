@@ -28,41 +28,31 @@ export const SideCrank = ({ dim, extension, createMaterial, crankRef }: SideCran
         receiveShadow
         position={[axleCenterX, dim.crankAxleY, dim.crankAxleZ]}
         rotation={[0, 0, Math.PI / 2]}
-      >
-        <cylinderGeometry args={[dim.gearAxleRadius * 0.9, dim.gearAxleRadius * 0.9, axleSpan, 12]} />
-        {createMaterial(PALETTE.crankShaft, 'wood')}
-      </mesh>
+       material={createMaterial(PALETTE.crankShaft, 'wood')}>
+        <cylinderGeometry args={[dim.gearAxleRadius * 0.9, dim.gearAxleRadius * 0.9, axleSpan, 12]} /></mesh>
 
       <group ref={crankRef} position={[endX, dim.crankAxleY, dim.crankAxleZ]}>
-        <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[dim.gearAxleRadius * 1.4, dim.gearAxleRadius * 1.4, 0.05, 14]} />
-          {createMaterial(PALETTE.crankKnob, 'wood')}
-        </mesh>
+        <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.crankKnob, 'wood')}>
+          <cylinderGeometry args={[dim.gearAxleRadius * 1.4, dim.gearAxleRadius * 1.4, 0.05, 14]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[armOffset, -dim.crankArmLength / 2, 0]}
-        >
-          <boxGeometry args={[0.05, dim.crankArmLength, 0.04]} />
-          {createMaterial(PALETTE.crankShaft, 'wood')}
-        </mesh>
+         material={createMaterial(PALETTE.crankShaft, 'wood')}>
+          <boxGeometry args={[0.05, dim.crankArmLength, 0.04]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[handleOffset, -dim.crankArmLength, 0]}
           rotation={[0, 0, Math.PI / 2]}
-        >
-          <cylinderGeometry args={[0.022, 0.022, dim.crankHandleLength, 10]} />
-          {createMaterial(PALETTE.crankShaft, 'wood')}
-        </mesh>
+         material={createMaterial(PALETTE.crankShaft, 'wood')}>
+          <cylinderGeometry args={[0.022, 0.022, dim.crankHandleLength, 10]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[knobOffset, -dim.crankArmLength, 0]}
-        >
-          <sphereGeometry args={[dim.crankKnobRadius, 12, 10]} />
-          {createMaterial(PALETTE.crankKnob, 'wood')}
-        </mesh>
+         material={createMaterial(PALETTE.crankKnob, 'wood')}>
+          <sphereGeometry args={[dim.crankKnobRadius, 12, 10]} /></mesh>
       </group>
     </group>
   );

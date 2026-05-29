@@ -27,14 +27,10 @@ export const ConnectingPipe = ({ dim, createMaterial }: ConnectingPipeProps) => 
         castShadow
         receiveShadow
         position={[startX, (startY + archHeight) / 2, startZ]}
-      >
-        <cylinderGeometry args={[radius, radius, archHeight - startY, 14]} />
-        {createMaterial(PALETTE.pipe, 'gold')}
-      </mesh>
-      <mesh castShadow receiveShadow position={[startX, archHeight, startZ]}>
-        <sphereGeometry args={[radius + 0.012, 14, 12]} />
-        {createMaterial(PALETTE.pipe, 'gold')}
-      </mesh>
+       material={createMaterial(PALETTE.pipe, 'gold')}>
+        <cylinderGeometry args={[radius, radius, archHeight - startY, 14]} /></mesh>
+      <mesh castShadow receiveShadow position={[startX, archHeight, startZ]} material={createMaterial(PALETTE.pipe, 'gold')}>
+        <sphereGeometry args={[radius + 0.012, 14, 12]} /></mesh>
 
       <mesh
         castShadow
@@ -45,41 +41,31 @@ export const ConnectingPipe = ({ dim, createMaterial }: ConnectingPipeProps) => 
           (startZ + motorAttachZ) / 2,
         ]}
         rotation={[0, -horizontalAngle, Math.PI / 2]}
-      >
-        <cylinderGeometry args={[radius, radius, horizontalLength, 14]} />
-        {createMaterial(PALETTE.pipe, 'gold')}
-      </mesh>
-      <mesh castShadow receiveShadow position={[motorAttachX, archHeight, motorAttachZ]}>
-        <sphereGeometry args={[radius + 0.012, 14, 12]} />
-        {createMaterial(PALETTE.pipe, 'gold')}
-      </mesh>
+       material={createMaterial(PALETTE.pipe, 'gold')}>
+        <cylinderGeometry args={[radius, radius, horizontalLength, 14]} /></mesh>
+      <mesh castShadow receiveShadow position={[motorAttachX, archHeight, motorAttachZ]} material={createMaterial(PALETTE.pipe, 'gold')}>
+        <sphereGeometry args={[radius + 0.012, 14, 12]} /></mesh>
 
       <mesh
         castShadow
         receiveShadow
         position={[motorAttachX, (archHeight + motorTopY) / 2, motorAttachZ]}
-      >
-        <cylinderGeometry args={[radius, radius, archHeight - motorTopY, 14]} />
-        {createMaterial(PALETTE.pipe, 'gold')}
-      </mesh>
+       material={createMaterial(PALETTE.pipe, 'gold')}>
+        <cylinderGeometry args={[radius, radius, archHeight - motorTopY, 14]} /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[motorAttachX, motorTopY, motorAttachZ]}
         rotation={[Math.PI / 2, 0, 0]}
-      >
-        <cylinderGeometry args={[radius + 0.018, radius + 0.022, 0.04, 14]} />
-        {createMaterial(PALETTE.pipeShadow, 'gold')}
-      </mesh>
+       material={createMaterial(PALETTE.pipeShadow, 'gold')}>
+        <cylinderGeometry args={[radius + 0.018, radius + 0.022, 0.04, 14]} /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[motorAttachX, motorTopY + 0.015, motorAttachZ]}
         rotation={[Math.PI / 2, 0, 0]}
-      >
-        <torusGeometry args={[radius + 0.018, 0.012, 8, 16]} />
-        {createMaterial(PALETTE.pipeRing, 'gold')}
-      </mesh>
+       material={createMaterial(PALETTE.pipeRing, 'gold')}>
+        <torusGeometry args={[radius + 0.018, 0.012, 8, 16]} /></mesh>
     </group>
   );
 };

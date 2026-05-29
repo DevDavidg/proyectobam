@@ -35,53 +35,41 @@ export const PlankPlatform = ({ dim, createMaterial }: PlankPlatformProps) => {
           castShadow
           receiveShadow
           position={[foot.x, dim.baseLift + dim.footHeight / 2, foot.z]}
-        >
-          <boxGeometry args={[dim.footSize, dim.footHeight, dim.footSize]} />
-          {createMaterial(PALETTE.plankShadow, 'wood')}
-        </mesh>
+         material={createMaterial(PALETTE.plankShadow, 'wood')}>
+          <boxGeometry args={[dim.footSize, dim.footHeight, dim.footSize]} /></mesh>
       ))}
 
       <mesh
         castShadow
         receiveShadow
         position={[0, dim.baseLift + dim.platformHeight - 0.02, 0]}
-      >
+       material={createMaterial(PALETTE.plankShadow, 'wood')}>
         <boxGeometry
           args={[
             dim.halfX * 2 + dim.platformExtensionX * 2 + 0.02,
             0.04,
             dim.halfZ * 2 + 0.02,
           ]}
-        />
-        {createMaterial(PALETTE.plankShadow, 'wood')}
-      </mesh>
+        /></mesh>
 
       {planks.map((plank) => (
         <group key={plank.id} position={[0, dim.platformTop - 0.04, plank.z]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[plank.width, 0.08, plank.depth]} />
-            {createMaterial(tonePalettePlank(plank.tone), 'wood')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[0, 0.045, 0]}>
-            <boxGeometry args={[plank.width - 0.04, 0.005, plank.depth - 0.02]} />
-            {createMaterial(PALETTE.plankLight, 'wood')}
-          </mesh>
+          <mesh castShadow receiveShadow material={createMaterial(tonePalettePlank(plank.tone), 'wood')}>
+            <boxGeometry args={[plank.width, 0.08, plank.depth]} /></mesh>
+          <mesh castShadow receiveShadow position={[0, 0.045, 0]} material={createMaterial(PALETTE.plankLight, 'wood')}>
+            <boxGeometry args={[plank.width - 0.04, 0.005, plank.depth - 0.02]} /></mesh>
           <mesh
             castShadow={false}
             receiveShadow
             position={[-plank.width / 2 + 0.06, 0.046, 0]}
-          >
-            <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} />
-            {createMaterial(PALETTE.plankNail, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.plankNail, 'iron')}>
+            <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} /></mesh>
           <mesh
             castShadow={false}
             receiveShadow
             position={[plank.width / 2 - 0.06, 0.046, 0]}
-          >
-            <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} />
-            {createMaterial(PALETTE.plankNail, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.plankNail, 'iron')}>
+            <cylinderGeometry args={[0.012, 0.012, 0.014, 8]} /></mesh>
         </group>
       ))}
 
@@ -90,10 +78,8 @@ export const PlankPlatform = ({ dim, createMaterial }: PlankPlatformProps) => {
         receiveShadow
         position={[-dim.halfX - 0.12, dim.baseLift + 0.05, 0.42]}
         rotation={[0, 0.4, 0.05]}
-      >
-        <boxGeometry args={[0.18, 0.1, 0.16]} />
-        {createMaterial(PALETTE.plankDark, 'wood')}
-      </mesh>
+       material={createMaterial(PALETTE.plankDark, 'wood')}>
+        <boxGeometry args={[0.18, 0.1, 0.16]} /></mesh>
     </group>
   );
 };

@@ -44,23 +44,15 @@ export const Rivets = ({ dim, createMaterial }: RivetsProps) => {
           >
             {rivetXs.map((localX, idx) => (
               <Fragment key={`rivet-${face}-${idx}`}>
-                <mesh castShadow position={[localX, topRowY, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                  <cylinderGeometry args={[rivetRadius, rivetRadius * 0.94, rivetDepth, 8]} />
-                  {createMaterial(PALETTE.boltDark, 'iron')}
-                </mesh>
-                <mesh position={[localX - rivetRadius * 0.32, topRowY + rivetRadius * 0.32, rivetDepth / 2 + 0.001]}>
-                  <sphereGeometry args={[rivetRadius * 0.32, 6, 6]} />
-                  {createMaterial(PALETTE.boltShine, 'iron')}
-                </mesh>
+                <mesh castShadow position={[localX, topRowY, 0]} rotation={[Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.boltDark, 'iron')}>
+                  <cylinderGeometry args={[rivetRadius, rivetRadius * 0.94, rivetDepth, 8]} /></mesh>
+                <mesh position={[localX - rivetRadius * 0.32, topRowY + rivetRadius * 0.32, rivetDepth / 2 + 0.001]} material={createMaterial(PALETTE.boltShine, 'iron')}>
+                  <sphereGeometry args={[rivetRadius * 0.32, 6, 6]} /></mesh>
 
-                <mesh castShadow position={[localX, bottomRowY, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                  <cylinderGeometry args={[rivetRadius, rivetRadius * 0.94, rivetDepth, 8]} />
-                  {createMaterial(PALETTE.boltDark, 'iron')}
-                </mesh>
-                <mesh position={[localX - rivetRadius * 0.32, bottomRowY + rivetRadius * 0.32, rivetDepth / 2 + 0.001]}>
-                  <sphereGeometry args={[rivetRadius * 0.32, 6, 6]} />
-                  {createMaterial(PALETTE.boltShine, 'iron')}
-                </mesh>
+                <mesh castShadow position={[localX, bottomRowY, 0]} rotation={[Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.boltDark, 'iron')}>
+                  <cylinderGeometry args={[rivetRadius, rivetRadius * 0.94, rivetDepth, 8]} /></mesh>
+                <mesh position={[localX - rivetRadius * 0.32, bottomRowY + rivetRadius * 0.32, rivetDepth / 2 + 0.001]} material={createMaterial(PALETTE.boltShine, 'iron')}>
+                  <sphereGeometry args={[rivetRadius * 0.32, 6, 6]} /></mesh>
               </Fragment>
             ))}
           </group>

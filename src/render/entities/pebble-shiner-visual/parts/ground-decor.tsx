@@ -25,10 +25,8 @@ export const GroundDecor = ({ dim, createMaterial }: GroundDecorProps) => (
         receiveShadow
         position={[pebble.x, 0.025 + pebble.size * 0.3, pebble.z]}
         rotation={[0.1, pebble.rotation, 0.15]}
-      >
-        <sphereGeometry args={[pebble.size, 10, 8]} />
-        {createMaterial(tonePaletteGround(pebble.tone), 'stone')}
-      </mesh>
+       material={createMaterial(tonePaletteGround(pebble.tone), 'stone')}>
+        <sphereGeometry args={[pebble.size, 10, 8]} /></mesh>
     ))}
 
     <GrassTuftCluster

@@ -1,5 +1,5 @@
-import { useMemo, useRef, type ReactElement } from 'react';
-import type { Group } from 'three';
+import { useMemo, useRef } from 'react';
+import { MeshStandardMaterial, type Group } from 'three';
 import {
   computeDimensions,
   resolveDimensionBlend,
@@ -25,9 +25,23 @@ import { SidePatch } from './parts/side-patch';
 import { SidePipes } from './parts/side-pipes';
 import type { MaterialFactory, MaterialToken, TownHallVisualProps } from './types';
 
-const defaultMaterialFactory: MaterialFactory = (fallbackColor: string, _token: MaterialToken): ReactElement => (
-  <meshStandardMaterial color={fallbackColor} roughness={0.78} metalness={0.16} flatShading />
-);
+const DEFAULT_MATERIAL_CACHE = new Map<string, MeshStandardMaterial>();
+
+const defaultMaterialFactory: MaterialFactory = (fallbackColor: string, _token: MaterialToken) => {
+  const cached = DEFAULT_MATERIAL_CACHE.get(fallbackColor);
+  if (cached) {
+    return cached;
+  }
+
+  const material = new MeshStandardMaterial({
+    color: fallbackColor,
+    roughness: 0.78,
+    metalness: 0.16,
+    flatShading: true,
+  });
+  DEFAULT_MATERIAL_CACHE.set(fallbackColor, material);
+  return material;
+};
 
 export const TownHallVisual = ({
   level,

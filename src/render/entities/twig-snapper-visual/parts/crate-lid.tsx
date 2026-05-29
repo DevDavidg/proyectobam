@@ -18,10 +18,8 @@ export const CrateLid = ({ dim, openProgress, createMaterial }: CrateLidProps) =
   return (
     <group position={[0, dim.lidHingeY, dim.lidHingeZ]} rotation={[targetAngle, 0, 0]}>
       <group position={[0, 0, dim.lidDepthZ / 2]}>
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[dim.lidWidthX, dim.lidThickness, dim.lidDepthZ]} />
-          {createMaterial(PALETTE.lidMid, 'wood')}
-        </mesh>
+        <mesh castShadow receiveShadow material={createMaterial(PALETTE.lidMid, 'wood')}>
+          <boxGeometry args={[dim.lidWidthX, dim.lidThickness, dim.lidDepthZ]} /></mesh>
 
         {Array.from({ length: plankCount }).map((_, index) => {
           const offsetX = -dim.lidWidthX / 2 + plankWidth / 2 + index * plankWidth;
@@ -31,10 +29,8 @@ export const CrateLid = ({ dim, openProgress, createMaterial }: CrateLidProps) =
               castShadow
               receiveShadow
               position={[offsetX, dim.lidThickness / 2 + 0.002, 0]}
-            >
-              <boxGeometry args={[plankWidth - 0.012, 0.005, dim.lidDepthZ - 0.02]} />
-              {createMaterial(tones[index] ?? PALETTE.lidMid, 'wood')}
-            </mesh>
+             material={createMaterial(tones[index] ?? PALETTE.lidMid, 'wood')}>
+              <boxGeometry args={[plankWidth - 0.012, 0.005, dim.lidDepthZ - 0.02]} /></mesh>
           );
         })}
 
@@ -42,46 +38,36 @@ export const CrateLid = ({ dim, openProgress, createMaterial }: CrateLidProps) =
           castShadow
           receiveShadow
           position={[0, dim.lidThickness / 2 + 0.006, -dim.lidDepthZ / 2 + 0.06]}
-        >
-          <boxGeometry args={[dim.lidWidthX - 0.06, 0.012, 0.022]} />
-          {createMaterial(PALETTE.lidStrap, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.lidStrap, 'iron')}>
+          <boxGeometry args={[dim.lidWidthX - 0.06, 0.012, 0.022]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[0, dim.lidThickness / 2 + 0.006, dim.lidDepthZ / 2 - 0.06]}
-        >
-          <boxGeometry args={[dim.lidWidthX - 0.06, 0.012, 0.022]} />
-          {createMaterial(PALETTE.lidStrap, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.lidStrap, 'iron')}>
+          <boxGeometry args={[dim.lidWidthX - 0.06, 0.012, 0.022]} /></mesh>
 
         <mesh
           castShadow
           receiveShadow
           position={[-dim.lidWidthX / 2 + 0.04, dim.lidThickness / 2 + 0.012, -dim.lidDepthZ / 2 + 0.05]}
           rotation={[Math.PI / 2, 0, 0]}
-        >
-          <cylinderGeometry args={[0.018, 0.018, 0.05, 10]} />
-          {createMaterial(PALETTE.lidStrap, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.lidStrap, 'iron')}>
+          <cylinderGeometry args={[0.018, 0.018, 0.05, 10]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[dim.lidWidthX / 2 - 0.04, dim.lidThickness / 2 + 0.012, -dim.lidDepthZ / 2 + 0.05]}
           rotation={[Math.PI / 2, 0, 0]}
-        >
-          <cylinderGeometry args={[0.018, 0.018, 0.05, 10]} />
-          {createMaterial(PALETTE.lidStrap, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.lidStrap, 'iron')}>
+          <cylinderGeometry args={[0.018, 0.018, 0.05, 10]} /></mesh>
 
         <mesh
           castShadow
           receiveShadow
           position={[0, -dim.lidThickness / 2 - 0.005, 0]}
-        >
-          <boxGeometry args={[dim.lidWidthX - 0.02, 0.005, dim.lidDepthZ - 0.04]} />
-          {createMaterial(PALETTE.lidDark, 'wood')}
-        </mesh>
+         material={createMaterial(PALETTE.lidDark, 'wood')}>
+          <boxGeometry args={[dim.lidWidthX - 0.02, 0.005, dim.lidDepthZ - 0.04]} /></mesh>
       </group>
     </group>
   );

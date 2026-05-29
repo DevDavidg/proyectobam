@@ -51,10 +51,8 @@ export const CentrifugeHopper = ({
   return (
     <group position={[dim.hopperCenterX, 0, 0]}>
       {/* Open funnel walls (no top cover) */}
-      <mesh castShadow receiveShadow position={[0, dim.hopperCenterY, 0]} rotation={[0, Math.PI / 4, 0]}>
-        <cylinderGeometry args={[topR, bottomR, dim.hopperHeight, 4, 1, true]} />
-        {createMaterial(PALETTE.hopperStone, 'stone')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, dim.hopperCenterY, 0]} rotation={[0, Math.PI / 4, 0]} material={createMaterial(PALETTE.hopperStone, 'stone')}>
+        <cylinderGeometry args={[topR, bottomR, dim.hopperHeight, 4, 1, true]} /></mesh>
 
       {/* Thick open rim around the mouth */}
       <mesh
@@ -62,10 +60,8 @@ export const CentrifugeHopper = ({
         receiveShadow
         position={[0, dim.hopperTopY - 0.02, 0]}
         rotation={[Math.PI / 2, Math.PI / 4, 0]}
-      >
-        <torusGeometry args={[topR, 0.035, 6, 4]} />
-        {createMaterial(PALETTE.hopperRim, 'stone')}
-      </mesh>
+       material={createMaterial(PALETTE.hopperRim, 'stone')}>
+        <torusGeometry args={[topR, 0.035, 6, 4]} /></mesh>
 
       {/* Heaped round stones inside the open mouth */}
       {pebbles.map((pebble) => (
@@ -75,21 +71,15 @@ export const CentrifugeHopper = ({
           receiveShadow
           position={[pebble.x, dim.hopperTopY - 0.08 + pebble.yJitter, pebble.z]}
           rotation={[pebble.tilt, pebble.rotation, 0]}
-        >
-          <icosahedronGeometry args={[pebble.size, 0]} />
-          {createMaterial(pebble.tone, 'stone')}
-        </mesh>
+         material={createMaterial(pebble.tone, 'stone')}>
+          <icosahedronGeometry args={[pebble.size, 0]} /></mesh>
       ))}
 
       {/* Narrow filtering neck under the funnel */}
-      <mesh castShadow receiveShadow position={[0, neckY, 0]}>
-        <cylinderGeometry args={[bottomR * 0.85, bottomR * 0.7, 0.14, 8]} />
-        {createMaterial(PALETTE.hopperStoneDark, 'stone')}
-      </mesh>
-      <mesh castShadow receiveShadow position={[0, neckY - 0.09, 0]}>
-        <cylinderGeometry args={[bottomR * 0.55, bottomR * 0.42, 0.06, 8]} />
-        {createMaterial(PALETTE.hopperStoneLight, 'stone')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, neckY, 0]} material={createMaterial(PALETTE.hopperStoneDark, 'stone')}>
+        <cylinderGeometry args={[bottomR * 0.85, bottomR * 0.7, 0.14, 8]} /></mesh>
+      <mesh castShadow receiveShadow position={[0, neckY - 0.09, 0]} material={createMaterial(PALETTE.hopperStoneLight, 'stone')}>
+        <cylinderGeometry args={[bottomR * 0.55, bottomR * 0.42, 0.06, 8]} /></mesh>
     </group>
   );
 };

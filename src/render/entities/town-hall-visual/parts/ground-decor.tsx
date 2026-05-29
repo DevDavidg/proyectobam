@@ -64,21 +64,15 @@ export const GroundDecor = ({ dim, createMaterial }: GroundDecorProps) => {
         createMaterial={createMaterial}
         y={0.011}
       />
-      <mesh receiveShadow position={[0, 0.013, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[groundOuterRadius * 0.55, groundOuterRadius * 0.92, 28, 1]} />
-        {createMaterial(PALETTE.groundDecalLight, 'wood')}
-      </mesh>
+      <mesh receiveShadow position={[0, 0.013, 0]} rotation={[-Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.groundDecalLight, 'wood')}>
+        <ringGeometry args={[groundOuterRadius * 0.55, groundOuterRadius * 0.92, 28, 1]} /></mesh>
 
       <group position={gearCenter} rotation={[0, 0.32, 0]}>
-        <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[gearRadius, gearRadius, gearThickness, 18]} />
-          {createMaterial(PALETTE.gearBody, 'iron')}
-        </mesh>
+        <mesh castShadow receiveShadow material={createMaterial(PALETTE.gearBody, 'iron')}>
+          <cylinderGeometry args={[gearRadius, gearRadius, gearThickness, 18]} /></mesh>
 
-        <mesh castShadow position={[0, gearThickness / 2 + 0.001, 0]}>
-          <cylinderGeometry args={[gearRadius * 0.96, gearRadius * 0.96, 0.012, 18]} />
-          {createMaterial(PALETTE.gearBodyLight, 'iron')}
-        </mesh>
+        <mesh castShadow position={[0, gearThickness / 2 + 0.001, 0]} material={createMaterial(PALETTE.gearBodyLight, 'iron')}>
+          <cylinderGeometry args={[gearRadius * 0.96, gearRadius * 0.96, 0.012, 18]} /></mesh>
 
         {Array.from({ length: GEAR_TEETH }).map((_, idx) => {
           const angle = (idx / GEAR_TEETH) * Math.PI * 2;
@@ -91,21 +85,15 @@ export const GroundDecor = ({ dim, createMaterial }: GroundDecorProps) => {
               receiveShadow
               position={[x, 0, z]}
               rotation={[0, -angle, 0]}
-            >
-              <boxGeometry args={[toothLength, gearThickness * 0.92, toothWidth]} />
-              {createMaterial(PALETTE.gearTeeth, 'iron')}
-            </mesh>
+             material={createMaterial(PALETTE.gearTeeth, 'iron')}>
+              <boxGeometry args={[toothLength, gearThickness * 0.92, toothWidth]} /></mesh>
           );
         })}
 
-        <mesh castShadow position={[0, gearThickness / 2 + 0.012, 0]}>
-          <cylinderGeometry args={[gearRadius * 0.32, gearRadius * 0.32, 0.024, 12]} />
-          {createMaterial(PALETTE.gearHubDark, 'iron')}
-        </mesh>
-        <mesh position={[0, gearThickness / 2 + 0.026, 0]}>
-          <cylinderGeometry args={[gearRadius * 0.12, gearRadius * 0.12, 0.014, 10]} />
-          {createMaterial(PALETTE.boltShine, 'iron')}
-        </mesh>
+        <mesh castShadow position={[0, gearThickness / 2 + 0.012, 0]} material={createMaterial(PALETTE.gearHubDark, 'iron')}>
+          <cylinderGeometry args={[gearRadius * 0.32, gearRadius * 0.32, 0.024, 12]} /></mesh>
+        <mesh position={[0, gearThickness / 2 + 0.026, 0]} material={createMaterial(PALETTE.boltShine, 'iron')}>
+          <cylinderGeometry args={[gearRadius * 0.12, gearRadius * 0.12, 0.014, 10]} /></mesh>
 
         {Array.from({ length: 4 }).map((_, idx) => {
           const angle = (idx / 4) * Math.PI * 2 + Math.PI / 4;
@@ -115,10 +103,8 @@ export const GroundDecor = ({ dim, createMaterial }: GroundDecorProps) => {
             <mesh
               key={`gear-spoke-hole-${idx}`}
               position={[x, gearThickness / 2 + 0.014, z]}
-            >
-              <cylinderGeometry args={[0.04, 0.04, 0.012, 12]} />
-              {createMaterial(PALETTE.gearHubDark, 'iron')}
-            </mesh>
+             material={createMaterial(PALETTE.gearHubDark, 'iron')}>
+              <cylinderGeometry args={[0.04, 0.04, 0.012, 12]} /></mesh>
           );
         })}
       </group>
@@ -130,10 +116,8 @@ export const GroundDecor = ({ dim, createMaterial }: GroundDecorProps) => {
             receiveShadow
             position={[rock.x, rock.height / 2 + 0.01, rock.z]}
             rotation={[rock.tilt ?? 0, rock.rotation, 0]}
-          >
-            <boxGeometry args={[rock.width, rock.height, rock.depth]} />
-            {createMaterial(tonePaletteRock(rock.tone), 'stone')}
-          </mesh>
+           material={createMaterial(tonePaletteRock(rock.tone), 'stone')}>
+            <boxGeometry args={[rock.width, rock.height, rock.depth]} /></mesh>
           <mesh
             position={[
               rock.x + Math.sin(rock.rotation) * 0.005,
@@ -141,17 +125,13 @@ export const GroundDecor = ({ dim, createMaterial }: GroundDecorProps) => {
               rock.z + Math.cos(rock.rotation) * 0.005,
             ]}
             rotation={[rock.tilt ?? 0, rock.rotation, 0]}
-          >
-            <boxGeometry args={[rock.width * 0.6, 0.014, rock.depth * 0.6]} />
-            {createMaterial(PALETTE.rockLight, 'stone')}
-          </mesh>
+           material={createMaterial(PALETTE.rockLight, 'stone')}>
+            <boxGeometry args={[rock.width * 0.6, 0.014, rock.depth * 0.6]} /></mesh>
         </Fragment>
       ))}
 
-      <mesh receiveShadow position={[gearCenter[0] + 0.02, 0.013, gearCenter[2] + 0.04]}>
-        <boxGeometry args={[gearRadius * 2.4, 0.005, gearRadius * 1.8]} />
-        {createMaterial(PALETTE.groundDecalLight, 'wood')}
-      </mesh>
+      <mesh receiveShadow position={[gearCenter[0] + 0.02, 0.013, gearCenter[2] + 0.04]} material={createMaterial(PALETTE.groundDecalLight, 'wood')}>
+        <boxGeometry args={[gearRadius * 2.4, 0.005, gearRadius * 1.8]} /></mesh>
     </group>
   );
 };

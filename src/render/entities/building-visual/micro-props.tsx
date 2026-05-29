@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { Material } from 'three';
 import {
   getCylinderGeometry,
   getSphereGeometry,
@@ -6,7 +6,7 @@ import {
 } from './geometry-cache';
 import type { MaterialToken } from './types';
 
-type CreateMaterial = (fallbackColor: string, token: MaterialToken) => ReactElement;
+type CreateMaterial = (fallbackColor: string, token: MaterialToken) => Material;
 
 type RivetClusterProps = {
   footprintX: number;
@@ -88,10 +88,8 @@ export const BuildingRivetCluster = ({
           receiveShadow
           position={[px, height, pz]}
           scale={[1, 0.55, 1]}
-        >
-          <primitive attach="geometry" object={getSphereGeometry(rivetRadius, 10, 10)} />
-          {createMaterial(color, token)}
-        </mesh>
+         material={createMaterial(color, token)}>
+          <primitive attach="geometry" object={getSphereGeometry(rivetRadius, 10, 10)} /></mesh>
       ))}
     </group>
   );
@@ -120,33 +118,27 @@ export const BuildingGooPipe = ({
 }: GooPipeProps) => {
   return (
     <group position={origin} rotation={[0, rotationY, 0]}>
-      <mesh castShadow receiveShadow position={[arcRadius, -arcRadius * 0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh castShadow receiveShadow position={[arcRadius, -arcRadius * 0.5, 0]} rotation={[Math.PI / 2, 0, 0]} material={createMaterial(pipeColor, pipeToken)}>
         <primitive
           attach="geometry"
           object={getTorusGeometry(arcRadius, tubeRadius, 8, 24, Math.PI / 2)}
-        />
-        {createMaterial(pipeColor, pipeToken)}
-      </mesh>
+        /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[arcRadius, -arcRadius - 0.05, 0]}
-      >
+       material={createMaterial(pipeColor, pipeToken)}>
         <primitive
           attach="geometry"
           object={getCylinderGeometry(tubeRadius * 1.1, tubeRadius * 1.1, 0.18, 10)}
-        />
-        {createMaterial(pipeColor, pipeToken)}
-      </mesh>
+        /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[arcRadius, 0.02, 0]}
         rotation={[Math.PI / 2, 0, 0]}
-      >
-        <primitive attach="geometry" object={getTorusGeometry(tubeRadius * 1.45, tubeRadius * 0.5, 8, 16)} />
-        {createMaterial(ringColor, 'gold')}
-      </mesh>
+       material={createMaterial(ringColor, 'gold')}>
+        <primitive attach="geometry" object={getTorusGeometry(tubeRadius * 1.45, tubeRadius * 0.5, 8, 16)} /></mesh>
     </group>
   );
 };
@@ -218,9 +210,7 @@ export const BuildingCornerBolts = ({
           position={[px, height, pz]}
           scale={[1, 0.6, 1]}
         >
-          <primitive attach="geometry" object={getSphereGeometry(boltRadius, 10, 10)} />
-          {createMaterial(color, token)}
-        </mesh>
+          <primitive attach="geometry" object={getSphereGeometry(boltRadius, 10, 10)} /></mesh>
       ))}
     </group>
   );

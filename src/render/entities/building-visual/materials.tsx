@@ -1,13 +1,15 @@
-import type { ReactElement } from "react";
 import {
   CanvasTexture,
   Color,
   DataTexture,
+  MeshStandardMaterial,
+  MeshToonMaterial,
   NearestFilter,
   RepeatWrapping,
   SRGBColorSpace,
-} from "three";
-import type { BuildingVisualMaterialMode, MaterialToken } from "./types";
+  type Material,
+} from 'three';
+import type { BuildingVisualMaterialMode, MaterialToken } from './types';
 
 type BuildingMaterialConfig = {
   color: string;
@@ -22,11 +24,11 @@ type MetalConfig = {
 };
 
 const MATCAP_BY_TOKEN = {
-  gold: "#d6a34f",
-  iron: "#8ca0b7",
-  wood: "#9a6239",
-  goo: "#5f8cab",
-  stone: "#a4a1a0",
+  gold: '#d6a34f',
+  iron: '#8ca0b7',
+  wood: '#9a6239',
+  goo: '#5f8cab',
+  stone: '#a4a1a0',
 } as const;
 
 const METAL_CONFIG_BY_TOKEN: Partial<Record<MaterialToken, MetalConfig>> = {
@@ -76,19 +78,19 @@ const createFallbackTexture = (color: string) => {
 };
 
 const createProceduralMatcapTexture = (baseColor: string) => {
-  if (typeof document === "undefined") {
+  if (typeof document === 'undefined') {
     return createFallbackTexture(baseColor);
   }
   const size = 256;
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext('2d');
   if (!context) {
     return createFallbackTexture(baseColor);
   }
 
-  context.fillStyle = "#121212";
+  context.fillStyle = '#121212';
   context.fillRect(0, 0, size, size);
 
   context.fillStyle = baseColor;
@@ -96,12 +98,12 @@ const createProceduralMatcapTexture = (baseColor: string) => {
   context.arc(size / 2, size / 2, size * 0.48, 0, Math.PI * 2);
   context.fill();
 
-  context.fillStyle = "rgba(255,255,255,0.22)";
+  context.fillStyle = 'rgba(255,255,255,0.22)';
   context.beginPath();
   context.arc(size * 0.36, size * 0.32, size * 0.16, 0, Math.PI * 2);
   context.fill();
 
-  context.strokeStyle = "rgba(0,0,0,0.55)";
+  context.strokeStyle = 'rgba(0,0,0,0.55)';
   context.lineWidth = size * 0.06;
   context.beginPath();
   context.arc(size / 2, size / 2, size * 0.45, 0, Math.PI * 2);
@@ -113,20 +115,20 @@ const createProceduralMatcapTexture = (baseColor: string) => {
 };
 
 const createGaugeTexture = () => {
-  if (typeof document === "undefined") {
-    return createFallbackTexture("#f5f5f4");
+  if (typeof document === 'undefined') {
+    return createFallbackTexture('#f5f5f4');
   }
   const size = 128;
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext('2d');
   if (!context) {
-    return createFallbackTexture("#f5f5f4");
+    return createFallbackTexture('#f5f5f4');
   }
-  context.fillStyle = "#f5f5f4";
+  context.fillStyle = '#f5f5f4';
   context.fillRect(0, 0, size, size);
-  context.strokeStyle = "#1f2937";
+  context.strokeStyle = '#1f2937';
   context.lineWidth = 6;
   context.beginPath();
   context.arc(size / 2, size / 2, 52, 0, Math.PI * 2);
@@ -143,7 +145,7 @@ const createGaugeTexture = () => {
     context.lineTo(toX, toY);
     context.stroke();
   }
-  context.strokeStyle = "#111827";
+  context.strokeStyle = '#111827';
   context.lineWidth = 5;
   context.beginPath();
   context.moveTo(size / 2, size / 2);
@@ -177,20 +179,82 @@ const createToonGradientTexture = (): DataTexture => {
 
 export const TOON_GRADIENT_TEXTURE = createToonGradientTexture();
 
+const BUILDING_MATERIAL_CACHE = new Map<string, Material>();
+
 const getMaterialConfig = (
   materialMode: BuildingVisualMaterialMode,
   fallbackColor: string,
 ): BuildingMaterialConfig => {
-  if (materialMode === "ghost-valid") {
-    return { color: "#60a5fa" };
+  if (materialMode === 'ghost-valid') {
+    return { color: '#60a5fa' };
   }
-  if (materialMode === "ghost-invalid") {
-    return { color: "#ef4444" };
+  if (materialMode === 'ghost-invalid') {
+    return { color: '#ef4444' };
   }
-  if (materialMode === "highlight") {
-    return { color: "#facc15" };
+  if (materialMode === 'highlight') {
+    return { color: '#facc15' };
   }
   return { color: fallbackColor };
+};
+
+const buildMaterialCacheKey = (
+  materialMode: BuildingVisualMaterialMode,
+  isGhost: boolean,
+  opacity: number,
+  color: string,
+  token: MaterialToken,
+  variant: 'metal' | 'toon',
+): string => `${materialMode}|${isGhost}|${opacity}|${color}|${token}|${variant}`;
+
+const getCachedToonMaterial = (
+  materialMode: BuildingVisualMaterialMode,
+  isGhost: boolean,
+  opacity: number,
+  color: string,
+  token: MaterialToken,
+): MeshToonMaterial => {
+  const key = buildMaterialCacheKey(materialMode, isGhost, opacity, color, token, 'toon');
+  const cached = BUILDING_MATERIAL_CACHE.get(key);
+  if (cached instanceof MeshToonMaterial) {
+    return cached;
+  }
+
+  const material = new MeshToonMaterial({
+    color,
+    gradientMap: TOON_GRADIENT_TEXTURE,
+    transparent: isGhost,
+    opacity,
+  });
+  BUILDING_MATERIAL_CACHE.set(key, material);
+  return material;
+};
+
+const getCachedMetalMaterial = (
+  materialMode: BuildingVisualMaterialMode,
+  isGhost: boolean,
+  opacity: number,
+  color: string,
+  token: MaterialToken,
+  metalConfig: MetalConfig,
+): MeshStandardMaterial => {
+  const key = buildMaterialCacheKey(materialMode, isGhost, opacity, color, token, 'metal');
+  const cached = BUILDING_MATERIAL_CACHE.get(key);
+  if (cached instanceof MeshStandardMaterial) {
+    return cached;
+  }
+
+  const material = new MeshStandardMaterial({
+    color,
+    metalness: metalConfig.metalness,
+    roughness: metalConfig.roughness,
+    envMapIntensity: metalConfig.envMapIntensity,
+    emissive: metalConfig.emissive ?? '#000000',
+    emissiveIntensity: metalConfig.emissiveIntensity ?? 0,
+    transparent: isGhost,
+    opacity,
+  });
+  BUILDING_MATERIAL_CACHE.set(key, material);
+  return material;
 };
 
 export const HATCHERY_GAUGE_TEXTURE = createGaugeTexture();
@@ -200,34 +264,16 @@ export const createMaterialFactory = (
   isGhost: boolean,
   opacity: number,
 ) => {
-  return (fallbackColor: string, token: MaterialToken): ReactElement => {
+  return (fallbackColor: string, token: MaterialToken): Material => {
     const config = getMaterialConfig(materialMode, fallbackColor);
     const metalConfig = METAL_CONFIG_BY_TOKEN[token];
     const useMetalMaterial = !isGhost && materialMode === 'default' && !!metalConfig;
 
     if (useMetalMaterial && metalConfig) {
-      return (
-        <meshStandardMaterial
-          color={config.color}
-          metalness={metalConfig.metalness}
-          roughness={metalConfig.roughness}
-          envMapIntensity={metalConfig.envMapIntensity}
-          emissive={metalConfig.emissive ?? '#000000'}
-          emissiveIntensity={metalConfig.emissiveIntensity ?? 0}
-          transparent={isGhost}
-          opacity={opacity}
-        />
-      );
+      return getCachedMetalMaterial(materialMode, isGhost, opacity, config.color, token, metalConfig);
     }
 
-    return (
-      <meshToonMaterial
-        color={config.color}
-        gradientMap={TOON_GRADIENT_TEXTURE}
-        transparent={isGhost}
-        opacity={opacity}
-      />
-    );
+    return getCachedToonMaterial(materialMode, isGhost, opacity, config.color, token);
   };
 };
 

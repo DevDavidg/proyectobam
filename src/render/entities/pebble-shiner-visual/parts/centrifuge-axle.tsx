@@ -33,38 +33,26 @@ export const CentrifugeAxle = ({
   return (
     <group>
       {/* Continuous metal axle through both drums */}
-      <mesh castShadow receiveShadow position={[axleCenterX, axleY, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[axleRadius, axleRadius, axleLength, 16]} />
-        {createMaterial(PALETTE.drumAxle, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[axleCenterX, axleY, 0]} rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.drumAxle, 'iron')}>
+        <cylinderGeometry args={[axleRadius, axleRadius, axleLength, 16]} /></mesh>
       {/* Axle highlight strip */}
-      <mesh position={[axleCenterX, axleY + axleRadius * 0.55, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[axleRadius * 0.45, axleRadius * 0.45, axleLength, 12]} />
-        {createMaterial(PALETTE.drumEndCapHighlight, 'iron')}
-      </mesh>
+      <mesh position={[axleCenterX, axleY + axleRadius * 0.55, 0]} rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.drumEndCapHighlight, 'iron')}>
+        <cylinderGeometry args={[axleRadius * 0.45, axleRadius * 0.45, axleLength, 12]} /></mesh>
       {/* End nut on the drive side */}
-      <mesh castShadow receiveShadow position={[axleRightX - 0.02, axleY, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[axleRadius * 1.6, axleRadius * 1.6, 0.05, 6]} />
-        {createMaterial(PALETTE.drumEndCapShadow, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[axleRightX - 0.02, axleY, 0]} rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.drumEndCapShadow, 'iron')}>
+        <cylinderGeometry args={[axleRadius * 1.6, axleRadius * 1.6, 0.05, 6]} /></mesh>
 
       {bearingXs.map((x, index) => (
         <group key={`bearing-${index}`} position={[x, dim.frameTopY, 0]}>
           {/* Gray pillow-block body */}
-          <mesh castShadow receiveShadow position={[0, mountHeight / 2, 0]}>
-            <boxGeometry args={[0.13, mountHeight, dim.drumRadius * 0.7]} />
-            {createMaterial(PALETTE.hopperStone, 'stone')}
-          </mesh>
+          <mesh castShadow receiveShadow position={[0, mountHeight / 2, 0]} material={createMaterial(PALETTE.hopperStone, 'stone')}>
+            <boxGeometry args={[0.13, mountHeight, dim.drumRadius * 0.7]} /></mesh>
           {/* Cap collar where the axle passes */}
-          <mesh castShadow receiveShadow position={[0, mountHeight - axleRadius * 0.4, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[axleRadius * 1.7, axleRadius * 1.7, 0.14, 14]} />
-            {createMaterial(PALETTE.hopperRim, 'iron')}
-          </mesh>
+          <mesh castShadow receiveShadow position={[0, mountHeight - axleRadius * 0.4, 0]} rotation={[Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.hopperRim, 'iron')}>
+            <cylinderGeometry args={[axleRadius * 1.7, axleRadius * 1.7, 0.14, 14]} /></mesh>
           {/* Bolt foot */}
-          <mesh castShadow receiveShadow position={[0, 0.02, 0]}>
-            <boxGeometry args={[0.17, 0.04, dim.drumRadius * 0.85]} />
-            {createMaterial(PALETTE.hopperStoneDark, 'stone')}
-          </mesh>
+          <mesh castShadow receiveShadow position={[0, 0.02, 0]} material={createMaterial(PALETTE.hopperStoneDark, 'stone')}>
+            <boxGeometry args={[0.17, 0.04, dim.drumRadius * 0.85]} /></mesh>
         </group>
       ))}
     </group>

@@ -68,40 +68,32 @@ const Gear = ({
   return (
     <group ref={groupRef}>
       {/* Main gear body — disc with axis along X */}
-      <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[radius, radius, thickness, 28]} />
-        {createMaterial(PALETTE.gearFace, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.gearFace, 'iron')}>
+        <cylinderGeometry args={[radius, radius, thickness, 28]} /></mesh>
       {/* Slim raised polish ring (outer rim) on visible face */}
       <mesh
         castShadow
         receiveShadow
         position={[faceOffset + 0.001, 0, 0]}
         rotation={[0, Math.PI / 2, 0]}
-      >
-        <torusGeometry args={[radius * 0.85, radius * 0.025, 8, 30]} />
-        {createMaterial(PALETTE.gearFaceShine, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearFaceShine, 'iron')}>
+        <torusGeometry args={[radius * 0.85, radius * 0.025, 8, 30]} /></mesh>
       {/* Mid groove ring for visual depth */}
       <mesh
         castShadow
         receiveShadow
         position={[faceOffset + 0.0018, 0, 0]}
         rotation={[0, Math.PI / 2, 0]}
-      >
-        <torusGeometry args={[radius * 0.66, radius * 0.022, 8, 28]} />
-        {createMaterial(PALETTE.gearFaceDark, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearFaceDark, 'iron')}>
+        <torusGeometry args={[radius * 0.66, radius * 0.022, 8, 28]} /></mesh>
       {/* Inner ring around the hub */}
       <mesh
         castShadow
         receiveShadow
         position={[faceOffset + 0.0026, 0, 0]}
         rotation={[0, Math.PI / 2, 0]}
-      >
-        <torusGeometry args={[hubRadius + radius * 0.04, radius * 0.018, 8, 22]} />
-        {createMaterial(PALETTE.gearHubRing, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearHubRing, 'iron')}>
+        <torusGeometry args={[hubRadius + radius * 0.04, radius * 0.018, 8, 22]} /></mesh>
 
       {/* Spoke holes — dark circular indents around the face */}
       {hasSpokeHoles
@@ -111,18 +103,14 @@ const Gear = ({
                 receiveShadow
                 position={[faceOffset + 0.0015, spokeHoleCenterRadius, 0]}
                 rotation={[0, Math.PI / 2, 0]}
-              >
-                <circleGeometry args={[spokeHoleRadius, 12]} />
-                {createMaterial(PALETTE.gearSpokeHole, 'iron')}
-              </mesh>
+               material={createMaterial(PALETTE.gearSpokeHole, 'iron')}>
+                <circleGeometry args={[spokeHoleRadius, 12]} /></mesh>
               <mesh
                 receiveShadow
                 position={[faceOffset + 0.0028, spokeHoleCenterRadius, 0]}
                 rotation={[0, Math.PI / 2, 0]}
-              >
-                <circleGeometry args={[spokeHoleRadius * 0.55, 10]} />
-                {createMaterial(PALETTE.gearFaceDeep, 'iron')}
-              </mesh>
+               material={createMaterial(PALETTE.gearFaceDeep, 'iron')}>
+                <circleGeometry args={[spokeHoleRadius * 0.55, 10]} /></mesh>
             </group>
           ))
         : null}
@@ -135,28 +123,22 @@ const Gear = ({
             castShadow
             receiveShadow
             position={[0, radius + toothHeight * 0.32, 0]}
-          >
-            <boxGeometry args={[thickness * 0.96, toothHeight * 0.65, toothBaseWidth]} />
-            {createMaterial(PALETTE.gearTeeth, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.gearTeeth, 'iron')}>
+            <boxGeometry args={[thickness * 0.96, toothHeight * 0.65, toothBaseWidth]} /></mesh>
           {/* Tooth tip (narrower, slightly lighter for highlight) */}
           <mesh
             castShadow
             receiveShadow
             position={[0, radius + toothHeight * 0.78, 0]}
-          >
-            <boxGeometry args={[thickness * 0.94, toothHeight * 0.42, toothTipWidth]} />
-            {createMaterial(PALETTE.gearTeethShine, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.gearTeethShine, 'iron')}>
+            <boxGeometry args={[thickness * 0.94, toothHeight * 0.42, toothTipWidth]} /></mesh>
           {/* Front-face accent strip on the tooth for visible contrast */}
           <mesh
             castShadow
             receiveShadow
             position={[faceOffset - 0.001, radius + toothHeight * 0.55, 0]}
-          >
-            <boxGeometry args={[0.004, toothHeight * 0.95, toothBaseWidth * 0.94]} />
-            {createMaterial(PALETTE.gearTeethDark, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.gearTeethDark, 'iron')}>
+            <boxGeometry args={[0.004, toothHeight * 0.95, toothBaseWidth * 0.94]} /></mesh>
         </group>
       ))}
 
@@ -166,48 +148,34 @@ const Gear = ({
         receiveShadow
         position={[faceOffset + 0.0012, 0, 0]}
         rotation={[0, Math.PI / 2, 0]}
-      >
-        <circleGeometry args={[hubRadius, 18]} />
-        {createMaterial(PALETTE.gearHub, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearHub, 'iron')}>
+        <circleGeometry args={[hubRadius, 18]} /></mesh>
       {/* Hub raised cylinder (slight bump) */}
-      <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[hubRadius * 0.6, hubRadius * 0.6, thickness * 1.05, 16]} />
-        {createMaterial(PALETTE.gearAxle, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.gearAxle, 'iron')}>
+        <cylinderGeometry args={[hubRadius * 0.6, hubRadius * 0.6, thickness * 1.05, 16]} /></mesh>
       {/* Center bolt cap — small bright sphere */}
       <mesh
         castShadow
         receiveShadow
         position={[faceOffset + 0.005, 0, 0]}
-      >
-        <sphereGeometry args={[hubRadius * 0.4, 12, 10]} />
-        {createMaterial(PALETTE.gearHubRing, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearHubRing, 'iron')}>
+        <sphereGeometry args={[hubRadius * 0.4, 12, 10]} /></mesh>
       {/* Tiny center pin */}
       <mesh
         castShadow
         receiveShadow
         position={[faceOffset + 0.012, 0, 0]}
-      >
-        <sphereGeometry args={[hubRadius * 0.18, 8, 8]} />
-        {createMaterial(PALETTE.gearAxle, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearAxle, 'iron')}>
+        <sphereGeometry args={[hubRadius * 0.18, 8, 8]} /></mesh>
 
       {hasHandle ? (
         <group position={[faceOffset + 0.012, radius * 0.55, 0]}>
-          <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[radius * 0.06, radius * 0.06, thickness * 0.5, 12]} />
-            {createMaterial(PALETTE.gearHubRing, 'iron')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[thickness * 0.18, 0, 0]}>
-            <sphereGeometry args={[radius * 0.12, 14, 12]} />
-            {createMaterial(PALETTE.gearTeethShine, 'iron')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[thickness * 0.18, 0, 0]}>
-            <sphereGeometry args={[radius * 0.05, 8, 6]} />
-            {createMaterial(PALETTE.gearAxle, 'iron')}
-          </mesh>
+          <mesh castShadow receiveShadow rotation={[0, 0, Math.PI / 2]} material={createMaterial(PALETTE.gearHubRing, 'iron')}>
+            <cylinderGeometry args={[radius * 0.06, radius * 0.06, thickness * 0.5, 12]} /></mesh>
+          <mesh castShadow receiveShadow position={[thickness * 0.18, 0, 0]} material={createMaterial(PALETTE.gearTeethShine, 'iron')}>
+            <sphereGeometry args={[radius * 0.12, 14, 12]} /></mesh>
+          <mesh castShadow receiveShadow position={[thickness * 0.18, 0, 0]} material={createMaterial(PALETTE.gearAxle, 'iron')}>
+            <sphereGeometry args={[radius * 0.05, 8, 6]} /></mesh>
         </group>
       ) : null}
     </group>
@@ -247,62 +215,48 @@ const MountPlate = ({
   return (
     <group>
       {/* Recessed inner panel — dark slab behind the gears */}
-      <mesh castShadow receiveShadow position={[centerX, centerY, centerZ]}>
-        <boxGeometry args={[frameDepth, height, depth]} />
-        {createMaterial(PALETTE.gearMountInset, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[centerX, centerY, centerZ]} material={createMaterial(PALETTE.gearMountInset, 'iron')}>
+        <boxGeometry args={[frameDepth, height, depth]} /></mesh>
       {/* Slightly brighter inner backplate */}
       <mesh
         receiveShadow
         position={[frontX - frameDepth * 0.1, centerY, centerZ]}
         rotation={[0, Math.PI / 2, 0]}
-      >
-        <planeGeometry args={[depth - frameThickness * 0.4, height - frameThickness * 0.4]} />
-        {createMaterial(PALETTE.gearFaceDeep, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearFaceDeep, 'iron')}>
+        <planeGeometry args={[depth - frameThickness * 0.4, height - frameThickness * 0.4]} /></mesh>
 
       {/* Frame: top, bottom, left, right rails on the front face */}
       <mesh
         castShadow
         receiveShadow
         position={[frontX - frameDepth * 0.1, centerY + cornerY, centerZ]}
-      >
-        <boxGeometry args={[frameDepth * 0.3, frameThickness, depth]} />
-        {createMaterial(PALETTE.gearMountFrame, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearMountFrame, 'iron')}>
+        <boxGeometry args={[frameDepth * 0.3, frameThickness, depth]} /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[frontX - frameDepth * 0.1, centerY - cornerY, centerZ]}
-      >
-        <boxGeometry args={[frameDepth * 0.3, frameThickness, depth]} />
-        {createMaterial(PALETTE.gearMountFrame, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearMountFrame, 'iron')}>
+        <boxGeometry args={[frameDepth * 0.3, frameThickness, depth]} /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[frontX - frameDepth * 0.1, centerY, centerZ + cornerZ]}
-      >
-        <boxGeometry args={[frameDepth * 0.3, height, frameThickness]} />
-        {createMaterial(PALETTE.gearMountFrame, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearMountFrame, 'iron')}>
+        <boxGeometry args={[frameDepth * 0.3, height, frameThickness]} /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[frontX - frameDepth * 0.1, centerY, centerZ - cornerZ]}
-      >
-        <boxGeometry args={[frameDepth * 0.3, height, frameThickness]} />
-        {createMaterial(PALETTE.gearMountFrame, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearMountFrame, 'iron')}>
+        <boxGeometry args={[frameDepth * 0.3, height, frameThickness]} /></mesh>
 
       {/* Bevel highlight strip along the top of the front frame */}
       <mesh
         receiveShadow
         position={[frontX - frameDepth * 0.1 + frameDepth * 0.16, centerY + cornerY, centerZ]}
-      >
-        <boxGeometry args={[0.006, frameThickness * 0.4, depth - frameThickness * 0.2]} />
-        {createMaterial(PALETTE.gearMountFrameLight, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.gearMountFrameLight, 'iron')}>
+        <boxGeometry args={[0.006, frameThickness * 0.4, depth - frameThickness * 0.2]} /></mesh>
 
       {/* Corner bolts on the frame */}
       {[
@@ -312,14 +266,10 @@ const MountPlate = ({
         { id: 'br', y: centerY - cornerY, z: centerZ + cornerZ },
       ].map(({ id, y, z }) => (
         <group key={`mount-bolt-${id}`} position={[frontX - frameDepth * 0.1 + frameDepth * 0.18, y, z]}>
-          <mesh castShadow receiveShadow>
-            <sphereGeometry args={[cornerBoltRadius, 10, 8]} />
-            {createMaterial(PALETTE.gearHub, 'iron')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[cornerInset * 0.3, 0, 0]}>
-            <sphereGeometry args={[cornerBoltRadius * 0.55, 8, 6]} />
-            {createMaterial(PALETTE.gearHubRing, 'iron')}
-          </mesh>
+          <mesh castShadow receiveShadow material={createMaterial(PALETTE.gearHub, 'iron')}>
+            <sphereGeometry args={[cornerBoltRadius, 10, 8]} /></mesh>
+          <mesh castShadow receiveShadow position={[cornerInset * 0.3, 0, 0]} material={createMaterial(PALETTE.gearHubRing, 'iron')}>
+            <sphereGeometry args={[cornerBoltRadius * 0.55, 8, 6]} /></mesh>
         </group>
       ))}
     </group>

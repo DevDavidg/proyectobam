@@ -43,42 +43,36 @@ export const ArmorBands = ({ dim, createMaterial, weight }: ArmorBandsProps) => 
 
         return (
           <Fragment key={`armor-band-${axis}-${sign}-${idx}`}>
-            <mesh castShadow receiveShadow position={[xPos, bandY, zPos]}>
-              <boxGeometry args={sizeArgs} />
-              {createMaterial(PALETTE.reinforcementSteel, 'iron')}
-            </mesh>
+            <mesh castShadow receiveShadow position={[xPos, bandY, zPos]} material={createMaterial(PALETTE.reinforcementSteel, 'iron')}>
+              <boxGeometry args={sizeArgs} /></mesh>
             <mesh
               position={[
                 xPos + (isFrontBack ? 0 : sign * 0.001),
                 bandY + bandHeight / 2 - 0.005,
                 zPos + (isFrontBack ? sign * 0.001 : 0),
               ]}
-            >
+             material={createMaterial(PALETTE.reinforcementSteelLight, 'iron')}>
               <boxGeometry
                 args={
                   isFrontBack
                     ? [widthArg + 0.004, 0.012, bandThickness + 0.005]
                     : [bandThickness + 0.005, 0.012, widthArg + 0.004]
                 }
-              />
-              {createMaterial(PALETTE.reinforcementSteelLight, 'iron')}
-            </mesh>
+              /></mesh>
             <mesh
               position={[
                 xPos + (isFrontBack ? 0 : sign * 0.001),
                 bandY - bandHeight / 2 + 0.005,
                 zPos + (isFrontBack ? sign * 0.001 : 0),
               ]}
-            >
+             material={createMaterial(PALETTE.reinforcementSteelDark, 'iron')}>
               <boxGeometry
                 args={
                   isFrontBack
                     ? [widthArg + 0.004, 0.01, bandThickness + 0.005]
                     : [bandThickness + 0.005, 0.01, widthArg + 0.004]
                 }
-              />
-              {createMaterial(PALETTE.reinforcementSteelDark, 'iron')}
-            </mesh>
+              /></mesh>
 
             {Array.from({ length: bolts }).map((_, boltIdx) => {
               const tNorm = (boltIdx + 0.5) / bolts;
@@ -92,10 +86,8 @@ export const ArmorBands = ({ dim, createMaterial, weight }: ArmorBandsProps) => 
                   castShadow
                   position={[boltX, bandY, boltZ]}
                   rotation={rotation}
-                >
-                  <cylinderGeometry args={[0.022, 0.022, 0.024, 8]} />
-                  {createMaterial(PALETTE.boltDark, 'iron')}
-                </mesh>
+                 material={createMaterial(PALETTE.boltDark, 'iron')}>
+                  <cylinderGeometry args={[0.022, 0.022, 0.024, 8]} /></mesh>
               );
             })}
           </Fragment>

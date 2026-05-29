@@ -21,10 +21,8 @@ const renderTwig = (twig: GroundTwig, createMaterial: MaterialFactory) => (
     receiveShadow
     position={[twig.x, twig.y, twig.z]}
     rotation={[twig.tiltX, twig.rotationY, Math.PI / 2 + twig.tiltZ]}
-  >
-    <cylinderGeometry args={[twig.thickness, twig.thickness * 0.7, twig.length, 8]} />
-    {createMaterial(tonePaletteTwig(twig.tone), 'wood')}
-  </mesh>
+   material={createMaterial(tonePaletteTwig(twig.tone), 'wood')}>
+    <cylinderGeometry args={[twig.thickness, twig.thickness * 0.7, twig.length, 8]} /></mesh>
 );
 
 export const GroundDecor = ({ dim, createMaterial }: GroundDecorProps) => (

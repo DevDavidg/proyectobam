@@ -36,62 +36,52 @@ export const IronWalls = ({ dim, createMaterial, chamferWeight = 0 }: IronWallsP
         castShadow
         receiveShadow
         position={[0, dim.baseLift + dim.bodyHeight / 2, 0]}
-      >
-        <boxGeometry args={[dim.halfX * 2, dim.bodyHeight, dim.halfZ * 2]} />
-        {createMaterial(PALETTE.bodyShell, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.bodyShell, 'iron')}>
+        <boxGeometry args={[dim.halfX * 2, dim.bodyHeight, dim.halfZ * 2]} /></mesh>
 
       <mesh
         castShadow
         receiveShadow
         position={[0, dim.baseLift + dim.trimHeight / 2, 0]}
-      >
+       material={createMaterial(PALETTE.trimMid, 'iron')}>
         <boxGeometry
           args={[
             dim.halfX * 2 + trimProtrusion * 2,
             dim.trimHeight,
             dim.halfZ * 2 + trimProtrusion * 2,
           ]}
-        />
-        {createMaterial(PALETTE.trimMid, 'iron')}
-      </mesh>
+        /></mesh>
       <mesh
         position={[0, dim.baseLift + dim.trimHeight - 0.005, 0]}
-      >
+       material={createMaterial(PALETTE.trimDark, 'iron')}>
         <boxGeometry
           args={[
             dim.halfX * 2 + trimProtrusion * 2 + 0.002,
             0.014,
             dim.halfZ * 2 + trimProtrusion * 2 + 0.002,
           ]}
-        />
-        {createMaterial(PALETTE.trimDark, 'iron')}
-      </mesh>
+        /></mesh>
 
       <mesh
         castShadow
         receiveShadow
         position={[0, dim.bodyTop - dim.trimHeight / 2, 0]}
-      >
+       material={createMaterial(PALETTE.trimLight, 'iron')}>
         <boxGeometry
           args={[
             dim.halfX * 2 + trimProtrusion * 2,
             dim.trimHeight,
             dim.halfZ * 2 + trimProtrusion * 2,
           ]}
-        />
-        {createMaterial(PALETTE.trimLight, 'iron')}
-      </mesh>
-      <mesh position={[0, dim.bodyTop - dim.trimHeight + 0.005, 0]}>
+        /></mesh>
+      <mesh position={[0, dim.bodyTop - dim.trimHeight + 0.005, 0]} material={createMaterial(PALETTE.trimDark, 'iron')}>
         <boxGeometry
           args={[
             dim.halfX * 2 + trimProtrusion * 2 + 0.002,
             0.014,
             dim.halfZ * 2 + trimProtrusion * 2 + 0.002,
           ]}
-        />
-        {createMaterial(PALETTE.trimDark, 'iron')}
-      </mesh>
+        /></mesh>
 
       {FACE_AXES.map((face) => {
         const orientation = orientFace(face);
@@ -117,26 +107,22 @@ export const IronWalls = ({ dim, createMaterial, chamferWeight = 0 }: IronWallsP
             rotation={[0, orientation.rotationY, 0]}
           >
             {grooves.map((localX, idx) => (
-              <mesh key={`groove-${face}-${idx}`} position={[localX, 0, grooveDepth / 2]}>
-                <boxGeometry args={[grooveWidth, interiorBodyHeight, grooveDepth]} />
-                {createMaterial(PALETTE.panelGroove, 'iron')}
-              </mesh>
+              <mesh key={`groove-${face}-${idx}`} position={[localX, 0, grooveDepth / 2]} material={createMaterial(PALETTE.panelGroove, 'iron')}>
+                <boxGeometry args={[grooveWidth, interiorBodyHeight, grooveDepth]} /></mesh>
             ))}
 
             {highlightStripes.map((localX, idx) => (
               <mesh
                 key={`hi-${face}-${idx}`}
                 position={[localX, 0, panelHighlightDepth / 2 + 0.0005]}
-              >
+               material={createMaterial(PALETTE.panelHighlight, 'iron')}>
                 <boxGeometry
                   args={[
                     panelHighlightWidth,
                     interiorBodyHeight * 0.92,
                     panelHighlightDepth,
                   ]}
-                />
-                {createMaterial(PALETTE.panelHighlight, 'iron')}
-              </mesh>
+                /></mesh>
             ))}
           </group>
         );
@@ -157,10 +143,8 @@ export const IronWalls = ({ dim, createMaterial, chamferWeight = 0 }: IronWallsP
             interiorBodyCenterY,
             sz * (dim.halfZ + cornerProtrusion * 0.5),
           ]}
-        >
-          <boxGeometry args={[cornerThickness, interiorBodyHeight, cornerThickness]} />
-          {createMaterial(PALETTE.cornerCap, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.cornerCap, 'iron')}>
+          <boxGeometry args={[cornerThickness, interiorBodyHeight, cornerThickness]} /></mesh>
       ))}
 
       {[
@@ -176,10 +160,8 @@ export const IronWalls = ({ dim, createMaterial, chamferWeight = 0 }: IronWallsP
             interiorBodyCenterY,
             sz * (dim.halfZ + cornerProtrusion * 0.5 - 0.001),
           ]}
-        >
-          <boxGeometry args={[cornerThickness * 0.4, interiorBodyHeight - 0.06, cornerThickness * 0.4]} />
-          {createMaterial(PALETTE.cornerCapShadow, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.cornerCapShadow, 'iron')}>
+          <boxGeometry args={[cornerThickness * 0.4, interiorBodyHeight - 0.06, cornerThickness * 0.4]} /></mesh>
       ))}
 
       {useChamferedRoof ? (
@@ -191,10 +173,8 @@ export const IronWalls = ({ dim, createMaterial, chamferWeight = 0 }: IronWallsP
       <mesh
         receiveShadow
         position={[0, dim.baseLift + 0.005, 0]}
-      >
-        <boxGeometry args={[dim.halfX * 2 + 0.18, 0.05, dim.halfZ * 2 + 0.18]} />
-        {createMaterial(PALETTE.cornerCapShadow, 'stone')}
-      </mesh>
+       material={createMaterial(PALETTE.cornerCapShadow, 'stone')}>
+        <boxGeometry args={[dim.halfX * 2 + 0.18, 0.05, dim.halfZ * 2 + 0.18]} /></mesh>
     </group>
   );
 };
@@ -210,29 +190,25 @@ const FlatRoof = ({ dim, createMaterial }: RoofPartProps) => (
       castShadow
       receiveShadow
       position={[0, dim.bodyTop + dim.roofHeight / 2, 0]}
-    >
+     material={createMaterial(PALETTE.roofTop, 'iron')}>
       <boxGeometry
         args={[
           dim.halfX * 2 + trimProtrusion * 1.6,
           dim.roofHeight,
           dim.halfZ * 2 + trimProtrusion * 1.6,
         ]}
-      />
-      {createMaterial(PALETTE.roofTop, 'iron')}
-    </mesh>
+      /></mesh>
     <mesh
       receiveShadow
       position={[0, dim.bodyTop + dim.roofHeight + 0.001, 0]}
       rotation={[-Math.PI / 2, 0, 0]}
-    >
+     material={createMaterial(PALETTE.roofTopHighlight, 'iron')}>
       <planeGeometry
         args={[
           dim.halfX * 2 + trimProtrusion * 1.55,
           dim.halfZ * 2 + trimProtrusion * 1.55,
         ]}
-      />
-      {createMaterial(PALETTE.roofTopHighlight, 'iron')}
-    </mesh>
+      /></mesh>
   </>
 );
 
@@ -261,40 +237,30 @@ const ChamferedRoof = ({ dim, createMaterial }: RoofPartProps) => {
         receiveShadow
         position={[0, chamferCenterY, 0]}
         rotation={[0, Math.PI / 4, 0]}
-      >
-        <cylinderGeometry args={[topRadius, bottomRadius, chamferHeight, 4, 1, false]} />
-        {createMaterial(PALETTE.roofTop, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.roofTop, 'iron')}>
+        <cylinderGeometry args={[topRadius, bottomRadius, chamferHeight, 4, 1, false]} /></mesh>
 
       <mesh
         position={[0, chamferBottomY + 0.012, 0]}
         rotation={[0, Math.PI / 4, 0]}
-      >
-        <cylinderGeometry args={[bottomRadius * 0.998, bottomRadius * 0.998, 0.018, 4, 1, true]} />
-        {createMaterial(PALETTE.trimDark, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.trimDark, 'iron')}>
+        <cylinderGeometry args={[bottomRadius * 0.998, bottomRadius * 0.998, 0.018, 4, 1, true]} /></mesh>
 
       <mesh
         position={[0, chamferTopY - 0.008, 0]}
         rotation={[0, Math.PI / 4, 0]}
-      >
-        <cylinderGeometry args={[topRadius * 1.01, topRadius * 1.01, 0.014, 4, 1, true]} />
-        {createMaterial(PALETTE.trimLight, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.trimLight, 'iron')}>
+        <cylinderGeometry args={[topRadius * 1.01, topRadius * 1.01, 0.014, 4, 1, true]} /></mesh>
 
-      <mesh castShadow receiveShadow position={[0, capCenterY, 0]}>
-        <boxGeometry args={[topHalf * 2, capHeight, topHalf * 2]} />
-        {createMaterial(PALETTE.roofTop, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, capCenterY, 0]} material={createMaterial(PALETTE.roofTop, 'iron')}>
+        <boxGeometry args={[topHalf * 2, capHeight, topHalf * 2]} /></mesh>
 
       <mesh
         receiveShadow
         position={[0, capTopY + 0.001, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <planeGeometry args={[topHalf * 2 - 0.005, topHalf * 2 - 0.005]} />
-        {createMaterial(PALETTE.roofTopHighlight, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.roofTopHighlight, 'iron')}>
+        <planeGeometry args={[topHalf * 2 - 0.005, topHalf * 2 - 0.005]} /></mesh>
 
       {[
         [1, 1],
@@ -306,10 +272,8 @@ const ChamferedRoof = ({ dim, createMaterial }: RoofPartProps) => {
           key={`chamfer-bolt-${idx}`}
           castShadow
           position={[sx * (topHalf - 0.04), capTopY - 0.005, sz * (topHalf - 0.04)]}
-        >
-          <cylinderGeometry args={[0.018, 0.018, 0.018, 8]} />
-          {createMaterial(PALETTE.boltDark, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.boltDark, 'iron')}>
+          <cylinderGeometry args={[0.018, 0.018, 0.018, 8]} /></mesh>
       ))}
     </>
   );

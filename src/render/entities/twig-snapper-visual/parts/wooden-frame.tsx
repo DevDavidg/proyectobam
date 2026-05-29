@@ -28,22 +28,14 @@ export const WoodenFrame = ({
     <group>
       {dim.frameCorners.map((corner) => (
         <group key={corner.id} position={[corner.x, sidePostCenterY, corner.z]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[dim.frameCornerSize, sidePostHalfHeight * 2, dim.frameCornerSize]} />
-            {createMaterial(PALETTE.frameWoodMid, 'wood')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[dim.frameCornerSize / 2 - 0.004, 0, 0]}>
-            <boxGeometry args={[0.008, sidePostHalfHeight * 2 - 0.04, dim.frameCornerSize - 0.02]} />
-            {createMaterial(PALETTE.frameWoodLight, 'wood')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[-dim.frameCornerSize / 2 + 0.004, 0, 0]}>
-            <boxGeometry args={[0.008, sidePostHalfHeight * 2 - 0.04, dim.frameCornerSize - 0.02]} />
-            {createMaterial(PALETTE.frameWoodDark, 'wood')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[0, sidePostHalfHeight - 0.012, 0]}>
-            <boxGeometry args={[dim.frameCornerSize + 0.012, 0.022, dim.frameCornerSize + 0.012]} />
-            {createMaterial(PALETTE.frameWoodDark, 'wood')}
-          </mesh>
+          <mesh castShadow receiveShadow material={createMaterial(PALETTE.frameWoodMid, 'wood')}>
+            <boxGeometry args={[dim.frameCornerSize, sidePostHalfHeight * 2, dim.frameCornerSize]} /></mesh>
+          <mesh castShadow receiveShadow position={[dim.frameCornerSize / 2 - 0.004, 0, 0]} material={createMaterial(PALETTE.frameWoodLight, 'wood')}>
+            <boxGeometry args={[0.008, sidePostHalfHeight * 2 - 0.04, dim.frameCornerSize - 0.02]} /></mesh>
+          <mesh castShadow receiveShadow position={[-dim.frameCornerSize / 2 + 0.004, 0, 0]} material={createMaterial(PALETTE.frameWoodDark, 'wood')}>
+            <boxGeometry args={[0.008, sidePostHalfHeight * 2 - 0.04, dim.frameCornerSize - 0.02]} /></mesh>
+          <mesh castShadow receiveShadow position={[0, sidePostHalfHeight - 0.012, 0]} material={createMaterial(PALETTE.frameWoodDark, 'wood')}>
+            <boxGeometry args={[dim.frameCornerSize + 0.012, 0.022, dim.frameCornerSize + 0.012]} /></mesh>
         </group>
       ))}
 
@@ -53,26 +45,20 @@ export const WoodenFrame = ({
             castShadow
             receiveShadow
             position={[0, dim.frameTopBeamY, dim.halfZ - dim.frameInset - dim.frameCornerSize / 2]}
-          >
-            <boxGeometry args={[beamLengthX, dim.frameTopBeamThickness, dim.frameTopBeamThickness]} />
-            {createMaterial(PALETTE.frameWoodLight, 'wood')}
-          </mesh>
+           material={createMaterial(PALETTE.frameWoodLight, 'wood')}>
+            <boxGeometry args={[beamLengthX, dim.frameTopBeamThickness, dim.frameTopBeamThickness]} /></mesh>
           <mesh
             castShadow
             receiveShadow
             position={[0, dim.frameTopBeamY, -dim.halfZ + dim.frameInset + dim.frameCornerSize / 2]}
-          >
-            <boxGeometry args={[beamLengthX, dim.frameTopBeamThickness, dim.frameTopBeamThickness]} />
-            {createMaterial(PALETTE.frameWoodMid, 'wood')}
-          </mesh>
+           material={createMaterial(PALETTE.frameWoodMid, 'wood')}>
+            <boxGeometry args={[beamLengthX, dim.frameTopBeamThickness, dim.frameTopBeamThickness]} /></mesh>
           <mesh
             castShadow
             receiveShadow
             position={[dim.halfX - dim.frameInset - dim.frameCornerSize / 2, dim.frameTopBeamY + 0.012, 0]}
-          >
-            <boxGeometry args={[dim.frameTopBeamThickness * 0.7, dim.frameTopBeamThickness * 0.7, beamLengthZ]} />
-            {createMaterial(PALETTE.frameWoodDark, 'wood')}
-          </mesh>
+           material={createMaterial(PALETTE.frameWoodDark, 'wood')}>
+            <boxGeometry args={[dim.frameTopBeamThickness * 0.7, dim.frameTopBeamThickness * 0.7, beamLengthZ]} /></mesh>
         </group>
       ) : null}
 
@@ -87,28 +73,22 @@ export const WoodenFrame = ({
                   receiveShadow
                   position={[-dim.halfX + dim.frameInset + dim.frameCornerSize / 2, rail.y, 0]}
                   scale={[1, railScaleY, 1]}
-                >
-                  <boxGeometry args={[rail.thickness, rail.thickness, railLengthZ]} />
-                  {createMaterial(PALETTE.frameRail, 'wood')}
-                </mesh>
+                 material={createMaterial(PALETTE.frameRail, 'wood')}>
+                  <boxGeometry args={[rail.thickness, rail.thickness, railLengthZ]} /></mesh>
                 <mesh
                   castShadow
                   receiveShadow
                   position={[dim.halfX - dim.frameInset - dim.frameCornerSize / 2, rail.y, 0]}
                   scale={[1, railScaleY, 1]}
-                >
-                  <boxGeometry args={[rail.thickness, rail.thickness, railLengthZ]} />
-                  {createMaterial(PALETTE.frameRail, 'wood')}
-                </mesh>
+                 material={createMaterial(PALETTE.frameRail, 'wood')}>
+                  <boxGeometry args={[rail.thickness, rail.thickness, railLengthZ]} /></mesh>
                 <mesh
                   castShadow
                   receiveShadow
                   position={[0, rail.y, -dim.halfZ + dim.frameInset + dim.frameCornerSize / 2]}
                   scale={[1, railScaleY, 1]}
-                >
-                  <boxGeometry args={[beamLengthX, rail.thickness, rail.thickness]} />
-                  {createMaterial(PALETTE.frameRail, 'wood')}
-                </mesh>
+                 material={createMaterial(PALETTE.frameRail, 'wood')}>
+                  <boxGeometry args={[beamLengthX, rail.thickness, rail.thickness]} /></mesh>
               </group>
             );
           })}

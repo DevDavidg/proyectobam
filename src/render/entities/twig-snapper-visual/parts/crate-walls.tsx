@@ -34,18 +34,14 @@ const WallPanel = ({ spanX, spanZ, axis, positionX, positionZ, dim, createMateri
     <group position={[positionX, 0, positionZ]}>
       {dim.crateWallPlanks.map((plank) => (
         <group key={plank.id} position={[0, plank.y, 0]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[sizeX, plank.height, sizeZ]} />
-            {createMaterial(toneColor(plank.tone), 'wood')}
-          </mesh>
+          <mesh castShadow receiveShadow material={createMaterial(toneColor(plank.tone), 'wood')}>
+            <boxGeometry args={[sizeX, plank.height, sizeZ]} /></mesh>
           <mesh
             castShadow={false}
             receiveShadow
             position={[isX ? 0 : thickness / 2 + 0.001, plank.height / 2 - 0.004, isX ? thickness / 2 + 0.001 : 0]}
-          >
-            <boxGeometry args={[isX ? innerSpan - 0.04 : 0.003, 0.006, isX ? 0.003 : innerSpan - 0.04]} />
-            {createMaterial(PALETTE.crateWallShadow, 'wood')}
-          </mesh>
+           material={createMaterial(PALETTE.crateWallShadow, 'wood')}>
+            <boxGeometry args={[isX ? innerSpan - 0.04 : 0.003, 0.006, isX ? 0.003 : innerSpan - 0.04]} /></mesh>
           {nailOffsets.map((offset, idx) => (
             <mesh
               key={`nail-${plank.id}-${idx}`}
@@ -53,10 +49,8 @@ const WallPanel = ({ spanX, spanZ, axis, positionX, positionZ, dim, createMateri
               receiveShadow
               position={[isX ? offset : thickness / 2 + 0.002, 0, isX ? thickness / 2 + 0.002 : offset]}
               rotation={isX ? [Math.PI / 2, 0, 0] : [0, 0, Math.PI / 2]}
-            >
-              <cylinderGeometry args={[0.008, 0.008, 0.006, 8]} />
-              {createMaterial(PALETTE.crateWallNail, 'iron')}
-            </mesh>
+             material={createMaterial(PALETTE.crateWallNail, 'iron')}>
+              <cylinderGeometry args={[0.008, 0.008, 0.006, 8]} /></mesh>
           ))}
         </group>
       ))}

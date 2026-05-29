@@ -28,33 +28,23 @@ const AntennaPole = ({
 
   return (
     <Fragment>
-      <mesh castShadow receiveShadow position={[0, poleY, 0]}>
-        <cylinderGeometry args={[poleRadius * 0.92, poleRadius * 1.08, poleHeight, 10]} />
-        {createMaterial(PALETTE.antennaPole, 'iron')}
-      </mesh>
-      <mesh position={[poleRadius * 0.55, poleY, 0]}>
-        <cylinderGeometry args={[poleRadius * 0.18, poleRadius * 0.18, poleHeight * 0.96, 4]} />
-        {createMaterial(PALETTE.antennaPoleLight, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, poleY, 0]} material={createMaterial(PALETTE.antennaPole, 'iron')}>
+        <cylinderGeometry args={[poleRadius * 0.92, poleRadius * 1.08, poleHeight, 10]} /></mesh>
+      <mesh position={[poleRadius * 0.55, poleY, 0]} material={createMaterial(PALETTE.antennaPoleLight, 'iron')}>
+        <cylinderGeometry args={[poleRadius * 0.18, poleRadius * 0.18, poleHeight * 0.96, 4]} /></mesh>
 
       {ringFractions.map((tNorm, idx) => {
         const ringY = baseY + poleHeight * tNorm;
         return (
-          <mesh key={`pole-ring-${idx}`} position={[0, ringY, 0]}>
-            <cylinderGeometry args={[poleRadius * 1.5, poleRadius * 1.5, 0.012, 12]} />
-            {createMaterial(PALETTE.reinforcementSteelDark, 'iron')}
-          </mesh>
+          <mesh key={`pole-ring-${idx}`} position={[0, ringY, 0]} material={createMaterial(PALETTE.reinforcementSteelDark, 'iron')}>
+            <cylinderGeometry args={[poleRadius * 1.5, poleRadius * 1.5, 0.012, 12]} /></mesh>
         );
       })}
 
-      <mesh castShadow position={[0, poleTopY + 0.015, 0]}>
-        <cylinderGeometry args={[poleRadius * 0.6, poleRadius * 0.85, 0.04, 8]} />
-        {createMaterial(PALETTE.antennaPoleLight, 'iron')}
-      </mesh>
-      <mesh position={[0, poleTopY + 0.06, 0]}>
-        <sphereGeometry args={[poleRadius * 0.7, 10, 10]} />
-        {createMaterial(PALETTE.antennaTip, 'iron')}
-      </mesh>
+      <mesh castShadow position={[0, poleTopY + 0.015, 0]} material={createMaterial(PALETTE.antennaPoleLight, 'iron')}>
+        <cylinderGeometry args={[poleRadius * 0.6, poleRadius * 0.85, 0.04, 8]} /></mesh>
+      <mesh position={[0, poleTopY + 0.06, 0]} material={createMaterial(PALETTE.antennaTip, 'iron')}>
+        <sphereGeometry args={[poleRadius * 0.7, 10, 10]} /></mesh>
     </Fragment>
   );
 };
@@ -83,18 +73,12 @@ export const RoofAntenna = ({ dim, createMaterial, weight }: RoofAntennaProps) =
 
   return (
     <group position={[platformX, 0, platformZ]} scale={[weight, weight, weight]}>
-      <mesh castShadow receiveShadow position={[0, mountY, 0]}>
-        <boxGeometry args={[mountWidth, mountHeight, mountDepth]} />
-        {createMaterial(PALETTE.reinforcementSteelDark, 'iron')}
-      </mesh>
-      <mesh position={[0, mountY + mountHeight / 2 - 0.004, 0]}>
-        <boxGeometry args={[mountWidth + 0.012, 0.012, mountDepth + 0.012]} />
-        {createMaterial(PALETTE.reinforcementSteelLight, 'iron')}
-      </mesh>
-      <mesh position={[0, mountY - mountHeight / 2 + 0.004, 0]}>
-        <boxGeometry args={[mountWidth + 0.012, 0.01, mountDepth + 0.012]} />
-        {createMaterial(PALETTE.reinforcementSteelDark, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, mountY, 0]} material={createMaterial(PALETTE.reinforcementSteelDark, 'iron')}>
+        <boxGeometry args={[mountWidth, mountHeight, mountDepth]} /></mesh>
+      <mesh position={[0, mountY + mountHeight / 2 - 0.004, 0]} material={createMaterial(PALETTE.reinforcementSteelLight, 'iron')}>
+        <boxGeometry args={[mountWidth + 0.012, 0.012, mountDepth + 0.012]} /></mesh>
+      <mesh position={[0, mountY - mountHeight / 2 + 0.004, 0]} material={createMaterial(PALETTE.reinforcementSteelDark, 'iron')}>
+        <boxGeometry args={[mountWidth + 0.012, 0.01, mountDepth + 0.012]} /></mesh>
 
       {[
         [1, 1],
@@ -110,10 +94,8 @@ export const RoofAntenna = ({ dim, createMaterial, weight }: RoofAntennaProps) =
             mountY + mountHeight / 2 + 0.001,
             sz * (mountDepth / 2 - 0.024),
           ]}
-        >
-          <cylinderGeometry args={[0.012, 0.012, 0.02, 8]} />
-          {createMaterial(PALETTE.boltDark, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.boltDark, 'iron')}>
+          <cylinderGeometry args={[0.012, 0.012, 0.02, 8]} /></mesh>
       ))}
 
       <group position={[-poleSpacingX, mountY + mountHeight / 2, 0]}>

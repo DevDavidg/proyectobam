@@ -26,7 +26,7 @@ const SinglePump = ({ dim, createMaterial, pistonRef, positionX, positionZ }: Si
 
   return (
     <group position={[positionX, 0, positionZ]}>
-      <mesh receiveShadow position={[0, socketY - dim.pumpSocketDepth * 0.5, 0]}>
+      <mesh receiveShadow position={[0, socketY - dim.pumpSocketDepth * 0.5, 0]} material={createMaterial(PALETTE.pumpSocket, 'iron')}>
         <cylinderGeometry
           args={[
             dim.pumpSocketRadius,
@@ -34,80 +34,56 @@ const SinglePump = ({ dim, createMaterial, pistonRef, positionX, positionZ }: Si
             dim.pumpSocketDepth,
             18,
           ]}
-        />
-        {createMaterial(PALETTE.pumpSocket, 'iron')}
-      </mesh>
+        /></mesh>
 
-      <mesh receiveShadow position={[0, socketY + 0.002, 0]}>
-        <torusGeometry args={[dim.pumpSocketRadius * 0.96, 0.012, 8, 24]} />
-        {createMaterial(PALETTE.pumpSocketRim, 'iron')}
-      </mesh>
+      <mesh receiveShadow position={[0, socketY + 0.002, 0]} material={createMaterial(PALETTE.pumpSocketRim, 'iron')}>
+        <torusGeometry args={[dim.pumpSocketRadius * 0.96, 0.012, 8, 24]} /></mesh>
 
       <group position={[0, socketY, 0]}>
-        <mesh castShadow receiveShadow position={[0, dim.pumpBodyHeight * 0.5, 0]}>
+        <mesh castShadow receiveShadow position={[0, dim.pumpBodyHeight * 0.5, 0]} material={createMaterial(PALETTE.pumpBody, 'iron')}>
           <cylinderGeometry
             args={[dim.pumpBodyRadius, dim.pumpBodyRadius * 1.04, dim.pumpBodyHeight, 18]}
-          />
-          {createMaterial(PALETTE.pumpBody, 'iron')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[0, dim.pumpBodyHeight - 0.012, 0]}>
+          /></mesh>
+        <mesh castShadow receiveShadow position={[0, dim.pumpBodyHeight - 0.012, 0]} material={createMaterial(PALETTE.pumpBodyShine, 'iron')}>
           <cylinderGeometry
             args={[dim.pumpBodyRadius * 1.06, dim.pumpBodyRadius, 0.04, 18]}
-          />
-          {createMaterial(PALETTE.pumpBodyShine, 'iron')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[0, 0.018, 0]}>
+          /></mesh>
+        <mesh castShadow receiveShadow position={[0, 0.018, 0]} material={createMaterial(PALETTE.pumpBodyDark, 'iron')}>
           <cylinderGeometry
             args={[dim.pumpBodyRadius * 1.05, dim.pumpBodyRadius * 1.08, 0.03, 18]}
-          />
-          {createMaterial(PALETTE.pumpBodyDark, 'iron')}
-        </mesh>
+          /></mesh>
       </group>
 
-      <mesh castShadow receiveShadow position={[0, shaftCenterY, 0]}>
-        <cylinderGeometry args={[dim.pumpShaftRadius, dim.pumpShaftRadius, shaftLength, 14]} />
-        {createMaterial(PALETTE.pumpShaft, 'iron')}
-      </mesh>
-      <mesh castShadow receiveShadow position={[dim.pumpShaftRadius * 0.4, shaftCenterY, 0]}>
-        <boxGeometry args={[dim.pumpShaftRadius * 0.18, shaftLength * 0.94, dim.pumpShaftRadius * 1.8]} />
-        {createMaterial(PALETTE.pumpShaftShine, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, shaftCenterY, 0]} material={createMaterial(PALETTE.pumpShaft, 'iron')}>
+        <cylinderGeometry args={[dim.pumpShaftRadius, dim.pumpShaftRadius, shaftLength, 14]} /></mesh>
+      <mesh castShadow receiveShadow position={[dim.pumpShaftRadius * 0.4, shaftCenterY, 0]} material={createMaterial(PALETTE.pumpShaftShine, 'iron')}>
+        <boxGeometry args={[dim.pumpShaftRadius * 0.18, shaftLength * 0.94, dim.pumpShaftRadius * 1.8]} /></mesh>
 
       <group ref={pistonRef} position={[0, dim.pumpShaftTopY, 0]}>
-        <mesh castShadow receiveShadow position={[0, -dim.pumpHeadThickness * 0.45, 0]}>
+        <mesh castShadow receiveShadow position={[0, -dim.pumpHeadThickness * 0.45, 0]} material={createMaterial(PALETTE.pumpRod, 'iron')}>
           <cylinderGeometry
             args={[dim.pumpShaftRadius * 1.6, dim.pumpShaftRadius * 1.4, 0.05, 14]}
-          />
-          {createMaterial(PALETTE.pumpRod, 'iron')}
-        </mesh>
+          /></mesh>
 
-        <mesh castShadow receiveShadow position={[0, dim.pumpHeadThickness * 0.5, 0]}>
+        <mesh castShadow receiveShadow position={[0, dim.pumpHeadThickness * 0.5, 0]} material={createMaterial(PALETTE.pumpHead, 'iron')}>
           <cylinderGeometry
             args={[dim.pumpHeadRadius, dim.pumpHeadRadius * 0.96, dim.pumpHeadThickness, 24]}
-          />
-          {createMaterial(PALETTE.pumpHead, 'iron')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[0, dim.pumpHeadThickness - 0.005, 0]}>
+          /></mesh>
+        <mesh castShadow receiveShadow position={[0, dim.pumpHeadThickness - 0.005, 0]} material={createMaterial(PALETTE.pumpHeadShine, 'iron')}>
           <cylinderGeometry
             args={[dim.pumpHeadRadius * 1.02, dim.pumpHeadRadius * 0.98, 0.018, 24]}
-          />
-          {createMaterial(PALETTE.pumpHeadShine, 'iron')}
-        </mesh>
-        <mesh receiveShadow position={[0, 0.005, 0]}>
+          /></mesh>
+        <mesh receiveShadow position={[0, 0.005, 0]} material={createMaterial(PALETTE.pumpHeadEdge, 'iron')}>
           <cylinderGeometry
             args={[dim.pumpHeadRadius * 1.04, dim.pumpHeadRadius, 0.018, 24]}
-          />
-          {createMaterial(PALETTE.pumpHeadEdge, 'iron')}
-        </mesh>
+          /></mesh>
         <mesh
           receiveShadow
           position={[dim.pumpHeadRadius * 0.42, dim.pumpHeadThickness * 0.5, 0]}
-        >
+         material={createMaterial(PALETTE.pumpHeadShine, 'iron')}>
           <boxGeometry
             args={[dim.pumpHeadRadius * 0.18, dim.pumpHeadThickness * 0.7, dim.pumpHeadRadius * 1.4]}
-          />
-          {createMaterial(PALETTE.pumpHeadShine, 'iron')}
-        </mesh>
+          /></mesh>
       </group>
     </group>
   );

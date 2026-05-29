@@ -23,10 +23,8 @@ export const TwigDebris = ({ dim, createMaterial, debrisRef }: TwigDebrisProps) 
         position={[twig.offsetX, 0, twig.offsetZ]}
         rotation={[0, twig.spinAxisY, Math.PI / 2]}
         visible={false}
-      >
-        <cylinderGeometry args={[twig.thickness, twig.thickness * 0.8, twig.length, 8]} />
-        {createMaterial(tonePaletteTwig(twig.tone), 'wood')}
-      </mesh>
+       material={createMaterial(tonePaletteTwig(twig.tone), 'wood')}>
+        <cylinderGeometry args={[twig.thickness, twig.thickness * 0.8, twig.length, 8]} /></mesh>
     ))}
   </group>
 );

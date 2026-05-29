@@ -42,27 +42,19 @@ export const FrontDoorReinforcement = ({
 
   return (
     <group scale={[weight, weight, 1]} position={[0, dim.doorHeight * 0.5 * (1 - weight) * 0.3, 0]}>
-      <mesh castShadow receiveShadow position={[0, midBandY, surfaceZ]}>
-        <boxGeometry args={[midBandWidth, 0.07, 0.018]} />
-        {createMaterial(PALETTE.doorBrace, 'iron')}
-      </mesh>
-      <mesh position={[0, midBandY + 0.025, surfaceZ + 0.001]}>
-        <boxGeometry args={[midBandWidth + 0.004, 0.012, 0.005]} />
-        {createMaterial(PALETTE.doorBraceLight, 'iron')}
-      </mesh>
-      <mesh position={[0, midBandY - 0.025, surfaceZ + 0.001]}>
-        <boxGeometry args={[midBandWidth + 0.004, 0.01, 0.005]} />
-        {createMaterial(PALETTE.doorBraceShadow, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, midBandY, surfaceZ]} material={createMaterial(PALETTE.doorBrace, 'iron')}>
+        <boxGeometry args={[midBandWidth, 0.07, 0.018]} /></mesh>
+      <mesh position={[0, midBandY + 0.025, surfaceZ + 0.001]} material={createMaterial(PALETTE.doorBraceLight, 'iron')}>
+        <boxGeometry args={[midBandWidth + 0.004, 0.012, 0.005]} /></mesh>
+      <mesh position={[0, midBandY - 0.025, surfaceZ + 0.001]} material={createMaterial(PALETTE.doorBraceShadow, 'iron')}>
+        <boxGeometry args={[midBandWidth + 0.004, 0.01, 0.005]} /></mesh>
       {[-0.4, -0.15, 0.15, 0.4].map((nx, idx) => (
         <mesh
           key={`mid-band-bolt-${idx}`}
           castShadow
           position={[nx * midBandWidth, midBandY, surfaceZ + 0.012]}
-        >
-          <cylinderGeometry args={[0.018, 0.018, 0.018, 8]} />
-          {createMaterial(PALETTE.boltDark, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.boltDark, 'iron')}>
+          <cylinderGeometry args={[0.018, 0.018, 0.018, 8]} /></mesh>
       ))}
 
       <mesh
@@ -70,27 +62,19 @@ export const FrontDoorReinforcement = ({
         receiveShadow
         position={[0, 0, surfaceZ - 0.001]}
         rotation={[0, 0, diagAngle]}
-      >
-        <boxGeometry args={[braceLength, BRACE_THICKNESS, BRACE_DEPTH]} />
-        {createMaterial(PALETTE.doorBrace, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.doorBrace, 'iron')}>
+        <boxGeometry args={[braceLength, BRACE_THICKNESS, BRACE_DEPTH]} /></mesh>
       <mesh
         castShadow
         receiveShadow
         position={[0, 0, surfaceZ - 0.0012]}
         rotation={[0, 0, -diagAngle]}
-      >
-        <boxGeometry args={[braceLength, BRACE_THICKNESS, BRACE_DEPTH]} />
-        {createMaterial(PALETTE.doorBrace, 'iron')}
-      </mesh>
-      <mesh castShadow position={[0, 0, surfaceZ + 0.012]}>
-        <cylinderGeometry args={[0.04, 0.04, 0.022, 12]} />
-        {createMaterial(PALETTE.reinforcementSteel, 'iron')}
-      </mesh>
-      <mesh position={[0, 0, surfaceZ + 0.024]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.012, 10]} />
-        {createMaterial(PALETTE.boltShine, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.doorBrace, 'iron')}>
+        <boxGeometry args={[braceLength, BRACE_THICKNESS, BRACE_DEPTH]} /></mesh>
+      <mesh castShadow position={[0, 0, surfaceZ + 0.012]} material={createMaterial(PALETTE.reinforcementSteel, 'iron')}>
+        <cylinderGeometry args={[0.04, 0.04, 0.022, 12]} /></mesh>
+      <mesh position={[0, 0, surfaceZ + 0.024]} material={createMaterial(PALETTE.boltShine, 'iron')}>
+        <cylinderGeometry args={[0.02, 0.02, 0.012, 10]} /></mesh>
 
       <Fragment>
         {[
@@ -107,23 +91,17 @@ export const FrontDoorReinforcement = ({
               sy * (dim.doorHeight / 2 - 0.05),
               surfaceZ + 0.012,
             ]}
-          >
-            <cylinderGeometry args={[0.022, 0.022, 0.02, 8]} />
-            {createMaterial(PALETTE.boltDark, 'iron')}
-          </mesh>
+           material={createMaterial(PALETTE.boltDark, 'iron')}>
+            <cylinderGeometry args={[0.022, 0.022, 0.02, 8]} /></mesh>
         ))}
       </Fragment>
 
       <group position={[0, viewportY, surfaceZ]}>
-        <mesh castShadow receiveShadow rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[viewportRadius * 1.18, viewportRadius * 1.18, 0.022, 18]} />
-          {createMaterial(PALETTE.doorViewportRing, 'iron')}
-        </mesh>
-        <mesh position={[0, 0, 0.003]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[viewportRadius, viewportRadius, 0.012, 18]} />
-          {createMaterial(PALETTE.viewportFrame, 'iron')}
-        </mesh>
-        <mesh position={[0, 0, 0.011]}>
+        <mesh castShadow receiveShadow rotation={[Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.doorViewportRing, 'iron')}>
+          <cylinderGeometry args={[viewportRadius * 1.18, viewportRadius * 1.18, 0.022, 18]} /></mesh>
+        <mesh position={[0, 0, 0.003]} rotation={[Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.viewportFrame, 'iron')}>
+          <cylinderGeometry args={[viewportRadius, viewportRadius, 0.012, 18]} /></mesh>
+        <mesh position={[0, 0, 0.011]} material={createMaterial(PALETTE.boltDark, 'iron')}>
           <circleGeometry args={[viewportRadius * 0.86, 18]} />
           <meshBasicMaterial color={PALETTE.viewportGlassDark} toneMapped={false} />
         </mesh>
@@ -141,9 +119,7 @@ export const FrontDoorReinforcement = ({
           const y = Math.sin(angle) * viewportRadius * 1.05;
           return (
             <mesh key={`viewport-bolt-${idx}`} castShadow position={[x, y, 0.013]}>
-              <cylinderGeometry args={[0.012, 0.012, 0.014, 6]} />
-              {createMaterial(PALETTE.boltDark, 'iron')}
-            </mesh>
+              <cylinderGeometry args={[0.012, 0.012, 0.014, 6]} /></mesh>
           );
         })}
       </group>
@@ -152,14 +128,10 @@ export const FrontDoorReinforcement = ({
         castShadow
         receiveShadow
         position={[handleX, handleY, surfaceZ + 0.004]}
-      >
-        <boxGeometry args={[backplateWidth, backplateHeight, 0.012]} />
-        {createMaterial(PALETTE.reinforcementSteel, 'iron')}
-      </mesh>
-      <mesh position={[handleX, handleY, surfaceZ + 0.011]}>
-        <boxGeometry args={[backplateWidth - 0.018, backplateHeight - 0.018, 0.005]} />
-        {createMaterial(PALETTE.reinforcementSteelDark, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.reinforcementSteel, 'iron')}>
+        <boxGeometry args={[backplateWidth, backplateHeight, 0.012]} /></mesh>
+      <mesh position={[handleX, handleY, surfaceZ + 0.011]} material={createMaterial(PALETTE.reinforcementSteelDark, 'iron')}>
+        <boxGeometry args={[backplateWidth - 0.018, backplateHeight - 0.018, 0.005]} /></mesh>
       {[
         [-1, 1],
         [1, 1],
@@ -174,10 +146,8 @@ export const FrontDoorReinforcement = ({
             handleY + sy * (backplateHeight / 2 - 0.014),
             handleSurfaceZ - 0.008,
           ]}
-        >
-          <cylinderGeometry args={[0.012, 0.012, 0.012, 6]} />
-          {createMaterial(PALETTE.boltDark, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.boltDark, 'iron')}>
+          <cylinderGeometry args={[0.012, 0.012, 0.012, 6]} /></mesh>
       ))}
     </group>
   );

@@ -37,14 +37,10 @@ export const Overflow = forwardRef<Group, OverflowProps>(({ dim, createMaterial 
             receiveShadow
             position={[0, -slot.drop * 0.5, 0]}
             rotation={[0, -slot.angle, 0]}
-          >
-            <boxGeometry args={[0.12, slot.drop, 0.08]} />
-            {createMaterial(PALETTE.goo, 'goo')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[0, -slot.drop, 0]}>
-            <sphereGeometry args={[0.07, 10, 8]} />
-            {createMaterial(PALETTE.gooBright, 'goo')}
-          </mesh>
+           material={createMaterial(PALETTE.goo, 'goo')}>
+            <boxGeometry args={[0.12, slot.drop, 0.08]} /></mesh>
+          <mesh castShadow receiveShadow position={[0, -slot.drop, 0]} material={createMaterial(PALETTE.gooBright, 'goo')}>
+            <sphereGeometry args={[0.07, 10, 8]} /></mesh>
         </group>
       );
     })}

@@ -31,22 +31,16 @@ export const PuttyPile = ({
           position={[slot.x, slot.y, slot.z]}
           rotation={[0, slot.rotY, 0]}
         >
-          <mesh ref={isNewest ? newestRef : undefined} castShadow receiveShadow>
-            <boxGeometry args={[slot.size, slot.size, slot.size]} />
-            {createMaterial(cubeColor, 'goo')}
-          </mesh>
-          <mesh castShadow receiveShadow position={[0, slot.size * 0.5 + 0.001, 0]}>
-            <boxGeometry args={[slot.size * 0.94, 0.006, slot.size * 0.94]} />
-            {createMaterial(PALETTE.puttyCubeTop, 'goo')}
-          </mesh>
+          <mesh ref={isNewest ? newestRef : undefined} castShadow receiveShadow material={createMaterial(cubeColor, 'goo')}>
+            <boxGeometry args={[slot.size, slot.size, slot.size]} /></mesh>
+          <mesh castShadow receiveShadow position={[0, slot.size * 0.5 + 0.001, 0]} material={createMaterial(PALETTE.puttyCubeTop, 'goo')}>
+            <boxGeometry args={[slot.size * 0.94, 0.006, slot.size * 0.94]} /></mesh>
           <mesh
             receiveShadow
             position={[0, -slot.size * 0.5 + 0.001, 0]}
             rotation={[Math.PI / 2, 0, 0]}
-          >
-            <boxGeometry args={[slot.size * 0.94, slot.size * 0.94, 0.004]} />
-            {createMaterial(PALETTE.puttyCubeShadow, 'goo')}
-          </mesh>
+           material={createMaterial(PALETTE.puttyCubeShadow, 'goo')}>
+            <boxGeometry args={[slot.size * 0.94, slot.size * 0.94, 0.004]} /></mesh>
         </group>
       );
     })}

@@ -24,18 +24,12 @@ const renderLegs = (dim: GooFactoryDimensions, createMaterial: CreateMaterial) =
         position={[cosA * reach * 0.55, dim.baseLift - 0.04, sinA * reach * 0.55]}
         rotation={[0, -angle, 0]}
       >
-        <mesh castShadow receiveShadow position={[0, 0, 0]} rotation={[0, 0, 0.05]}>
-          <boxGeometry args={[reach * 1.1, 0.12, 0.18]} />
-          {createMaterial(PALETTE.woodLeg, 'wood')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[reach * 0.5, -0.04, 0]}>
-          <boxGeometry args={[0.18, 0.16, 0.22]} />
-          {createMaterial(PALETTE.woodLegDark, 'wood')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[-reach * 0.05, 0.06, 0]}>
-          <boxGeometry args={[0.08, 0.04, 0.18]} />
-          {createMaterial(PALETTE.metalBand, 'iron')}
-        </mesh>
+        <mesh castShadow receiveShadow position={[0, 0, 0]} rotation={[0, 0, 0.05]} material={createMaterial(PALETTE.woodLeg, 'wood')}>
+          <boxGeometry args={[reach * 1.1, 0.12, 0.18]} /></mesh>
+        <mesh castShadow receiveShadow position={[reach * 0.5, -0.04, 0]} material={createMaterial(PALETTE.woodLegDark, 'wood')}>
+          <boxGeometry args={[0.18, 0.16, 0.22]} /></mesh>
+        <mesh castShadow receiveShadow position={[-reach * 0.05, 0.06, 0]} material={createMaterial(PALETTE.metalBand, 'iron')}>
+          <boxGeometry args={[0.08, 0.04, 0.18]} /></mesh>
       </group>
     );
   });
@@ -58,10 +52,8 @@ const renderStaves = (dim: GooFactoryDimensions, createMaterial: CreateMaterial)
           sinA * (dim.tankRadius - 0.02),
         ]}
         rotation={[0, -angle + Math.PI / 2, 0]}
-      >
-        <boxGeometry args={[staveWidth, dim.tankHeight, 0.075]} />
-        {createMaterial(staveColor, 'wood')}
-      </mesh>
+       material={createMaterial(staveColor, 'wood')}>
+        <boxGeometry args={[staveWidth, dim.tankHeight, 0.075]} /></mesh>
     );
   });
 
@@ -82,32 +74,24 @@ const renderOrnaments = (
         position={[ornamentX, bandY, ornamentZ]}
         rotation={[0, -angle + Math.PI / 2, 0]}
       >
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[0.16, 0.07, 0.018]} />
-          {createMaterial(PALETTE.ornamentDark, 'iron')}
-        </mesh>
-        <mesh castShadow receiveShadow position={[0, 0, 0.005]}>
-          <boxGeometry args={[0.05, 0.05, 0.025]} />
-          {createMaterial(PALETTE.ornamentMid, 'iron')}
-        </mesh>
+        <mesh castShadow receiveShadow material={createMaterial(PALETTE.ornamentDark, 'iron')}>
+          <boxGeometry args={[0.16, 0.07, 0.018]} /></mesh>
+        <mesh castShadow receiveShadow position={[0, 0, 0.005]} material={createMaterial(PALETTE.ornamentMid, 'iron')}>
+          <boxGeometry args={[0.05, 0.05, 0.025]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[0.055, 0, 0.005]}
           rotation={[0, 0, Math.PI / 4]}
-        >
-          <boxGeometry args={[0.026, 0.026, 0.025]} />
-          {createMaterial(PALETTE.ornamentMid, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.ornamentMid, 'iron')}>
+          <boxGeometry args={[0.026, 0.026, 0.025]} /></mesh>
         <mesh
           castShadow
           receiveShadow
           position={[-0.055, 0, 0.005]}
           rotation={[0, 0, Math.PI / 4]}
-        >
-          <boxGeometry args={[0.026, 0.026, 0.025]} />
-          {createMaterial(PALETTE.ornamentMid, 'iron')}
-        </mesh>
+         material={createMaterial(PALETTE.ornamentMid, 'iron')}>
+          <boxGeometry args={[0.026, 0.026, 0.025]} /></mesh>
       </group>
     );
   });
@@ -118,83 +102,59 @@ const renderBronzeBody = (dim: GooFactoryDimensions, createMaterial: CreateMater
   const lowerBandY = dim.tankBottom + dim.tankHeight * 0.18;
   return (
     <group>
-      <mesh castShadow receiveShadow position={[0, midY, 0]}>
+      <mesh castShadow receiveShadow position={[0, midY, 0]} material={createMaterial(PALETTE.bronzeBase, 'iron')}>
         <cylinderGeometry
           args={[dim.tankRadius, dim.tankRadius * 0.98, dim.tankHeight, 26]}
-        />
-        {createMaterial(PALETTE.bronzeBase, 'iron')}
-      </mesh>
-      <mesh receiveShadow position={[0, midY, 0]}>
+        /></mesh>
+      <mesh receiveShadow position={[0, midY, 0]} material={createMaterial(PALETTE.bronzeMid, 'iron')}>
         <cylinderGeometry
           args={[dim.tankRadius * 0.92, dim.tankRadius * 0.92, dim.tankHeight * 0.85, 22]}
-        />
-        {createMaterial(PALETTE.bronzeMid, 'iron')}
-      </mesh>
-      <mesh receiveShadow position={[0, dim.tankBottom + dim.tankHeight * 0.32, 0]}>
+        /></mesh>
+      <mesh receiveShadow position={[0, dim.tankBottom + dim.tankHeight * 0.32, 0]} material={createMaterial(PALETTE.bronzeShadow, 'iron')}>
         <cylinderGeometry
           args={[dim.tankRadius + 0.005, dim.tankRadius + 0.005, dim.tankHeight * 0.08, 24]}
-        />
-        {createMaterial(PALETTE.bronzeShadow, 'iron')}
-      </mesh>
+        /></mesh>
 
-      <mesh castShadow receiveShadow position={[0, lowerBandY, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[dim.tankRadius + 0.018, 0.045, 10, 28]} />
-        {createMaterial(PALETTE.metalBand, 'iron')}
-      </mesh>
-      <mesh castShadow receiveShadow position={[0, upperBandY, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[dim.tankRadius + 0.018, 0.045, 10, 28]} />
-        {createMaterial(PALETTE.metalBand, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, lowerBandY, 0]} rotation={[Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.metalBand, 'iron')}>
+        <torusGeometry args={[dim.tankRadius + 0.018, 0.045, 10, 28]} /></mesh>
+      <mesh castShadow receiveShadow position={[0, upperBandY, 0]} rotation={[Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.metalBand, 'iron')}>
+        <torusGeometry args={[dim.tankRadius + 0.018, 0.045, 10, 28]} /></mesh>
 
-      <mesh receiveShadow position={[0, midY, 0]}>
+      <mesh receiveShadow position={[0, midY, 0]} material={createMaterial(PALETTE.bronzeShadow, 'iron')}>
         <cylinderGeometry
           args={[dim.tankRadius + 0.006, dim.tankRadius + 0.006, 0.16, 26]}
-        />
-        {createMaterial(PALETTE.bronzeShadow, 'iron')}
-      </mesh>
+        /></mesh>
       {renderOrnaments(dim, createMaterial, midY)}
 
-      <mesh castShadow receiveShadow position={[0, dim.tankBottom - 0.05, 0]}>
-        <cylinderGeometry args={[dim.tankRadius + 0.04, dim.tankRadius + 0.07, 0.1, 22]} />
-        {createMaterial(PALETTE.bronzeShadow, 'iron')}
-      </mesh>
+      <mesh castShadow receiveShadow position={[0, dim.tankBottom - 0.05, 0]} material={createMaterial(PALETTE.bronzeShadow, 'iron')}>
+        <cylinderGeometry args={[dim.tankRadius + 0.04, dim.tankRadius + 0.07, 0.1, 22]} /></mesh>
 
       <mesh
         castShadow
         receiveShadow
         position={[0, dim.tankTop + 0.005, 0]}
         rotation={[Math.PI / 2, 0, 0]}
-      >
-        <torusGeometry args={[dim.tankRadius + 0.025, 0.055, 12, 30]} />
-        {createMaterial(PALETTE.bronzeRim, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.bronzeRim, 'iron')}>
+        <torusGeometry args={[dim.tankRadius + 0.025, 0.055, 12, 30]} /></mesh>
       <mesh
         receiveShadow
         position={[0, dim.tankTop + 0.005, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <ringGeometry args={[dim.tankRadius * 0.55, dim.tankRadius - 0.02, 26]} />
-        {createMaterial(PALETTE.bronzeShadow, 'iron')}
-      </mesh>
+       material={createMaterial(PALETTE.bronzeShadow, 'iron')}>
+        <ringGeometry args={[dim.tankRadius * 0.55, dim.tankRadius - 0.02, 26]} /></mesh>
 
-      <mesh receiveShadow position={[0, dim.tankBottom + 0.02, 0]}>
-        <cylinderGeometry args={[dim.tankRadius - 0.04, dim.tankRadius - 0.04, 0.04, 22]} />
-        {createMaterial(PALETTE.ornamentDark, 'iron')}
-      </mesh>
+      <mesh receiveShadow position={[0, dim.tankBottom + 0.02, 0]} material={createMaterial(PALETTE.ornamentDark, 'iron')}>
+        <cylinderGeometry args={[dim.tankRadius - 0.04, dim.tankRadius - 0.04, 0.04, 22]} /></mesh>
     </group>
   );
 };
 
 const renderWoodBody = (dim: GooFactoryDimensions, createMaterial: CreateMaterial) => (
   <group>
-    <mesh castShadow receiveShadow position={[0, dim.tankBottom - 0.04, 0]}>
-      <cylinderGeometry args={[dim.tankRadius + 0.04, dim.tankRadius + 0.06, 0.08, 18]} />
-      {createMaterial(PALETTE.woodBarrelDeep, 'wood')}
-    </mesh>
-    <mesh castShadow receiveShadow position={[0, dim.tankBottom + 0.04, 0]}>
-      <cylinderGeometry args={[dim.tankRadius - 0.03, dim.tankRadius - 0.03, 0.06, 18]} />
-      {createMaterial(PALETTE.woodBarrelDeep, 'wood')}
-    </mesh>
+    <mesh castShadow receiveShadow position={[0, dim.tankBottom - 0.04, 0]} material={createMaterial(PALETTE.woodBarrelDeep, 'wood')}>
+      <cylinderGeometry args={[dim.tankRadius + 0.04, dim.tankRadius + 0.06, 0.08, 18]} /></mesh>
+    <mesh castShadow receiveShadow position={[0, dim.tankBottom + 0.04, 0]} material={createMaterial(PALETTE.woodBarrelDeep, 'wood')}>
+      <cylinderGeometry args={[dim.tankRadius - 0.03, dim.tankRadius - 0.03, 0.06, 18]} /></mesh>
 
     {renderStaves(dim, createMaterial)}
 
@@ -203,19 +163,15 @@ const renderWoodBody = (dim: GooFactoryDimensions, createMaterial: CreateMateria
       receiveShadow
       position={[0, dim.tankBottom + 0.1, 0]}
       rotation={[Math.PI / 2, 0, 0]}
-    >
-      <torusGeometry args={[dim.tankRadius + 0.05, 0.04, 8, 24]} />
-      {createMaterial(PALETTE.metalBand, 'iron')}
-    </mesh>
+     material={createMaterial(PALETTE.metalBand, 'iron')}>
+      <torusGeometry args={[dim.tankRadius + 0.05, 0.04, 8, 24]} /></mesh>
     <mesh
       castShadow
       receiveShadow
       position={[0, dim.tankTop - 0.06, 0]}
       rotation={[Math.PI / 2, 0, 0]}
-    >
-      <torusGeometry args={[dim.tankRadius + 0.05, 0.045, 8, 24]} />
-      {createMaterial(PALETTE.metalBand, 'iron')}
-    </mesh>
+     material={createMaterial(PALETTE.metalBand, 'iron')}>
+      <torusGeometry args={[dim.tankRadius + 0.05, 0.045, 8, 24]} /></mesh>
   </group>
 );
 
@@ -225,19 +181,15 @@ export const Tank = forwardRef<Group, TankProps>(
     const isBronze = dim.tankMaterial === 'bronze';
     return (
       <group>
-        <mesh receiveShadow position={[0.12, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[dim.tankRadius * (1.05 + fillRatio * 0.35), 28]} />
-          {createMaterial(PALETTE.gooDeep, 'goo')}
-        </mesh>
+        <mesh receiveShadow position={[0.12, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]} material={createMaterial(PALETTE.gooDeep, 'goo')}>
+          <circleGeometry args={[dim.tankRadius * (1.05 + fillRatio * 0.35), 28]} /></mesh>
         <mesh
           receiveShadow
           position={[0.18, 0.018, 0.05]}
           rotation={[-Math.PI / 2, 0, 0]}
           scale={[tankPuddleScale, tankPuddleScale, tankPuddleScale]}
-        >
-          <circleGeometry args={[dim.tankRadius * 0.95, 24]} />
-          {createMaterial(PALETTE.goo, 'goo')}
-        </mesh>
+         material={createMaterial(PALETTE.goo, 'goo')}>
+          <circleGeometry args={[dim.tankRadius * 0.95, 24]} /></mesh>
 
         {renderLegs(dim, createMaterial)}
 
@@ -245,20 +197,14 @@ export const Tank = forwardRef<Group, TankProps>(
           ? renderBronzeBody(dim, createMaterial)
           : renderWoodBody(dim, createMaterial)}
 
-        <mesh receiveShadow position={[0, dim.tankBottom + 0.04, 0]}>
-          <cylinderGeometry args={[dim.tankRadius - 0.06, dim.tankRadius - 0.06, 0.05, 18]} />
-          {createMaterial(PALETTE.gooDeep, 'goo')}
-        </mesh>
+        <mesh receiveShadow position={[0, dim.tankBottom + 0.04, 0]} material={createMaterial(PALETTE.gooDeep, 'goo')}>
+          <cylinderGeometry args={[dim.tankRadius - 0.06, dim.tankRadius - 0.06, 0.05, 18]} /></mesh>
 
         <group ref={gooSurfaceRef} position={[0, dim.tankBottom + 0.08, 0]}>
-          <mesh receiveShadow>
-            <cylinderGeometry args={[dim.tankRadius - 0.06, dim.tankRadius - 0.06, 0.06, 18]} />
-            {createMaterial(PALETTE.goo, 'goo')}
-          </mesh>
-          <mesh receiveShadow position={[0, 0.035, 0]}>
-            <cylinderGeometry args={[dim.tankRadius - 0.08, dim.tankRadius - 0.08, 0.02, 18]} />
-            {createMaterial(PALETTE.gooBright, 'goo')}
-          </mesh>
+          <mesh receiveShadow material={createMaterial(PALETTE.goo, 'goo')}>
+            <cylinderGeometry args={[dim.tankRadius - 0.06, dim.tankRadius - 0.06, 0.06, 18]} /></mesh>
+          <mesh receiveShadow position={[0, 0.035, 0]} material={createMaterial(PALETTE.gooBright, 'goo')}>
+            <cylinderGeometry args={[dim.tankRadius - 0.08, dim.tankRadius - 0.08, 0.02, 18]} /></mesh>
         </group>
       </group>
     );

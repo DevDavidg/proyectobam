@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import type { Group } from 'three';
+import { AdditiveBlending } from 'three';
 import { useGameStore } from '../../state/game-store';
 import type { ResourceOrb, ResourceOrbResourceType } from '../../state/game-store/types';
 
@@ -15,29 +16,29 @@ type OrbVisual = {
 const ORB_VISUAL_BY_TYPE: Record<ResourceOrbResourceType, OrbVisual> = {
   twigs: {
     color: '#8b5a2b',
-    emissive: '#5a3a16',
-    emissiveIntensity: 0.35,
+    emissive: '#7c4b1f',
+    emissiveIntensity: 0.58,
     trailColor: '#c69457',
     scale: 0.22,
   },
   pebbles: {
     color: '#d4dae3',
-    emissive: '#7f8a99',
-    emissiveIntensity: 0.3,
+    emissive: '#9aa7b9',
+    emissiveIntensity: 0.46,
     trailColor: '#e5e9f0',
     scale: 0.22,
   },
   putty: {
     color: '#a855f7',
     emissive: '#6d28d9',
-    emissiveIntensity: 0.85,
+    emissiveIntensity: 1.15,
     trailColor: '#d8b4fe',
     scale: 0.24,
   },
   goo: {
     color: '#22c55e',
     emissive: '#15803d',
-    emissiveIntensity: 1,
+    emissiveIntensity: 1.3,
     trailColor: '#86efac',
     scale: 0.25,
   },
@@ -156,6 +157,17 @@ const OrbMesh = ({ orb }: OrbMeshProps) => {
       <mesh scale={2.4} castShadow={false}>
         <sphereGeometry args={[1, 10, 10]} />
         <meshBasicMaterial color={visual.trailColor} transparent opacity={0.07} depthWrite={false} />
+      </mesh>
+      <mesh scale={3.1} castShadow={false}>
+        <sphereGeometry args={[1, 8, 8]} />
+        <meshBasicMaterial
+          color={visual.trailColor}
+          transparent
+          opacity={0.08}
+          depthWrite={false}
+          blending={AdditiveBlending}
+          toneMapped={false}
+        />
       </mesh>
     </group>
   );

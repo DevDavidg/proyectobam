@@ -4,48 +4,66 @@ import {
   getBuildingRequiredTownHallLevel,
   getInstantFinishShinyCost,
   isBuildableType,
-} from '../../core/constants/build-rules';
-import { ENHANCED_BUILDING_CATALOG } from '../../core/constants/catalog';
-import { computeGooCollectorBuffer } from '../../core/constants/goo-factory-catalog';
-import { computePebbleShinerBuffer } from '../../core/constants/pebble-shiner-catalog';
-import { computePuttySquisherBuffer } from '../../core/constants/putty-squisher-catalog';
-import { computeTwigSnapperBuffer } from '../../core/constants/twig-snapper-catalog';
-import { BUILDING_TYPES, type Building, type BuildingStatus, type BuildingType } from '../../core/types/building';
-import type { Enemy } from '../../core/types/enemy';
-import type { GameResources } from '../../core/types/resources';
-import { computeTownHallFunnelWorld } from '../../render/entities/town-hall-visual/world-anchors';
-import { CELL_SIZE, GRID_SIZE, gridToWorldCenter } from '../../utils/coordinates';
+} from "../../core/constants/build-rules";
+import { ENHANCED_BUILDING_CATALOG } from "../../core/constants/catalog";
+import { computeGooCollectorBuffer } from "../../core/constants/goo-factory-catalog";
+import { computePebbleShinerBuffer } from "../../core/constants/pebble-shiner-catalog";
+import { computePuttySquisherBuffer } from "../../core/constants/putty-squisher-catalog";
+import { computeTwigSnapperBuffer } from "../../core/constants/twig-snapper-catalog";
+import {
+  BUILDING_TYPES,
+  type Building,
+  type BuildingStatus,
+  type BuildingType,
+} from "../../core/types/building";
+import type { Enemy } from "../../core/types/enemy";
+import type { GameResources } from "../../core/types/resources";
+import { computeTownHallFunnelWorld } from "../../render/entities/town-hall-visual/world-anchors";
+import {
+  CELL_SIZE,
+  GRID_SIZE,
+  gridToWorldCenter,
+} from "../../utils/coordinates";
+import { findPathAStar } from "../../utils/pathfinding";
 import {
   MAX_UNLOCKED_GRID_SIZE,
   MAX_WORKERS,
   createLandCellKey,
   generateLandExpansionPreview,
+  getWalkableGridFromState,
   getWorkerShinyCost,
   isUnrestrictedMode,
   isWithinUnlockedArea,
   resolveWorkerHomeCells,
+  rollObstacleClearShinyReward,
   spendResources,
-} from './helpers';
-import type { GameStore, GameStoreGet, GameStoreSet, ResourceOrb, ResourceOrbResourceType } from './types';
+} from "./helpers";
+import type {
+  GameStore,
+  GameStoreGet,
+  GameStoreSet,
+  ResourceOrb,
+  ResourceOrbResourceType,
+} from "./types";
 
 type EconomyActions = Pick<
   GameStore,
-  | 'setSelectedBuildingType'
-  | 'setActiveBuildTab'
-  | 'buyWorker'
-  | 'buyLandExpansion'
-  | 'startLandExpansionMode'
-  | 'cancelLandExpansionMode'
-  | 'confirmLandExpansionAtActiveCell'
-  | 'refreshLandExpansionPreview'
-  | 'placeSelectedBuilding'
-  | 'dismissWorkerBusyModal'
-  | 'instantFinishBuildingWithShiny'
-  | 'spawnEnemy'
-  | 'collectFromCollector'
-  | 'collectAllCollectors'
-  | 'pruneExpiredResourceOrbs'
-  | 'clearObstacle'
+  | "setSelectedBuildingType"
+  | "setActiveBuildTab"
+  | "buyWorker"
+  | "buyLandExpansion"
+  | "startLandExpansionMode"
+  | "cancelLandExpansionMode"
+  | "confirmLandExpansionAtActiveCell"
+  | "refreshLandExpansionPreview"
+  | "placeSelectedBuilding"
+  | "dismissWorkerBusyModal"
+  | "instantFinishBuildingWithShiny"
+  | "spawnEnemy"
+  | "collectFromCollector"
+  | "collectAllCollectors"
+  | "pruneExpiredResourceOrbs"
+  | "clearObstacle"
 >;
 
 const ORB_DURATION_MS = 850;
@@ -70,18 +88,33 @@ const computeOrbCount = (amount: number): number => {
 
 const pickJitter = (range: number): number => (Math.random() - 0.5) * range;
 
-const computeCollectorBuffer = (collector: Building, now: number): CollectorBufferResult => {
+const computeCollectorBuffer = (
+  collector: Building,
+  now: number,
+): CollectorBufferResult => {
   if (collector.type === BUILDING_TYPES.RESOURCE_GOO_COLLECTOR) {
-    return { resourceType: 'goo', amount: computeGooCollectorBuffer(collector, now).amount };
+    return {
+      resourceType: "goo",
+      amount: computeGooCollectorBuffer(collector, now).amount,
+    };
   }
   if (collector.type === BUILDING_TYPES.RESOURCE_PEBBLE_COLLECTOR) {
-    return { resourceType: 'pebbles', amount: computePebbleShinerBuffer(collector, now).amount };
+    return {
+      resourceType: "pebbles",
+      amount: computePebbleShinerBuffer(collector, now).amount,
+    };
   }
   if (collector.type === BUILDING_TYPES.RESOURCE_PUTTY_COLLECTOR) {
-    return { resourceType: 'putty', amount: computePuttySquisherBuffer(collector, now).amount };
+    return {
+      resourceType: "putty",
+      amount: computePuttySquisherBuffer(collector, now).amount,
+    };
   }
   if (collector.type === BUILDING_TYPES.RESOURCE_TWIG_COLLECTOR) {
-    return { resourceType: 'twigs', amount: computeTwigSnapperBuffer(collector, now).amount };
+    return {
+      resourceType: "twigs",
+      amount: computeTwigSnapperBuffer(collector, now).amount,
+    };
   }
   return null;
 };
@@ -94,7 +127,10 @@ const creditResource = (
   const bucket = resources[resourceType];
   return {
     ...resources,
-    [resourceType]: { ...bucket, current: Math.min(bucket.max, bucket.current + amount) },
+    [resourceType]: {
+      ...bucket,
+      current: Math.min(bucket.max, bucket.current + amount),
+    },
   };
 };
 
@@ -155,15 +191,19 @@ const buildCollectionOrbs = (
   return orbs;
 };
 
-const isValidExpansionCell = (x: number, y: number, unlockedLandCells: Record<string, true>): boolean => {
+const isValidExpansionCell = (
+  x: number,
+  y: number,
+  unlockedLandCells: Record<string, true>,
+): boolean => {
   if (unlockedLandCells[createLandCellKey(x, y)]) {
     return false;
   }
   return Boolean(
     unlockedLandCells[createLandCellKey(x + 1, y)] ||
-      unlockedLandCells[createLandCellKey(x - 1, y)] ||
-      unlockedLandCells[createLandCellKey(x, y + 1)] ||
-      unlockedLandCells[createLandCellKey(x, y - 1)]
+    unlockedLandCells[createLandCellKey(x - 1, y)] ||
+    unlockedLandCells[createLandCellKey(x, y + 1)] ||
+    unlockedLandCells[createLandCellKey(x, y - 1)],
   );
 };
 
@@ -174,7 +214,10 @@ const getLandExpansionCost = (nextLandLevel: number) => ({
   goo: Math.round(170 * nextLandLevel),
 });
 
-export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): EconomyActions => ({
+export const createEconomyActions = (
+  set: GameStoreSet,
+  get: GameStoreGet,
+): EconomyActions => ({
   setSelectedBuildingType: (buildingType) => {
     const current = get();
     const definition = ENHANCED_BUILDING_CATALOG[buildingType];
@@ -206,7 +249,10 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
     if (!canAfford) {
       return;
     }
-    const workerHome = resolveWorkerHomeCells(current.engine.getState().buildings, nextWorkerNumber)[nextWorkerNumber - 1] ?? {
+    const workerHome = resolveWorkerHomeCells(
+      current.engine.getState().buildings,
+      nextWorkerNumber,
+    )[nextWorkerNumber - 1] ?? {
       x: 7 + (nextWorkerNumber % 2),
       y: 12,
     };
@@ -218,14 +264,16 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
         y: workerHome.y,
         homeX: workerHome.x,
         homeY: workerHome.y,
-        state: 'IDLE' as const,
+        state: "IDLE" as const,
         path: [],
       },
     ];
     set({
       workers: nextWorkers,
       workersTotal: nextWorkerNumber,
-      shiny: unrestricted ? current.shiny : Math.max(0, current.shiny - workerShinyCost),
+      shiny: unrestricted
+        ? current.shiny
+        : Math.max(0, current.shiny - workerShinyCost),
     });
     current.refreshEcs();
   },
@@ -263,7 +311,13 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
     if (current.landLevel >= current.maxLandLevel) {
       return;
     }
-    if (!isValidExpansionCell(targetCell.x, targetCell.y, current.unlockedLandCells)) {
+    if (
+      !isValidExpansionCell(
+        targetCell.x,
+        targetCell.y,
+        current.unlockedLandCells,
+      )
+    ) {
       return;
     }
     const nextLandLevel = current.landLevel + 1;
@@ -277,17 +331,27 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
     if (!canAfford) {
       return;
     }
-    const nextResources = current.freeBuildMode ? current.resources : spendResources(current.resources, expansionCost);
+    const nextResources = current.freeBuildMode
+      ? current.resources
+      : spendResources(current.resources, expansionCost);
     const nextUnlockedLandCells = { ...current.unlockedLandCells };
     nextUnlockedLandCells[createLandCellKey(targetCell.x, targetCell.y)] = true;
-    const unlockedEntries = Object.keys(nextUnlockedLandCells).map((cellKey) => cellKey.split(',').map((part) => Number(part)));
+    const unlockedEntries = Object.keys(nextUnlockedLandCells).map((cellKey) =>
+      cellKey.split(",").map((part) => Number(part)),
+    );
     const minX = Math.min(...unlockedEntries.map(([x]) => x));
     const maxX = Math.max(...unlockedEntries.map(([x]) => x));
     const minY = Math.min(...unlockedEntries.map(([, y]) => y));
     const maxY = Math.max(...unlockedEntries.map(([, y]) => y));
-    const nextUnlockedGridSize = Math.min(MAX_UNLOCKED_GRID_SIZE, Math.max(maxX - minX + 1, maxY - minY + 1));
+    const nextUnlockedGridSize = Math.min(
+      MAX_UNLOCKED_GRID_SIZE,
+      Math.max(maxX - minX + 1, maxY - minY + 1),
+    );
     const nextPreviewSize = 10 + nextLandLevel * 2;
-    const nextLandExpansionPreview = generateLandExpansionPreview(nextUnlockedLandCells, nextPreviewSize);
+    const nextLandExpansionPreview = generateLandExpansionPreview(
+      nextUnlockedLandCells,
+      nextPreviewSize,
+    );
     current.engine.setResources(nextResources);
     set({
       resources: nextResources,
@@ -304,7 +368,10 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
   refreshLandExpansionPreview: () => {
     const current = get();
     const previewSize = 10 + current.landLevel * 2;
-    const nextLandExpansionPreview = generateLandExpansionPreview(current.unlockedLandCells, previewSize);
+    const nextLandExpansionPreview = generateLandExpansionPreview(
+      current.unlockedLandCells,
+      previewSize,
+    );
     set({ landExpansionPreview: nextLandExpansionPreview });
   },
   placeSelectedBuilding: () => {
@@ -319,14 +386,20 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
     }
     const unrestricted = isUnrestrictedMode(current);
     const state = current.engine.getState();
-    const townHall = state.buildings.find((building) => building.type === BUILDING_TYPES.TOWN_HALL);
+    const townHall = state.buildings.find(
+      (building) => building.type === BUILDING_TYPES.TOWN_HALL,
+    );
     const townHallLevel = townHall?.level ?? 1;
-    const requiredTownHallLevel = getBuildingRequiredTownHallLevel(selectedType);
+    const requiredTownHallLevel =
+      getBuildingRequiredTownHallLevel(selectedType);
     if (!unrestricted && townHallLevel < requiredTownHallLevel) {
       return;
     }
     const currentCount = getBuildingCount(state.buildings, selectedType);
-    const maxAllowed = getBuildingCapForTownHallLevel(selectedType, townHallLevel);
+    const maxAllowed = getBuildingCapForTownHallLevel(
+      selectedType,
+      townHallLevel,
+    );
     if (!unrestricted && currentCount >= maxAllowed) {
       return;
     }
@@ -365,7 +438,7 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
       sizeY: current.placementSize.sizeY,
       hp: definition.baseHp,
       maxHp: definition.baseHp,
-      status: 'PENDING',
+      status: "PENDING",
       buildStartedAt: now,
       buildEndsAt: undefined,
       range: definition.range,
@@ -381,7 +454,9 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
       return;
     }
 
-    const nextResources = unrestricted ? current.resources : spendResources(current.resources, cost);
+    const nextResources = unrestricted
+      ? current.resources
+      : spendResources(current.resources, cost);
     current.engine.setResources(nextResources);
 
     current.engine.clearPlacementPreview();
@@ -396,9 +471,16 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
     current.tickConstruction();
     const refreshedState = current.engine.getState();
     const activeTasks = refreshedState.buildings
-      .filter((building) => building.buildEndsAt && building.status === 'UNDER_CONSTRUCTION')
-      .sort((left, right) => (left.buildEndsAt ?? 0) - (right.buildEndsAt ?? 0));
-    const idleWorkers = current.workers.filter((worker) => worker.state === 'IDLE');
+      .filter(
+        (building) =>
+          building.buildEndsAt && building.status === "UNDER_CONSTRUCTION",
+      )
+      .sort(
+        (left, right) => (left.buildEndsAt ?? 0) - (right.buildEndsAt ?? 0),
+      );
+    const idleWorkers = current.workers.filter(
+      (worker) => worker.state === "IDLE",
+    );
     if (!idleWorkers.length && activeTasks.length) {
       const activeTask = activeTasks[0];
       const remainingMs = Math.max(0, (activeTask.buildEndsAt ?? now) - now);
@@ -434,39 +516,85 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
       return;
     }
 
-    current.engine.updateBuilding(buildingId, (item) => ({
-      ...item,
-      status: 'ACTIVE',
-      assignedWorkerId: undefined,
-      buildEndsAt: undefined,
-      buildStartedAt: undefined,
-      lastHarvested:
-        item.type === BUILDING_TYPES.RESOURCE_GOO_COLLECTOR ||
-        item.type === BUILDING_TYPES.RESOURCE_PEBBLE_COLLECTOR ||
-        item.type === BUILDING_TYPES.RESOURCE_PUTTY_COLLECTOR
-          ? now
-          : item.lastHarvested,
-    }));
+    const isObstacleTask = building.tags?.includes("obstacle") ?? false;
 
-    const nextWorkers = current.workers.map((worker) => {
-      if (worker.assignedBuildingId !== buildingId) {
-        return worker;
-      }
-      return {
-        ...worker,
-        state: 'RETURNING' as const,
-        taskType: undefined,
-        taskEndsAt: undefined,
-        assignedBuildingId: undefined,
-        path: [],
-      };
-    });
+    if (isObstacleTask) {
+      current.engine.removeBuilding(buildingId);
+      const nextWorkers = current.workers.map((worker) => {
+        if (worker.assignedBuildingId !== buildingId) {
+          return worker;
+        }
+        const homePath =
+          findPathAStar(
+            getWalkableGridFromState(current.engine.getState().buildings, state.gridSize),
+            { x: Math.round(worker.x), y: Math.round(worker.y) },
+            [{ x: worker.homeX, y: worker.homeY }],
+          ) ?? [];
+        return {
+          ...worker,
+          state: "RETURNING" as const,
+          taskType: undefined,
+          taskEndsAt: undefined,
+          assignedBuildingId: undefined,
+          taskTargetX: undefined,
+          taskTargetY: undefined,
+          path: homePath.slice(1),
+        };
+      });
+      set({
+        shiny: unrestricted
+          ? current.shiny + rollObstacleClearShinyReward()
+          : Math.max(0, current.shiny - shinyCost) + rollObstacleClearShinyReward(),
+        workers: nextWorkers,
+        workerBusyModal: null,
+      });
+    } else {
+      current.engine.updateBuilding(buildingId, (item) => ({
+        ...item,
+        status: "ACTIVE",
+        assignedWorkerId: undefined,
+        buildEndsAt: undefined,
+        buildStartedAt: undefined,
+        lastHarvested:
+          item.type === BUILDING_TYPES.RESOURCE_GOO_COLLECTOR ||
+          item.type === BUILDING_TYPES.RESOURCE_PEBBLE_COLLECTOR ||
+          item.type === BUILDING_TYPES.RESOURCE_PUTTY_COLLECTOR
+            ? now
+            : item.lastHarvested,
+      }));
 
-    set({
-      shiny: unrestricted ? current.shiny : Math.max(0, current.shiny - shinyCost),
-      workers: nextWorkers,
-      workerBusyModal: null,
-    });
+      current.requestCameraCelebration(building);
+
+      const nextWorkers = current.workers.map((worker) => {
+        if (worker.assignedBuildingId !== buildingId) {
+          return worker;
+        }
+        const homePath =
+          findPathAStar(
+            getWalkableGridFromState(current.engine.getState().buildings, state.gridSize),
+            { x: Math.round(worker.x), y: Math.round(worker.y) },
+            [{ x: worker.homeX, y: worker.homeY }],
+          ) ?? [];
+        return {
+          ...worker,
+          state: "RETURNING" as const,
+          taskType: undefined,
+          taskEndsAt: undefined,
+          assignedBuildingId: undefined,
+          taskTargetX: undefined,
+          taskTargetY: undefined,
+          path: homePath.slice(1),
+        };
+      });
+
+      set({
+        shiny: unrestricted
+          ? current.shiny
+          : Math.max(0, current.shiny - shinyCost),
+        workers: nextWorkers,
+        workerBusyModal: null,
+      });
+    }
     current.recalculateMaxCapacities();
     current.refreshEcs();
   },
@@ -510,11 +638,15 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
   collectFromCollector: (collectorId) => {
     const current = get();
     const state = current.engine.getState();
-    const collector = state.buildings.find((building) => building.id === collectorId);
-    if (!collector || collector.status !== 'ACTIVE') {
+    const collector = state.buildings.find(
+      (building) => building.id === collectorId,
+    );
+    if (!collector || collector.status !== "ACTIVE") {
       return;
     }
-    const townHall = state.buildings.find((building) => building.type === BUILDING_TYPES.TOWN_HALL);
+    const townHall = state.buildings.find(
+      (building) => building.type === BUILDING_TYPES.TOWN_HALL,
+    );
     if (!townHall) {
       return;
     }
@@ -523,7 +655,11 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
     if (!buffer || buffer.amount <= 0) {
       return;
     }
-    const nextResources = creditResource(current.resources, buffer.resourceType, buffer.amount);
+    const nextResources = creditResource(
+      current.resources,
+      buffer.resourceType,
+      buffer.amount,
+    );
     current.engine.setResources(nextResources);
     current.engine.updateBuildingLastHarvested(collectorId, now);
     const orbs = buildCollectionOrbs(collector, townHall, buffer, now, 0, 0);
@@ -538,7 +674,9 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
   collectAllCollectors: () => {
     const current = get();
     const state = current.engine.getState();
-    const townHall = state.buildings.find((building) => building.type === BUILDING_TYPES.TOWN_HALL);
+    const townHall = state.buildings.find(
+      (building) => building.type === BUILDING_TYPES.TOWN_HALL,
+    );
     if (!townHall) {
       return;
     }
@@ -550,7 +688,8 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
       BUILDING_TYPES.RESOURCE_GOO_COLLECTOR,
     ]);
     const collectors = state.buildings.filter(
-      (building) => collectorTypes.has(building.type) && building.status === 'ACTIVE',
+      (building) =>
+        collectorTypes.has(building.type) && building.status === "ACTIVE",
     );
     let nextResources = current.resources;
     const newOrbs: ResourceOrb[] = [];
@@ -562,10 +701,21 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
       if (!buffer || buffer.amount <= 0) {
         continue;
       }
-      nextResources = creditResource(nextResources, buffer.resourceType, buffer.amount);
+      nextResources = creditResource(
+        nextResources,
+        buffer.resourceType,
+        buffer.amount,
+      );
       current.engine.updateBuildingLastHarvested(collector.id, now);
       const groupDelayMs = groupIndex * ORB_GROUP_STAGGER_MS;
-      const orbs = buildCollectionOrbs(collector, townHall, buffer, now, groupDelayMs, orbBaseIndex);
+      const orbs = buildCollectionOrbs(
+        collector,
+        townHall,
+        buffer,
+        now,
+        groupDelayMs,
+        orbBaseIndex,
+      );
       newOrbs.push(...orbs);
       orbBaseIndex += orbs.length;
       groupIndex += 1;
@@ -589,7 +739,9 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
       return;
     }
     const now = Date.now();
-    const nextOrbs = current.resourceOrbs.filter((orb) => now - orb.startedAt < orb.durationMs + orb.delayMs + 80);
+    const nextOrbs = current.resourceOrbs.filter(
+      (orb) => now - orb.startedAt < orb.durationMs + orb.delayMs + 80,
+    );
     if (nextOrbs.length === current.resourceOrbs.length) {
       return;
     }
@@ -598,16 +750,18 @@ export const createEconomyActions = (set: GameStoreSet, get: GameStoreGet): Econ
   clearObstacle: (obstacleId) => {
     const current = get();
     const state = current.engine.getState();
-    const obstacle = state.buildings.find((building) => building.id === obstacleId);
-    if (!obstacle || !obstacle.tags?.includes('obstacle')) {
+    const obstacle = state.buildings.find(
+      (building) => building.id === obstacleId,
+    );
+    if (!obstacle || !obstacle.tags?.includes("obstacle")) {
       return;
     }
-    if (obstacle.status !== 'ACTIVE') {
+    if (obstacle.status !== "ACTIVE") {
       return;
     }
     current.engine.updateBuilding(obstacle.id, (building) => ({
       ...building,
-      status: 'PENDING' as BuildingStatus,
+      status: "PENDING" as BuildingStatus,
       buildStartedAt: Date.now(),
       buildEndsAt: undefined,
     }));

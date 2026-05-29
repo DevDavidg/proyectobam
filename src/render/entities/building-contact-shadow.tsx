@@ -45,39 +45,21 @@ export const BuildingContactShadow = ({ sizeX, sizeY, status }: BuildingContactS
   if (status !== 'ACTIVE' || !texture) {
     return null;
   }
-  const shadowScaleX = sizeX * CELL_SIZE * 1.62;
-  const shadowScaleY = sizeY * CELL_SIZE * 1.38;
-  const castOffsetX = Math.max(sizeX, sizeY) * CELL_SIZE * 0.12;
-  const castOffsetZ = Math.max(sizeX, sizeY) * CELL_SIZE * 0.14;
-  const contactScale = Math.max(sizeX, sizeY) * CELL_SIZE * 0.96;
+  const contactScale = Math.max(sizeX, sizeY) * CELL_SIZE * 0.9;
   return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[castOffsetX, 0.012, castOffsetZ]}>
-        <planeGeometry args={[shadowScaleX, shadowScaleY]} />
-        <meshBasicMaterial
-          map={texture}
-          color="#0d2403"
-          transparent
-          depthWrite={false}
-          opacity={0.5}
-          blending={MultiplyBlending}
-          polygonOffset
-          polygonOffsetFactor={-1}
-        />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.013, 0]}>
-        <planeGeometry args={[contactScale, contactScale]} />
-        <meshBasicMaterial
-          map={texture}
-          color="#050a02"
-          transparent
-          depthWrite={false}
-          opacity={0.42}
-          blending={MultiplyBlending}
-          polygonOffset
-          polygonOffsetFactor={-2}
-        />
-      </mesh>
-    </group>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.013, 0]}>
+      <planeGeometry args={[contactScale, contactScale]} />
+      <meshBasicMaterial
+        map={texture}
+        color="#050a02"
+        transparent
+        premultipliedAlpha
+        depthWrite={false}
+        opacity={0.34}
+        blending={MultiplyBlending}
+        polygonOffset
+        polygonOffsetFactor={-2}
+      />
+    </mesh>
   );
 };

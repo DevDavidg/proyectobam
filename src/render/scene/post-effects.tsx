@@ -2,33 +2,16 @@ import {
   Bloom,
   BrightnessContrast,
   EffectComposer,
-  Outline,
+  SMAA,
+  Vignette,
 } from "@react-three/postprocessing";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useState } from "react";
-import { Mesh, Object3D } from "three";
-
-const collectOutlinedObjects = (root: Object3D): Object3D[] => {
-  const result: Object3D[] = [];
-  root.traverse((object) => {
-    const mesh = object as Mesh;
-    if (!mesh.isMesh) {
-      return;
-    }
-    if (object.userData.ignoreOutline) {
-      return;
-    }
-    result.push(object);
-  });
-  return result;
-};
+import { useThree } from "@react-three/fiber";
+import { useMemo } from "react";
+import { useGameStore } from "../../state/game-store";
 
 export const PostEffects = () => {
-  const { gl, scene } = useThree();
-  const [selection, setSelection] = useState<Object3D[]>([]);
-  const visibleEdgeColor = useMemo(() => 0x0f0f0f, []);
-  const hiddenEdgeColor = useMemo(() => 0x020202, []);
-  const ticker = useMemo(() => ({ elapsed: 0 }), []);
+  const shopOpen = useGameStore((state) => state.shopOpen);
+  const { gl } = useThree();
   const canUseComposer = useMemo(() => {
     try {
       const context = gl.getContext();
@@ -38,36 +21,21 @@ export const PostEffects = () => {
     }
   }, [gl]);
 
-  if (!canUseComposer) {
+  if (!canUseComposer || shopOpen) {
     return null;
   }
 
-  useFrame((_, delta) => {
-    ticker.elapsed += delta;
-    if (ticker.elapsed < 0.4) {
-      return;
-    }
-    ticker.elapsed = 0;
-    setSelection(collectOutlinedObjects(scene));
-  });
-
   return (
     <EffectComposer multisampling={4}>
+      <SMAA />
       <Bloom
-        intensity={0.25}
-        luminanceThreshold={0.55}
-        luminanceSmoothing={0.25}
+        intensity={0.2}
+        luminanceThreshold={0.92}
+        luminanceSmoothing={0.14}
         mipmapBlur={true}
       />
-      <BrightnessContrast brightness={-0.01} contrast={0.11} />
-      <Outline
-        selection={selection}
-        edgeStrength={2.2}
-        pulseSpeed={0}
-        blur={false}
-        visibleEdgeColor={visibleEdgeColor}
-        hiddenEdgeColor={hiddenEdgeColor}
-      />
+      <BrightnessContrast brightness={0} contrast={0.15} />
+      <Vignette eskil={false} offset={0.25} darkness={0.28} />
     </EffectComposer>
   );
 };

@@ -30,12 +30,12 @@ export const GrassTuftCluster = ({
   showSecondary = true,
 }: GrassTuftClusterProps) => (
   <group position={position}>
-    <mesh castShadow receiveShadow position={[0, 0.04, 0]} rotation={primaryRotation}>
+    <mesh receiveShadow position={[0, 0.04, 0]} rotation={primaryRotation}>
       <coneGeometry args={[primaryRadius, primaryHeight, 6]} />
       {createMaterial(color, token)}
     </mesh>
     {showSecondary ? (
-      <mesh castShadow receiveShadow position={secondaryOffset} rotation={secondaryRotation}>
+      <mesh receiveShadow position={secondaryOffset} rotation={secondaryRotation}>
         <coneGeometry args={[secondaryRadius, secondaryHeight, 6]} />
         {createMaterial(color, token)}
       </mesh>

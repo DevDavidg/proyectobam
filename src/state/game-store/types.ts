@@ -1,15 +1,15 @@
-import type { StoreApi } from 'zustand';
+import type { StoreApi } from "zustand";
 import type {
   MonsterLifecycleState,
   MonsterRuntimeState,
   MonsterType,
-} from '../../core/constants/monster-catalog';
-import type { GameEngine } from '../../core/engine/game-engine';
-import type { BuildingCategory, BuildingType } from '../../core/types/building';
-import type { Enemy } from '../../core/types/enemy';
-import type { GameResources } from '../../core/types/resources';
-import type { RenderEntitySnapshot } from '../../ecs/systems/sync-grid-system';
-import type { createEcsWorld } from '../../ecs/world/world';
+} from "../../core/constants/monster-catalog";
+import type { GameEngine } from "../../core/engine/game-engine";
+import type { Building, BuildingCategory, BuildingType } from "../../core/types/building";
+import type { Enemy } from "../../core/types/enemy";
+import type { GameResources } from "../../core/types/resources";
+import type { RenderEntitySnapshot } from "../../ecs/systems/sync-grid-system";
+import type { createEcsWorld } from "../../ecs/world/world";
 
 export type GridPoint = {
   x: number;
@@ -26,6 +26,15 @@ export type ContextMenuPosition = {
   y: number;
 };
 
+export type CameraCelebrationRequest = {
+  buildingId: string;
+  gridX: number;
+  gridY: number;
+  sizeX: number;
+  sizeY: number;
+  token: number;
+};
+
 export type Projectile = {
   id: string;
   turretId: string;
@@ -34,7 +43,7 @@ export type Projectile = {
   originY: number;
   targetSnapshotX: number;
   targetSnapshotY: number;
-  pathType: 'linear' | 'arc';
+  pathType: "linear" | "arc";
   damage: number;
   splashRadius: number;
   applyDamageOnImpact: boolean;
@@ -60,7 +69,7 @@ export type FloatingText = {
   maxLife: number;
 };
 
-export type ResourceOrbResourceType = 'twigs' | 'pebbles' | 'putty' | 'goo';
+export type ResourceOrbResourceType = "twigs" | "pebbles" | "putty" | "goo";
 
 export type ResourceOrb = {
   id: string;
@@ -99,15 +108,13 @@ export type PenResident = {
   moving: boolean;
 };
 
-export type MonsterResearchState =
-  | {
-      labId: string;
-      monsterType: MonsterType;
-      targetLevel: number;
-      startedAt: number;
-      endsAt: number;
-    }
-  | null;
+export type MonsterResearchState = {
+  labId: string;
+  monsterType: MonsterType;
+  targetLevel: number;
+  startedAt: number;
+  endsAt: number;
+} | null;
 
 export type AcademyResearch = {
   monsterType: MonsterType | null;
@@ -125,7 +132,11 @@ export type PendingRaidSpawn = {
 
 export type BuildableType = Exclude<
   BuildingType,
-  'TOWN_HALL' | 'PREVIEW' | 'OBSTACLE_TREE' | 'OBSTACLE_ROCK' | 'OBSTACLE_MUSHROOM'
+  | "TOWN_HALL"
+  | "PREVIEW"
+  | "OBSTACLE_TREE"
+  | "OBSTACLE_ROCK"
+  | "OBSTACLE_MUSHROOM"
 >;
 
 export type Worker = {
@@ -134,23 +145,21 @@ export type Worker = {
   y: number;
   homeX: number;
   homeY: number;
-  state: 'IDLE' | 'MOVING_TO_TASK' | 'WORKING' | 'RETURNING';
+  state: "IDLE" | "MOVING_TO_TASK" | "WORKING" | "RETURNING";
   path: GridPoint[];
   assignedBuildingId?: string;
   taskTargetX?: number;
   taskTargetY?: number;
-  taskType?: 'BUILD' | 'CLEAR_OBSTACLE';
+  taskType?: "BUILD" | "CLEAR_OBSTACLE";
   taskEndsAt?: number;
 };
 
-export type WorkerBusyModalState =
-  | {
-      queuedBuildingType: BuildableType;
-      activeTaskBuildingId: string;
-      shinyCost: number;
-      remainingMs: number;
-    }
-  | null;
+export type WorkerBusyModalState = {
+  queuedBuildingType: BuildableType;
+  activeTaskBuildingId: string;
+  shinyCost: number;
+  remainingMs: number;
+} | null;
 
 export type GameStore = {
   engine: GameEngine;
@@ -190,14 +199,17 @@ export type GameStore = {
   battleExclusion: { minX: number; minY: number; maxX: number; maxY: number };
   pendingRaidSpawns: PendingRaidSpawn[];
   battleHasStarted: boolean;
-  battleResult: 'VICTORY' | 'DEFEAT' | null;
+  battleResult: "VICTORY" | "DEFEAT" | null;
   selectedBuildingId: string | null;
   buildingContextMenuPosition: ContextMenuPosition | null;
   activePenMenuBuildingId: string | null;
   housingDetailsPenId: string | null;
   movingBuildingId: string | null;
   movingBuildingOrigin: { x: number; y: number } | null;
-  penHousingSettings: Record<string, { name: string; priority: 'ANY' | MonsterType }>;
+  penHousingSettings: Record<
+    string,
+    { name: string; priority: "ANY" | MonsterType }
+  >;
   hoveredBuildingId: string | null;
   selectedBuildingType: BuildableType;
   activeBuildTab: BuildingCategory;
@@ -215,6 +227,9 @@ export type GameStore = {
   lastConstructionTick: number;
   lastHatcheryTick: number;
   nextObstacleRespawnAt: number;
+  cameraCelebration: CameraCelebrationRequest | null;
+  requestCameraCelebration: (building: Building) => void;
+  clearCameraCelebration: () => void;
   refreshEcs: () => void;
   recalculateMaxCapacities: () => void;
   tickResources: () => void;
@@ -243,8 +258,14 @@ export type GameStore = {
   startMovingBuilding: (buildingId: string) => void;
   confirmMovingBuilding: () => void;
   cancelMovingBuilding: () => void;
-  setPenHousingSettings: (buildingId: string, settings: { name: string; priority: 'ANY' | MonsterType }) => void;
-  openBuildingContextMenu: (buildingId: string, position?: ContextMenuPosition) => void;
+  setPenHousingSettings: (
+    buildingId: string,
+    settings: { name: string; priority: "ANY" | MonsterType },
+  ) => void;
+  openBuildingContextMenu: (
+    buildingId: string,
+    position?: ContextMenuPosition,
+  ) => void;
   closeBuildingContextMenu: () => void;
   setHoveredBuildingId: (buildingId: string | null) => void;
   upgradeSelectedBuilding: () => void;
@@ -277,5 +298,5 @@ export type GameStore = {
   clearObstacle: (obstacleId: string) => void;
 };
 
-export type GameStoreSet = StoreApi<GameStore>['setState'];
+export type GameStoreSet = StoreApi<GameStore>["setState"];
 export type GameStoreGet = () => GameStore;

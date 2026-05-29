@@ -195,9 +195,21 @@ export const generateLandExpansionPreview = (
   return preview;
 };
 
-export const getWalkableGridFromState = (buildings: Building[], gridSize: number): boolean[][] => {
+type WalkableGridOptions = {
+  excludeBuildingIds?: string[];
+};
+
+export const getWalkableGridFromState = (
+  buildings: Building[],
+  gridSize: number,
+  options?: WalkableGridOptions,
+): boolean[][] => {
+  const excluded = new Set(options?.excludeBuildingIds ?? []);
   const walkable = Array.from({ length: gridSize }, () => Array.from({ length: gridSize }, () => true));
   for (const building of buildings) {
+    if (excluded.has(building.id)) {
+      continue;
+    }
     if (building.status === 'ACTIVE' || building.status === 'UNDER_CONSTRUCTION' || building.status === 'PENDING') {
       for (let row = building.y; row < building.y + building.sizeY; row += 1) {
         for (let col = building.x; col < building.x + building.sizeX; col += 1) {

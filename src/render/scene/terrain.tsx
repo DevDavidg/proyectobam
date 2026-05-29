@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { CanvasTexture, RepeatWrapping } from 'three';
+import { TerrainBoundary } from './terrain-boundary';
 
 type TerrainProps = {
   worldSize: number;
+  gridOpacity: number;
 };
 
 const createSeededRandom = (seed: number) => {
@@ -36,15 +38,28 @@ const mixColors = (colorA: RgbColor, colorB: RgbColor, ratio: number): RgbColor 
 
 const GRASS_BASE = hexToRgb('#5aab1c');
 const GRASS_LIGHT = hexToRgb('#84c626');
-const GRASS_SHADE = hexToRgb('#3f7f14');
+const GRASS_SHADE = hexToRgb('#3a780d');
+const GRASS_DRY = hexToRgb('#99bc23');
 const BLADE_LIGHT = hexToRgb('#a2dd57');
 const BLADE_DARK = hexToRgb('#4f8f1a');
-const GRID_COLOR = 'rgba(255, 255, 255, 0.14)';
+const GRID_COLOR = 'rgba(255, 255, 255, 0.12)';
 
 const TEXTURE_RESOLUTION = 1024;
 const GRID_TEXTURE_RESOLUTION = 1024;
 const GRID_CELL_PX = 64;
 const GRID_LINE_PX = 1;
+
+const drawPathPolyline = (
+  context: CanvasRenderingContext2D,
+  controlPoints: Array<[number, number]>
+): void => {
+  context.beginPath();
+  context.moveTo(controlPoints[0][0], controlPoints[0][1]);
+  for (let index = 1; index < controlPoints.length; index += 1) {
+    const point = controlPoints[index];
+    context.lineTo(point[0], point[1]);
+  }
+};
 
 const createTerrainCanvas = (): HTMLCanvasElement | null => {
   if (typeof document === 'undefined') {
@@ -86,10 +101,10 @@ const createTerrainCanvas = (): HTMLCanvasElement | null => {
   }
 
   context.globalAlpha = 0.2;
-  for (let pass = 0; pass < 2; pass += 1) {
-    const highlight = pass === 0 ? GRASS_LIGHT : GRASS_SHADE;
+  for (let pass = 0; pass < 3; pass += 1) {
+    const highlight = pass === 0 ? GRASS_LIGHT : pass === 1 ? GRASS_SHADE : GRASS_DRY;
     context.fillStyle = `rgb(${highlight.red}, ${highlight.green}, ${highlight.blue})`;
-    for (let patch = 0; patch < 120; patch += 1) {
+    for (let patch = 0; patch < 95; patch += 1) {
       const x = random() * TEXTURE_RESOLUTION;
       const y = random() * TEXTURE_RESOLUTION;
       const width = 18 + random() * 40;
@@ -100,6 +115,83 @@ const createTerrainCanvas = (): HTMLCanvasElement | null => {
     }
   }
   context.globalAlpha = 1;
+
+  const drawPath = (controlPoints: Array<[number, number]>, width: number): void => {
+    context.save();
+    context.strokeStyle = 'rgba(139, 90, 43, 0.42)';
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.lineWidth = width;
+    drawPathPolyline(context, controlPoints);
+    context.stroke();
+    context.strokeStyle = 'rgba(171, 126, 71, 0.22)';
+    context.lineWidth = Math.max(4, width * 0.42);
+    drawPathPolyline(context, controlPoints);
+    context.stroke();
+
+    // Break edges so roads look worn and organic.
+    context.globalCompositeOperation = 'destination-out';
+    const chipCount = 600;
+    for (let chip = 0; chip < chipCount; chip += 1) {
+      const segmentIndex = Math.floor(random() * (controlPoints.length - 1));
+      const a = controlPoints[segmentIndex];
+      const b = controlPoints[segmentIndex + 1];
+      const t = random();
+      const x = a[0] + (b[0] - a[0]) * t;
+      const y = a[1] + (b[1] - a[1]) * t;
+      const edgeSign = random() > 0.5 ? 1 : -1;
+      const edgeOffset = (width * 0.33 + random() * width * 0.22) * edgeSign;
+      const dx = b[0] - a[0];
+      const dy = b[1] - a[1];
+      const length = Math.max(1, Math.hypot(dx, dy));
+      const nx = -dy / length;
+      const ny = dx / length;
+      const radius = 2 + random() * 9;
+      context.beginPath();
+      context.arc(x + nx * edgeOffset, y + ny * edgeOffset, radius, 0, Math.PI * 2);
+      context.fill();
+    }
+    context.globalCompositeOperation = 'source-over';
+
+    // Blend grass blades back into road borders.
+    context.globalAlpha = 0.28;
+    for (let patch = 0; patch < 360; patch += 1) {
+      const segmentIndex = Math.floor(random() * (controlPoints.length - 1));
+      const a = controlPoints[segmentIndex];
+      const b = controlPoints[segmentIndex + 1];
+      const t = random();
+      const x = a[0] + (b[0] - a[0]) * t;
+      const y = a[1] + (b[1] - a[1]) * t;
+      drawBladeCluster(
+        x + (random() - 0.5) * width * 0.45,
+        y + (random() - 0.5) * width * 0.45,
+        1 + Math.floor(random() * 3)
+      );
+    }
+    context.globalAlpha = 1;
+    context.restore();
+  };
+
+  drawPath(
+    [
+      [120, 660],
+      [290, 590],
+      [430, 510],
+      [610, 430],
+      [820, 360],
+    ],
+    58
+  );
+  drawPath(
+    [
+      [170, 280],
+      [330, 350],
+      [490, 450],
+      [670, 560],
+      [870, 650],
+    ],
+    44
+  );
 
   return canvas;
 };
@@ -130,6 +222,21 @@ const createGridCanvas = (): HTMLCanvasElement | null => {
     context.lineTo(GRID_TEXTURE_RESOLUTION, position + 0.5);
     context.stroke();
   }
+  const fadeGradient = context.createRadialGradient(
+    GRID_TEXTURE_RESOLUTION / 2,
+    GRID_TEXTURE_RESOLUTION / 2,
+    GRID_TEXTURE_RESOLUTION * 0.18,
+    GRID_TEXTURE_RESOLUTION / 2,
+    GRID_TEXTURE_RESOLUTION / 2,
+    GRID_TEXTURE_RESOLUTION * 0.66
+  );
+  fadeGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  fadeGradient.addColorStop(0.75, 'rgba(255, 255, 255, 0.68)');
+  fadeGradient.addColorStop(1, 'rgba(255, 255, 255, 0.08)');
+  context.globalCompositeOperation = 'destination-in';
+  context.fillStyle = fadeGradient;
+  context.fillRect(0, 0, GRID_TEXTURE_RESOLUTION, GRID_TEXTURE_RESOLUTION);
+  context.globalCompositeOperation = 'source-over';
   return canvas;
 };
 
@@ -169,16 +276,29 @@ const createGridTexture = (): CanvasTexture | null => {
   return texture;
 };
 
-export const Terrain = ({ worldSize }: TerrainProps) => {
+export const Terrain = ({ worldSize, gridOpacity }: TerrainProps) => {
   const terrainTexture = useMemo(() => createTerrainTexture(), []);
   const gridTexture = useMemo(() => createGridTexture(), []);
-  const extendedWorldSize = worldSize * 2.6;
+  const extendedWorldSize = worldSize * 4.4;
+  const boundaryProps = useMemo(() => {
+    const random = createSeededRandom(7401);
+    return Array.from({ length: 34 }).map((_, index) => {
+      const angle = (index / 34) * Math.PI * 2;
+      const radius = worldSize * (0.6 + random() * 0.06);
+      return {
+        x: Math.cos(angle) * radius,
+        z: Math.sin(angle) * radius,
+        moundScale: 0.9 + random() * 1.2,
+        canopyScale: 0.8 + random() * 1.3,
+      };
+    });
+  }, [worldSize]);
 
   return (
     <group>
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.011, 0]}>
         <planeGeometry args={[extendedWorldSize, extendedWorldSize]} />
-        <meshStandardMaterial map={terrainTexture} color="#9ad94e" roughness={0.9} metalness={0.01} />
+        <meshStandardMaterial map={terrainTexture} color="#9ad94e" roughness={1} metalness={0} />
       </mesh>
       {gridTexture ? (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.004, 0]}>
@@ -186,15 +306,12 @@ export const Terrain = ({ worldSize }: TerrainProps) => {
           <meshBasicMaterial
             map={gridTexture}
             transparent
-            opacity={0.75}
+            opacity={gridOpacity}
             depthWrite={false}
           />
         </mesh>
       ) : null}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.018, 0]}>
-        <planeGeometry args={[extendedWorldSize, extendedWorldSize]} />
-        <meshBasicMaterial color="#5aab1c" />
-      </mesh>
+      <TerrainBoundary boundaryProps={boundaryProps} />
     </group>
   );
 };

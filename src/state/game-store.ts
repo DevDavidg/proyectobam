@@ -15,6 +15,7 @@ import {
   persistedShiny,
   world,
 } from './game-store/helpers';
+import { createCameraActions } from './game-store/camera-actions';
 import { createCombatActions } from './game-store/combat-actions';
 import { createEconomyActions } from './game-store/economy-actions';
 import { createLifecycleActions } from './game-store/lifecycle-actions';
@@ -145,6 +146,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   lastConstructionTick: Date.now(),
   lastHatcheryTick: Date.now(),
   nextObstacleRespawnAt: Date.now() + getRandomObstacleRespawnDelayMs(),
+  ...createCameraActions(set, get),
   ...createLifecycleActions(set, get),
   ...createCombatActions(set, get),
   ...createPlacementActions(set, get),

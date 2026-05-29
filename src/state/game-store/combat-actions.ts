@@ -1,13 +1,36 @@
-import { BUILDING_TYPES } from '../../core/types/building';
-import { ENHANCED_BUILDING_CATALOG } from '../../core/constants/catalog';
-import { acquireTurretShotEvents, runCombatTickSystem } from '../../ecs/systems/combat-tick-system';
-import { findPathAStar, getRectangleBorderCells } from '../../utils/pathfinding';
-import { getWalkableGridFromState, rollObstacleClearShinyReward } from './helpers';
-import type { GameStore, GameStoreGet, GameStoreSet, Projectile, Worker } from './types';
+import { BUILDING_TYPES } from "../../core/types/building";
+import { ENHANCED_BUILDING_CATALOG } from "../../core/constants/catalog";
+import {
+  acquireTurretShotEvents,
+  runCombatTickSystem,
+} from "../../ecs/systems/combat-tick-system";
+import {
+  buildStructureAvoidanceCosts,
+  computeWorkPosition,
+  findPathAStar,
+  getExtendedApproachCells,
+} from "../../utils/pathfinding";
+import {
+  getWalkableGridFromState,
+  rollObstacleClearShinyReward,
+} from "./helpers";
+import type {
+  GameStore,
+  GameStoreGet,
+  GameStoreSet,
+  Projectile,
+  Worker,
+} from "./types";
 
-type CombatActions = Pick<GameStore, 'tickCombat' | 'tickConstruction' | 'tickProjectiles' | 'tickEffects'>;
+type CombatActions = Pick<
+  GameStore,
+  "tickCombat" | "tickConstruction" | "tickProjectiles" | "tickEffects"
+>;
 
-export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): CombatActions => ({
+export const createCombatActions = (
+  set: GameStoreSet,
+  get: GameStoreGet,
+): CombatActions => ({
   tickCombat: () => {
     const current = get();
     const now = Date.now();
@@ -16,16 +39,24 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
       return;
     }
 
-    const dueSpawns = current.pendingRaidSpawns.filter((spawn) => spawn.spawnAt <= now).map((spawn) => spawn.enemy);
-    const remainingSpawns = current.pendingRaidSpawns.filter((spawn) => spawn.spawnAt > now);
+    const dueSpawns = current.pendingRaidSpawns
+      .filter((spawn) => spawn.spawnAt <= now)
+      .map((spawn) => spawn.enemy);
+    const remainingSpawns = current.pendingRaidSpawns.filter(
+      (spawn) => spawn.spawnAt > now,
+    );
     const mergedEnemies = [...current.enemies, ...dueSpawns];
-    const shouldEvaluateBattleResult = current.battleMode && current.battleHasStarted;
+    const shouldEvaluateBattleResult =
+      current.battleMode && current.battleHasStarted;
     const canSkipCombatSimulation =
       mergedEnemies.length === 0 &&
       dueSpawns.length === 0 &&
       remainingSpawns.length === 0 &&
       !shouldEvaluateBattleResult;
     if (canSkipCombatSimulation) {
+      if (current.impacts.length || current.floatingTexts.length) {
+        current.tickEffects(deltaSeconds);
+      }
       set({ lastCombatTick: now });
       return;
     }
@@ -44,7 +75,7 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
       combatResult.enemies,
       state.buildings,
       now,
-      current.turretCooldownById
+      current.turretCooldownById,
     );
     const nextEnemies = [...combatResult.enemies];
     const nextDamageTimestamps = { ...current.damageTimestamps };
@@ -52,16 +83,24 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
     let nextProjectileCount = current.projectileCount;
 
     for (const shot of turretAcquisition.shots) {
-      const enemyIndex = nextEnemies.findIndex((enemy) => enemy.id === shot.enemyId);
+      const enemyIndex = nextEnemies.findIndex(
+        (enemy) => enemy.id === shot.enemyId,
+      );
       if (enemyIndex === -1) {
         continue;
       }
       const enemy = nextEnemies[enemyIndex];
-      const turret = state.buildings.find((building) => building.id === shot.turretId);
-      if (!turret && (shot.originX === undefined || shot.originY === undefined)) {
+      const turret = state.buildings.find(
+        (building) => building.id === shot.turretId,
+      );
+      if (
+        !turret &&
+        (shot.originX === undefined || shot.originY === undefined)
+      ) {
         continue;
       }
-      const isMortar = shot.pathType === 'arc' || (turret?.tags?.includes('mortar') ?? false);
+      const isMortar =
+        shot.pathType === "arc" || (turret?.tags?.includes("mortar") ?? false);
 
       if (!isMortar) {
         nextEnemies[enemyIndex] = {
@@ -75,11 +114,13 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
         id: `proj-${nextProjectileCount}`,
         turretId: shot.turretId,
         targetEnemyId: shot.enemyId,
-        originX: shot.originX ?? (turret ? turret.x + turret.sizeX / 2 : enemy.x),
-        originY: shot.originY ?? (turret ? turret.y + turret.sizeY / 2 : enemy.y),
+        originX:
+          shot.originX ?? (turret ? turret.x + turret.sizeX / 2 : enemy.x),
+        originY:
+          shot.originY ?? (turret ? turret.y + turret.sizeY / 2 : enemy.y),
         targetSnapshotX: enemy.x,
         targetSnapshotY: enemy.y,
-        pathType: isMortar ? 'arc' : 'linear',
+        pathType: isMortar ? "arc" : "linear",
         damage: shot.damage,
         splashRadius: turret?.splashRadius ?? 0,
         applyDamageOnImpact: isMortar,
@@ -99,9 +140,21 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
       nextDamageTimestamps[event.buildingId] = now;
     }
 
-    const townHall = current.engine.getState().buildings.find((building) => building.type === BUILDING_TYPES.TOWN_HALL && building.status === 'ACTIVE');
-    const isDefeat = current.battleMode && current.battleHasStarted && !townHall;
-    const isVictory = current.battleMode && current.battleHasStarted && townHall && aliveEnemies.length === 0 && remainingSpawns.length === 0;
+    const townHall = current.engine
+      .getState()
+      .buildings.find(
+        (building) =>
+          building.type === BUILDING_TYPES.TOWN_HALL &&
+          building.status === "ACTIVE",
+      );
+    const isDefeat =
+      current.battleMode && current.battleHasStarted && !townHall;
+    const isVictory =
+      current.battleMode &&
+      current.battleHasStarted &&
+      townHall &&
+      aliveEnemies.length === 0 &&
+      remainingSpawns.length === 0;
     if (!townHall) {
       aliveEnemies.length = 0;
     }
@@ -114,7 +167,11 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
       projectileCount: nextProjectileCount,
       damageTimestamps: nextDamageTimestamps,
       turretCooldownById: turretAcquisition.cooldownByTurret,
-      battleResult: isDefeat ? 'DEFEAT' : isVictory ? 'VICTORY' : current.battleResult,
+      battleResult: isDefeat
+        ? "DEFEAT"
+        : isVictory
+          ? "VICTORY"
+          : current.battleResult,
       lastCombatTick: now,
     });
     const hasEnemySimulation = mergedEnemies.length > 0 || dueSpawns.length > 0;
@@ -123,17 +180,32 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
     if (hasEnemySimulation || hasBuildingDamage || enemyCountChanged) {
       current.refreshEcs();
     }
+
+    const latest = get();
+    if (latest.projectiles.length) {
+      latest.tickProjectiles(deltaSeconds);
+    }
+    if (latest.impacts.length || latest.floatingTexts.length) {
+      latest.tickEffects(deltaSeconds);
+    }
   },
   tickConstruction: () => {
     const current = get();
     const now = Date.now();
-    const deltaSeconds = Math.max(0, (now - current.lastConstructionTick) / 1000);
+    const deltaSeconds = Math.max(
+      0,
+      (now - current.lastConstructionTick) / 1000,
+    );
     if (deltaSeconds <= 0) {
       return;
     }
 
-    const hasIdleWorkers = current.workers.some((worker) => worker.state !== 'IDLE' || worker.path.length > 0);
-    const hasPendingBuildings = current.engine.getState().buildings.some((building) => building.status === 'PENDING');
+    const hasIdleWorkers = current.workers.some(
+      (worker) => worker.state !== "IDLE" || worker.path.length > 0,
+    );
+    const hasPendingBuildings = current.engine
+      .getState()
+      .buildings.some((building) => building.status === "PENDING");
     if (!hasIdleWorkers && !hasPendingBuildings) {
       set({ lastConstructionTick: now });
       return;
@@ -141,11 +213,19 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
 
     const state = current.engine.getState();
     const walkable = getWalkableGridFromState(state.buildings, state.gridSize);
-    const nextWorkers: Worker[] = current.workers.map((worker) => ({ ...worker, path: [...worker.path] }));
+    const nextWorkers: Worker[] = current.workers.map((worker) => ({
+      ...worker,
+      path: [...worker.path],
+    }));
     const nextQueuedMonsters = [...current.queuedMonsters];
     let nextShiny = current.shiny;
     const updatedBuildingIds = new Set<string>();
-    const workerStateBefore = current.workers.map((worker) => `${worker.state}|${worker.x.toFixed(3)}|${worker.y.toFixed(3)}|${worker.path.length}`).join(';');
+    const workerStateBefore = current.workers
+      .map(
+        (worker) =>
+          `${worker.state}|${worker.x.toFixed(3)}|${worker.y.toFixed(3)}|${worker.path.length}`,
+      )
+      .join(";");
 
     const moveWorker = (worker: Worker): Worker => {
       if (!worker.path.length) {
@@ -176,25 +256,38 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
 
     for (let index = 0; index < nextWorkers.length; index += 1) {
       const worker = moveWorker(nextWorkers[index]);
-      if (worker.state === 'MOVING_TO_TASK' && worker.path.length === 0 && worker.taskEndsAt) {
-        if (typeof worker.taskTargetX === 'number' && typeof worker.taskTargetY === 'number') {
+      if (
+        worker.state === "MOVING_TO_TASK" &&
+        worker.path.length === 0 &&
+        worker.taskEndsAt
+      ) {
+        if (
+          typeof worker.taskTargetX === "number" &&
+          typeof worker.taskTargetY === "number"
+        ) {
           worker.x = worker.taskTargetX;
           worker.y = worker.taskTargetY;
         }
-        worker.state = 'WORKING';
+        worker.state = "WORKING";
       }
-      if (worker.state === 'WORKING' && worker.taskEndsAt && now >= worker.taskEndsAt) {
+      if (
+        worker.state === "WORKING" &&
+        worker.taskEndsAt &&
+        now >= worker.taskEndsAt
+      ) {
         const assignedBuildingId = worker.assignedBuildingId;
         if (assignedBuildingId) {
-          const assigned = state.buildings.find((building) => building.id === assignedBuildingId);
+          const assigned = state.buildings.find(
+            (building) => building.id === assignedBuildingId,
+          );
           if (assigned) {
-            if (worker.taskType === 'CLEAR_OBSTACLE') {
+            if (worker.taskType === "CLEAR_OBSTACLE") {
               current.engine.removeBuilding(assignedBuildingId);
               nextShiny += rollObstacleClearShinyReward();
             } else {
               current.engine.updateBuilding(assignedBuildingId, (building) => ({
                 ...building,
-                status: 'ACTIVE',
+                status: "ACTIVE",
                 assignedWorkerId: undefined,
                 buildEndsAt: undefined,
                 buildStartedAt: undefined,
@@ -206,16 +299,23 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
                     : building.lastHarvested,
               }));
               updatedBuildingIds.add(assignedBuildingId);
+              current.requestCameraCelebration(assigned);
               if (assigned.type === BUILDING_TYPES.ARMY_HATCHERY) {
-                nextQueuedMonsters.push('Mite');
+                nextQueuedMonsters.push("Mite");
               }
             }
           }
         }
 
-        const homePath = findPathAStar(walkable, { x: Math.round(worker.x), y: Math.round(worker.y) }, [{ x: worker.homeX, y: worker.homeY }]) ?? [];
+        const homePath =
+          findPathAStar(
+            walkable,
+            { x: Math.round(worker.x), y: Math.round(worker.y) },
+            [{ x: worker.homeX, y: worker.homeY }],
+            buildStructureAvoidanceCosts(walkable, state.gridSize),
+          ) ?? [];
         worker.path = homePath.slice(1);
-        worker.state = 'RETURNING';
+        worker.state = "RETURNING";
         worker.taskEndsAt = undefined;
         worker.assignedBuildingId = undefined;
         worker.taskTargetX = undefined;
@@ -223,58 +323,127 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
         worker.taskType = undefined;
       }
 
-      if (worker.state === 'RETURNING' && worker.path.length === 0) {
-        worker.state = 'IDLE';
+      if (worker.state === "RETURNING" && worker.path.length === 0) {
+        worker.state = "IDLE";
       }
       nextWorkers[index] = worker;
     }
 
-    const freeWorkers = nextWorkers.filter((worker) => worker.state === 'IDLE');
+    const freeWorkers = nextWorkers.filter((worker) => worker.state === "IDLE");
     const pendingBuildings = current.engine
       .getState()
-      .buildings.filter((building) => building.status === 'PENDING')
-      .sort((left, right) => (left.buildStartedAt ?? 0) - (right.buildStartedAt ?? 0));
+      .buildings.filter((building) => building.status === "PENDING")
+      .sort(
+        (left, right) =>
+          (left.buildStartedAt ?? 0) - (right.buildStartedAt ?? 0),
+      );
 
     for (const pending of pendingBuildings) {
-      const worker = freeWorkers.shift();
-      if (!worker) {
+      if (!freeWorkers.length) {
         break;
       }
-      const targetCells = getRectangleBorderCells(pending.x, pending.y, pending.sizeX, pending.sizeY, state.gridSize);
-      const path = findPathAStar(walkable, { x: Math.round(worker.x), y: Math.round(worker.y) }, targetCells);
-      if (!path || path.length < 2) {
+
+      const isObstacleTask = pending.tags?.includes("obstacle") ?? false;
+      const pathWalkable = getWalkableGridFromState(state.buildings, state.gridSize, {
+        excludeBuildingIds: isObstacleTask ? [pending.id] : [],
+      });
+      const avoidanceCosts = buildStructureAvoidanceCosts(pathWalkable, state.gridSize);
+      const approachCells = getExtendedApproachCells(
+        pending.x,
+        pending.y,
+        pending.sizeX,
+        pending.sizeY,
+        state.gridSize,
+      );
+
+      let bestWorkerIndex = -1;
+      let bestPath: { x: number; y: number }[] | null = null;
+      let bestPathCost = Infinity;
+
+      for (let workerIndex = 0; workerIndex < freeWorkers.length; workerIndex += 1) {
+        const candidate = freeWorkers[workerIndex];
+        const path = findPathAStar(
+          pathWalkable,
+          { x: Math.round(candidate.x), y: Math.round(candidate.y) },
+          approachCells,
+          avoidanceCosts,
+        );
+        if (!path) {
+          continue;
+        }
+        const pathCost = path.length;
+        if (pathCost < bestPathCost) {
+          bestPathCost = pathCost;
+          bestPath = path;
+          bestWorkerIndex = workerIndex;
+        }
+      }
+
+      if (bestWorkerIndex === -1 || !bestPath) {
+        if (isObstacleTask) {
+          current.engine.updateBuilding(pending.id, (building) => ({
+            ...building,
+            status: "ACTIVE",
+            assignedWorkerId: undefined,
+            buildStartedAt: undefined,
+            buildEndsAt: undefined,
+          }));
+          updatedBuildingIds.add(pending.id);
+        }
         continue;
       }
-      const destinationCell = path[path.length - 1];
+
+      const worker = freeWorkers.splice(bestWorkerIndex, 1)[0];
+      const destinationCell = bestPath[bestPath.length - 1];
+      const workPosition = computeWorkPosition(
+        destinationCell,
+        pending.x,
+        pending.y,
+        pending.sizeX,
+        pending.sizeY,
+      );
       const definition = ENHANCED_BUILDING_CATALOG[pending.type];
-      const isObstacleTask = pending.tags?.includes('obstacle') ?? false;
-      const presetRemainingMs = pending.buildEndsAt ? Math.max(0, pending.buildEndsAt - now) : 0;
-      const duration = isObstacleTask ? 30000 : presetRemainingMs > 0 ? presetRemainingMs : definition.constructionMs;
+      const presetRemainingMs = pending.buildEndsAt
+        ? Math.max(0, pending.buildEndsAt - now)
+        : 0;
+      const duration = isObstacleTask
+        ? 30000
+        : presetRemainingMs > 0
+          ? presetRemainingMs
+          : definition.constructionMs;
       current.engine.updateBuilding(pending.id, (building) => ({
         ...building,
-        status: 'UNDER_CONSTRUCTION',
+        status: "UNDER_CONSTRUCTION",
         assignedWorkerId: worker.id,
         buildStartedAt: now,
         buildEndsAt: now + duration,
       }));
-      worker.path = path.slice(1);
-      worker.state = 'MOVING_TO_TASK';
-      worker.taskType = isObstacleTask ? 'CLEAR_OBSTACLE' : 'BUILD';
+      worker.path = bestPath.length > 1 ? bestPath.slice(1) : [];
+      worker.state = "MOVING_TO_TASK";
+      worker.taskType = isObstacleTask ? "CLEAR_OBSTACLE" : "BUILD";
       worker.assignedBuildingId = pending.id;
-      worker.taskTargetX = destinationCell?.x ?? worker.x;
-      worker.taskTargetY = destinationCell?.y ?? worker.y;
+      worker.taskTargetX = workPosition.x;
+      worker.taskTargetY = workPosition.y;
       worker.taskEndsAt = now + duration;
       updatedBuildingIds.add(pending.id);
     }
 
-    const workerStateAfter = nextWorkers.map((worker) => `${worker.state}|${worker.x.toFixed(3)}|${worker.y.toFixed(3)}|${worker.path.length}`).join(';');
-    const queuedMonstersChanged = nextQueuedMonsters.length !== current.queuedMonsters.length;
+    const workerStateAfter = nextWorkers
+      .map(
+        (worker) =>
+          `${worker.state}|${worker.x.toFixed(3)}|${worker.y.toFixed(3)}|${worker.path.length}`,
+      )
+      .join(";");
+    const queuedMonstersChanged =
+      nextQueuedMonsters.length !== current.queuedMonsters.length;
     const workersChanged = workerStateAfter !== workerStateBefore;
     const buildingsChanged = updatedBuildingIds.size > 0;
 
     set({
       workers: workersChanged ? nextWorkers : current.workers,
-      queuedMonsters: queuedMonstersChanged ? nextQueuedMonsters : current.queuedMonsters,
+      queuedMonsters: queuedMonstersChanged
+        ? nextQueuedMonsters
+        : current.queuedMonsters,
       shiny: nextShiny,
       lastConstructionTick: now,
     });
@@ -298,9 +467,12 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
     const now = Date.now();
 
     for (const projectile of current.projectiles) {
-      const nextProgress = projectile.progress + deltaSeconds * projectile.speed;
+      const nextProgress =
+        projectile.progress + deltaSeconds * projectile.speed;
       if (nextProgress >= 1) {
-        const targetEnemy = current.enemies.find((enemy) => enemy.id === projectile.targetEnemyId);
+        const targetEnemy = current.enemies.find(
+          (enemy) => enemy.id === projectile.targetEnemyId,
+        );
         const impactX = targetEnemy?.x ?? projectile.targetSnapshotX;
         const impactY = targetEnemy?.y ?? projectile.targetSnapshotY;
         nextImpacts.push({
@@ -325,7 +497,9 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
               };
             });
           } else {
-            const targetEnemyIndex = nextEnemies.findIndex((enemy) => enemy.id === projectile.targetEnemyId);
+            const targetEnemyIndex = nextEnemies.findIndex(
+              (enemy) => enemy.id === projectile.targetEnemyId,
+            );
             if (targetEnemyIndex !== -1) {
               nextEnemies[targetEnemyIndex] = {
                 ...nextEnemies[targetEnemyIndex],

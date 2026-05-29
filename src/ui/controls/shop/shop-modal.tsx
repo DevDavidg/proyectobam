@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   getBuildingCapForTownHallLevel,
   getBuildingCount,
@@ -12,6 +12,7 @@ import { useGameStore } from '../../../state/game-store';
 import { MAX_WORKERS, getWorkerShinyCost } from '../../../state/game-store/helpers';
 import { ShopBuildingPreview } from './shop-building-preview';
 import { ShopItemCard } from './shop-item-card';
+import { ShopPreviewCanvas } from './shop-preview-canvas';
 import { ShopUpgradePreviewStrip } from './shop-upgrade-preview-strip';
 import { getShopTechnicalName } from './shop-technical-names';
 
@@ -62,6 +63,7 @@ export const ShopModal = () => {
 
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedShopItemType, setSelectedShopItemType] = useState<BuildableType | null>(null);
+  const previewSurfaceRef = useRef<HTMLDivElement>(null);
 
   const state = engine.getState();
   const townHall = state.buildings.find((building) => building.type === BUILDING_TYPES.TOWN_HALL);
@@ -171,7 +173,7 @@ export const ShopModal = () => {
           ))}
         </div>
 
-        <div className="relative mx-4 mb-3 min-h-0 flex-1">
+        <div ref={previewSurfaceRef} className="relative mx-4 mb-3 flex min-h-0 flex-1 flex-col">
           <button
             type="button"
             aria-label="Pagina anterior"
@@ -183,7 +185,7 @@ export const ShopModal = () => {
             <span aria-hidden>‹</span>
           </button>
 
-          <div className="bym-shop-catalog mx-12 h-full overflow-hidden p-3">
+          <div className="bym-shop-catalog relative mx-12 h-full overflow-hidden p-3">
             <div className="grid h-full grid-cols-5 grid-rows-2 gap-2">
               {pagedCatalog.map((definition) => {
                 const buildableType = definition.type as BuildableType;
@@ -200,7 +202,7 @@ export const ShopModal = () => {
                     isDisabled={isDisabled}
                     onSelect={() => handleSelectItem(buildableType)}
                     previewSlot={
-                      <ShopBuildingPreview type={definition.type} className="h-[88px] w-full bg-white" />
+                      <ShopBuildingPreview type={buildableType} className="h-[88px] w-full bg-white" />
                     }
                   />
                 );
@@ -218,18 +220,20 @@ export const ShopModal = () => {
           >
             <span aria-hidden>›</span>
           </button>
-        </div>
 
-        {selectedShopItemType ? (
-          <>
-            <ShopUpgradePreviewStrip type={selectedShopItemType} buildings={state.buildings} />
-            {canBuildItem(selectedShopItemType) ? (
-              <p className="mx-4 -mt-1 mb-2 px-1 text-center font-mono text-[10px] font-semibold text-[#5c4a2d]">
-                Clic de nuevo en la tarjeta para colocar en el mapa
-              </p>
-            ) : null}
-          </>
-        ) : null}
+          {selectedShopItemType ? (
+            <>
+              <ShopUpgradePreviewStrip type={selectedShopItemType} buildings={state.buildings} />
+              {canBuildItem(selectedShopItemType) ? (
+                <p className="-mt-1 mb-2 px-1 text-center font-mono text-[10px] font-semibold text-[#5c4a2d]">
+                  Clic de nuevo en la tarjeta para colocar en el mapa
+                </p>
+              ) : null}
+            </>
+          ) : null}
+
+          <ShopPreviewCanvas containerRef={previewSurfaceRef} />
+        </div>
 
         <div className="mx-4 mb-4 flex shrink-0 flex-wrap items-center gap-2 border-t border-[#8b6914]/35 pt-3">
           <button

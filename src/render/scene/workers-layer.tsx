@@ -44,10 +44,14 @@ type TransitionState = {
   startedAt: number;
 };
 
+const SPEECH_DURATION_MS = 2200;
+const MAX_SPEECH_LINES_PER_TASK = 2;
+const AMBIENT_SPEECH_INTERVAL_MS = 14000;
+
 const WORKER_LINES = {
-  walking: ['Off to work', "I'm on it!", 'On my way', 'In a jiffy'],
-  working: ['All in a days work', 'Job done!', 'Lookin good!', 'No problem!'],
-  idle: ['All done boss', 'Perfect!', 'Hope you like it', 'That was easy'],
+  walking: ['¡Voy!', '¡Ya voy!', 'En camino', '¡A trabajar!'],
+  working: ['¡Toma!', '¡Aquí vamos!', '¡Trabajando!', '¡Casi listo!'],
+  idle: ['¡Listo jefe!', '¡Terminado!', '¡Hecho!', '¡Fácil!'],
 } as const;
 
 let workerAudioContext: AudioContext | null = null;
@@ -107,13 +111,11 @@ const normalizeAngle = (angle: number): number => {
 
 const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshProps) => {
   const rootRef = useRef<Group>(null);
-  const torsoRef = useRef<Group>(null);
-  const headRef = useRef<Group>(null);
-  const leftArmRef = useRef<Group>(null);
-  const rightArmRef = useRef<Group>(null);
-  const leftLegRef = useRef<Group>(null);
-  const rightLegRef = useRef<Group>(null);
-  const toolRef = useRef<Mesh>(null);
+  const bodyRef = useRef<Group>(null);
+  const leftEyeRef = useRef<Group>(null);
+  const rightEyeRef = useRef<Group>(null);
+  const mouthRef = useRef<Mesh>(null);
+  const hammerRef = useRef<Group>(null);
   const workParticleRefs = useRef<Array<Mesh | null>>([]);
   const animationOffset = useMemo(() => Math.random() * Math.PI * 2, []);
   const previousStateRef = useRef(worker.state);
@@ -125,7 +127,8 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
   const walkWeightRef = useRef<number>(0);
   const workWeightRef = useRef<number>(0);
   const renderSpeedRef = useRef<number>(0);
-  const nextAmbientLineAtRef = useRef<number>(Date.now() + 3500 + Math.random() * 3500);
+  const nextAmbientLineAtRef = useRef<number>(Date.now() + 8000 + Math.random() * 4000);
+  const speechCountRef = useRef<number>(0);
   const lastSfxAtRef = useRef<number>(0);
   const [speechLine, setSpeechLine] = useState<string>('');
   const [speechExpiresAt, setSpeechExpiresAt] = useState<number>(0);
@@ -140,17 +143,28 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
     : [worldX, 0, worldZ];
   const desiredHeading = nextWaypoint
     ? Math.atan2(nextWaypoint.x - worker.x, nextWaypoint.y - worker.y)
-    : targetBuilding
-      ? Math.atan2(targetBuilding.x + targetBuilding.sizeX / 2 - worker.x, targetBuilding.y + targetBuilding.sizeY / 2 - worker.y)
-      : 0;
+    : isWorking && typeof worker.taskTargetX === 'number'
+      ? Math.atan2(
+          (targetBuilding ? targetBuilding.x + targetBuilding.sizeX / 2 : worker.taskTargetX) - worker.x,
+          (targetBuilding ? targetBuilding.y + targetBuilding.sizeY / 2 : worker.taskTargetY ?? worker.y) - worker.y,
+        )
+      : targetBuilding
+        ? Math.atan2(targetBuilding.x + targetBuilding.sizeX / 2 - worker.x, targetBuilding.y + targetBuilding.sizeY / 2 - worker.y)
+        : 0;
+
+  const clearSpeech = (): void => {
+    setSpeechLine('');
+    setSpeechExpiresAt(0);
+  };
 
   const pushSpeech = (line: string, state: Worker['state']): void => {
-    if (!line) {
+    if (!line || speechCountRef.current >= MAX_SPEECH_LINES_PER_TASK) {
       return;
     }
     const now = Date.now();
     setSpeechLine(line);
-    setSpeechExpiresAt(now + 1800);
+    setSpeechExpiresAt(now + SPEECH_DURATION_MS);
+    speechCountRef.current += 1;
     if (now - lastSfxAtRef.current < 260) {
       return;
     }
@@ -165,15 +179,18 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
     }
     if (previous === 'IDLE' && worker.state === 'MOVING_TO_TASK') {
       transitionRef.current = { type: 'emerging', startedAt: performance.now() };
+      speechCountRef.current = 0;
+      nextAmbientLineAtRef.current = Date.now() + 8000;
     } else if (worker.state === 'IDLE' && previous !== 'IDLE') {
       transitionRef.current = { type: 'entering', startedAt: performance.now() };
     }
-    if (worker.state === 'MOVING_TO_TASK' || worker.state === 'RETURNING') {
+    if (worker.state === 'RETURNING' || worker.state === 'IDLE') {
+      clearSpeech();
+      speechCountRef.current = 0;
+    } else if (worker.state === 'MOVING_TO_TASK') {
       pushSpeech(pickRandomLine(WORKER_LINES.walking), worker.state);
     } else if (worker.state === 'WORKING') {
       pushSpeech(pickRandomLine(WORKER_LINES.working), worker.state);
-    } else if (worker.state === 'IDLE') {
-      pushSpeech(pickRandomLine(WORKER_LINES.idle), worker.state);
     }
     previousStateRef.current = worker.state;
   }, [worker.state]);
@@ -354,40 +371,42 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
     rootRef.current.rotation.y = nextHeading;
 
     if (
-      !torsoRef.current ||
-      !leftArmRef.current ||
-      !rightArmRef.current ||
-      !leftLegRef.current ||
-      !rightLegRef.current ||
-      !toolRef.current
+      !bodyRef.current ||
+      !leftEyeRef.current ||
+      !rightEyeRef.current ||
+      !mouthRef.current ||
+      !hammerRef.current
     ) {
       return;
     }
 
     const nowMs = Date.now();
     if (nowMs > speechExpiresAt && speechLine) {
-      setSpeechLine('');
+      clearSpeech();
     }
-    if (nowMs >= nextAmbientLineAtRef.current && isWorking) {
+    if (
+      isWorking &&
+      !speechLine &&
+      speechCountRef.current < MAX_SPEECH_LINES_PER_TASK &&
+      nowMs >= nextAmbientLineAtRef.current
+    ) {
       pushSpeech(pickRandomLine(WORKER_LINES.working), worker.state);
-      nextAmbientLineAtRef.current = nowMs + 6000 + Math.random() * 5000;
+      nextAmbientLineAtRef.current = nowMs + AMBIENT_SPEECH_INTERVAL_MS;
     }
 
     const ambientTime = state.clock.elapsedTime + animationOffset;
     const animRefs: WorkerAnimRefs = {
-      torso: torsoRef.current,
-      leftArm: leftArmRef.current,
-      rightArm: rightArmRef.current,
-      leftLeg: leftLegRef.current,
-      rightLeg: rightLegRef.current,
-      tool: toolRef.current,
-      head: headRef.current,
+      body: bodyRef.current,
+      leftEye: leftEyeRef.current,
+      rightEye: rightEyeRef.current,
+      mouth: mouthRef.current,
+      hammer: hammerRef.current,
     };
 
     if (workWeight > 0.01) {
       applyWorkingPose(
         animRefs,
-        { time: ambientTime, weight: workWeight },
+        { time: ambientTime, weight: workWeight, taskType: worker.taskType },
         workParticleRefs.current,
       );
     } else {
@@ -404,91 +423,78 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
 
   return (
     <group ref={rootRef} position={[worldX, 0, worldZ]} visible={worker.state !== 'IDLE'}>
-      <group ref={torsoRef} position={[0, 0.6, 0]}>
-        <mesh castShadow receiveShadow position={[0, 0.25, 0]}>
-          <capsuleGeometry args={[0.17, 0.25, 6, 12]} />
-          <meshStandardMaterial color="#3b82f6" roughness={0.45} metalness={0.08} />
+      <group ref={bodyRef} position={[0, 0.34, 0]}>
+        <mesh castShadow receiveShadow>
+          <sphereGeometry args={[0.28, 24, 24]} />
+          <meshStandardMaterial color="#3b82f6" roughness={0.38} metalness={0.06} />
         </mesh>
-        <group ref={headRef} position={[0, 0.58, 0]}>
+
+        <group ref={leftEyeRef} position={[-0.12, 0.1, 0.22]}>
           <mesh castShadow receiveShadow>
-            <sphereGeometry args={[0.17, 16, 16]} />
-            <meshStandardMaterial color="#60a5fa" roughness={0.4} metalness={0.05} />
+            <sphereGeometry args={[0.11, 14, 14]} />
+            <meshStandardMaterial color="#f8fafc" roughness={0.25} />
           </mesh>
-          <mesh castShadow receiveShadow position={[0.06, 0.02, 0.15]}>
-            <sphereGeometry args={[0.03, 10, 10]} />
-            <meshStandardMaterial color="#e5e7eb" emissive="#1d4ed8" emissiveIntensity={0.5} />
+          <mesh castShadow receiveShadow position={[0, 0, 0.07]}>
+            <sphereGeometry args={[0.055, 10, 10]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.2} />
           </mesh>
-          <mesh castShadow receiveShadow position={[-0.06, 0.02, 0.15]}>
-            <sphereGeometry args={[0.03, 10, 10]} />
-            <meshStandardMaterial color="#e5e7eb" emissive="#1d4ed8" emissiveIntensity={0.5} />
+          <mesh position={[0.025, 0.025, 0.1]}>
+            <sphereGeometry args={[0.014, 6, 6]} />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.8} />
           </mesh>
         </group>
-        <mesh castShadow receiveShadow position={[0, 0.25, -0.14]}>
-          <boxGeometry args={[0.2, 0.2, 0.1]} />
-          <meshStandardMaterial color="#1e3a8a" roughness={0.7} />
+
+        <group ref={rightEyeRef} position={[0.12, 0.1, 0.22]}>
+          <mesh castShadow receiveShadow>
+            <sphereGeometry args={[0.11, 14, 14]} />
+            <meshStandardMaterial color="#f8fafc" roughness={0.25} />
+          </mesh>
+          <mesh castShadow receiveShadow position={[0, 0, 0.07]}>
+            <sphereGeometry args={[0.055, 10, 10]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.2} />
+          </mesh>
+          <mesh position={[0.025, 0.025, 0.1]}>
+            <sphereGeometry args={[0.014, 6, 6]} />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.8} />
+          </mesh>
+        </group>
+
+        <mesh ref={mouthRef} castShadow position={[0, -0.05, 0.24]}>
+          <boxGeometry args={[0.14, 0.05, 0.03]} />
+          <meshStandardMaterial color="#1e3a8a" roughness={0.5} />
         </mesh>
+
+        <group ref={hammerRef} position={[0.18, -0.04, 0.12]}>
+          <mesh castShadow receiveShadow position={[0, -0.14, 0]}>
+            <boxGeometry args={[0.05, 0.28, 0.05]} />
+            <meshStandardMaterial color="#8b5a2b" roughness={0.72} />
+          </mesh>
+          <mesh castShadow receiveShadow position={[0, -0.3, 0]}>
+            <boxGeometry args={[0.16, 0.07, 0.1]} />
+            <meshStandardMaterial color="#9ca3af" metalness={0.55} roughness={0.3} />
+          </mesh>
+        </group>
+
         {isReturning ? (
-          <group position={[0, 0.85, -0.02]}>
-            <mesh castShadow receiveShadow rotation={[0.4, 0.18, 0.12]}>
-              <boxGeometry args={[0.32, 0.18, 0.22]} />
+          <group position={[0, 0.2, -0.08]}>
+            <mesh castShadow receiveShadow rotation={[0.3, 0.2, 0.1]}>
+              <boxGeometry args={[0.28, 0.16, 0.2]} />
               <meshStandardMaterial color="#8a5a2c" roughness={0.85} />
             </mesh>
-            <mesh castShadow receiveShadow position={[0, 0.13, 0]} rotation={[0.4, 0.18, 0.12]}>
-              <boxGeometry args={[0.36, 0.04, 0.26]} />
+            <mesh castShadow receiveShadow position={[0, 0.11, 0]} rotation={[0.3, 0.2, 0.1]}>
+              <boxGeometry args={[0.32, 0.04, 0.24]} />
               <meshStandardMaterial color="#5b3a1a" roughness={0.85} />
-            </mesh>
-            <mesh castShadow receiveShadow position={[-0.06, 0.18, 0.08]} rotation={[0.6, -0.2, 0.5]}>
-              <cylinderGeometry args={[0.018, 0.018, 0.34, 6]} />
-              <meshStandardMaterial color="#caa15a" roughness={0.5} />
-            </mesh>
-            <mesh castShadow receiveShadow position={[0.08, 0.2, -0.04]} rotation={[0.3, 0.4, -0.2]}>
-              <cylinderGeometry args={[0.018, 0.018, 0.3, 6]} />
-              <meshStandardMaterial color="#a3804a" roughness={0.55} />
             </mesh>
           </group>
         ) : null}
       </group>
 
-      <group ref={leftArmRef} position={[-0.2, 0.78, 0]}>
-        <mesh castShadow receiveShadow position={[0, -0.2, 0]}>
-          <capsuleGeometry args={[0.06, 0.22, 4, 8]} />
-          <meshStandardMaterial color="#1d4ed8" roughness={0.45} />
-        </mesh>
-      </group>
-      <group ref={rightArmRef} position={[0.2, 0.78, 0]}>
-        <mesh castShadow receiveShadow position={[0, -0.2, 0]}>
-          <capsuleGeometry args={[0.06, 0.22, 4, 8]} />
-          <meshStandardMaterial color="#1d4ed8" roughness={0.45} />
-        </mesh>
-        <mesh ref={toolRef} castShadow receiveShadow position={[0.03, -0.4, 0.08]}>
-          <boxGeometry args={[0.06, 0.32, 0.06]} />
-          <meshStandardMaterial color="#8b5a2b" roughness={0.72} />
-        </mesh>
-        <mesh castShadow receiveShadow position={[0.03, -0.57, 0.08]}>
-          <boxGeometry args={[0.18, 0.08, 0.14]} />
-          <meshStandardMaterial color="#9ca3af" metalness={0.55} roughness={0.3} />
-        </mesh>
-      </group>
-
-      <group ref={leftLegRef} position={[-0.09, 0.34, 0]}>
-        <mesh castShadow receiveShadow position={[0, -0.2, 0]}>
-          <capsuleGeometry args={[0.07, 0.26, 4, 8]} />
-          <meshStandardMaterial color="#1e40af" roughness={0.5} />
-        </mesh>
-      </group>
-      <group ref={rightLegRef} position={[0.09, 0.34, 0]}>
-        <mesh castShadow receiveShadow position={[0, -0.2, 0]}>
-          <capsuleGeometry args={[0.07, 0.26, 4, 8]} />
-          <meshStandardMaterial color="#1e40af" roughness={0.5} />
-        </mesh>
-      </group>
-
       <mesh receiveShadow position={[0, 0.02, 0]}>
-        <circleGeometry args={[0.25, 16]} />
+        <circleGeometry args={[0.22, 16]} />
         <meshBasicMaterial color="#1f2937" transparent opacity={0.22} />
       </mesh>
       {speechLine ? (
-        <Html position={[0, 1.28, 0]} center>
+        <Html position={[0, 0.95, 0]} center>
           <div className="pointer-events-none rounded-md border border-amber-300/70 bg-amber-50/95 px-2 py-1 text-[10px] font-bold text-amber-900 shadow-md">
             {speechLine}
           </div>
@@ -500,7 +506,7 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
           <meshBasicMaterial color="#f59e0b" transparent opacity={0.5} />
         </mesh>
       ) : null}
-      <group position={[0, 0.08, 0]}>
+      <group position={[0, 0.08, 0.34]}>
         {Array.from({ length: 6 }).map((_, index) => (
           <mesh
             key={`${worker.id}-dust-${index}`}

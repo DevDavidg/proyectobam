@@ -1,7 +1,7 @@
 import { Html } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { Vector3 } from "three";
+import { useShallow } from "zustand/react/shallow";
 import { useGameStore } from "../../state/game-store";
 import {
   CELL_SIZE,
@@ -9,34 +9,15 @@ import {
   gridPointToWorld,
 } from "../../utils/coordinates";
 
-const EFFECTS_STEP_SECONDS = 1 / 30;
-const MAX_EFFECT_STEPS_PER_FRAME = 3;
-
 export const CombatJuiceLayer = () => {
-  const enemies = useGameStore((state) => state.enemies);
-  const projectiles = useGameStore((state) => state.projectiles);
-  const impacts = useGameStore((state) => state.impacts);
-  const floatingTexts = useGameStore((state) => state.floatingTexts);
-  const tickProjectiles = useGameStore((state) => state.tickProjectiles);
-  const tickEffects = useGameStore((state) => state.tickEffects);
-  const effectsAccumulatorRef = useRef(0);
-
-  useFrame((_, delta) => {
-    effectsAccumulatorRef.current += delta;
-    let steps = 0;
-    while (
-      effectsAccumulatorRef.current >= EFFECTS_STEP_SECONDS &&
-      steps < MAX_EFFECT_STEPS_PER_FRAME
-    ) {
-      tickProjectiles(EFFECTS_STEP_SECONDS);
-      tickEffects(EFFECTS_STEP_SECONDS);
-      effectsAccumulatorRef.current -= EFFECTS_STEP_SECONDS;
-      steps += 1;
-    }
-    if (steps === MAX_EFFECT_STEPS_PER_FRAME) {
-      effectsAccumulatorRef.current = 0;
-    }
-  });
+  const { enemies, projectiles, impacts, floatingTexts } = useGameStore(
+    useShallow((state) => ({
+      enemies: state.enemies,
+      projectiles: state.projectiles,
+      impacts: state.impacts,
+      floatingTexts: state.floatingTexts,
+    })),
+  );
 
   const reusableStart = useMemo(() => new Vector3(), []);
   const reusableEnd = useMemo(() => new Vector3(), []);

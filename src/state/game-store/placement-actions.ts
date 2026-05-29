@@ -1,4 +1,5 @@
 import { isBuildableType } from "../../core/constants/build-rules";
+import { getRaidWaveConfig } from "../../core/constants/raid-wave";
 import { ENHANCED_BUILDING_CATALOG } from "../../core/constants/catalog";
 import {
   getCannonTowerLevelSpec,
@@ -46,6 +47,7 @@ import {
   type MonsterType,
 } from "../../core/constants/monster-catalog";
 import { BUILDING_TYPES, type Building } from "../../core/types/building";
+import { GRID_SIZE } from "../../utils/coordinates";
 import { runPreviewUpdateSystem } from "../../ecs/systems/preview-update-system";
 import { clearPersistedGameData, savePersistedGameData } from "../persistence";
 import { isUnrestrictedMode, isWithinUnlockedArea, spendResources } from "./helpers";
@@ -299,7 +301,7 @@ export const createPlacementActions = (
       .getState()
       .buildings.find((building) => building.type === BUILDING_TYPES.TOWN_HALL);
     const townHallLevel = townHall?.level ?? 1;
-    const wavePoints = townHallLevel * 6 + Math.floor(Math.random() * 5);
+    const { wavePoints, minMobs, spawnStaggerMs } = getRaidWaveConfig(townHallLevel);
     const spawns: PendingRaidSpawn[] = [];
     let points = wavePoints;
     let nextEnemyId = current.enemyCount;
@@ -320,20 +322,40 @@ export const createPlacementActions = (
       borderCandidates.push({ x, y });
     });
 
-    while (points > 0 && borderCandidates.length) {
-      const heavy = points >= 5 && Math.random() > 0.45;
+    const spawnCandidates =
+      borderCandidates.length > 0
+        ? borderCandidates
+        : Array.from({ length: GRID_SIZE * 2 + (GRID_SIZE - 2) * 2 }, (_, index) => {
+            if (index < GRID_SIZE) {
+              return { x: index, y: 0 };
+            }
+            if (index < GRID_SIZE * 2) {
+              return { x: index - GRID_SIZE, y: GRID_SIZE - 1 };
+            }
+            if (index < GRID_SIZE * 2 + (GRID_SIZE - 2)) {
+              const offset = index - GRID_SIZE * 2;
+              return { x: 0, y: offset + 1 };
+            }
+            const offset = index - (GRID_SIZE * 2 + (GRID_SIZE - 2));
+            return { x: GRID_SIZE - 1, y: offset + 1 };
+          });
+
+    const mutableCandidates = [...spawnCandidates];
+
+    while ((points > 0 || spawns.length < minMobs) && mutableCandidates.length) {
+      const heavy = points >= 5 && Math.random() > 0.4;
       const monsterType = heavy ? "Rambot" : "Pokey";
       const monsterLevel = current.monsterLevels[monsterType] || 1;
       const spec = getMonsterLevelSpec(monsterType, monsterLevel);
       const cost = heavy ? 5 : 1;
-      points -= cost;
-      const candidateIndex = Math.floor(
-        Math.random() * borderCandidates.length,
-      );
-      const spawnPoint = borderCandidates.splice(candidateIndex, 1)[0];
+      if (points > 0) {
+        points -= cost;
+      }
+      const candidateIndex = Math.floor(Math.random() * mutableCandidates.length);
+      const spawnPoint = mutableCandidates.splice(candidateIndex, 1)[0];
       nextEnemyId += 1;
       spawns.push({
-        spawnAt: now + spawns.length * 350,
+        spawnAt: now + spawns.length * spawnStaggerMs,
         enemy: {
           id: `raid-${monsterType.toLowerCase()}-${nextEnemyId}`,
           x: spawnPoint.x,
@@ -347,6 +369,7 @@ export const createPlacementActions = (
     }
 
     set({
+      shopOpen: false,
       battleMode: true,
       placementEnabled: false,
       battleHasStarted: spawns.length > 0,
@@ -354,6 +377,8 @@ export const createPlacementActions = (
       enemyCount: nextEnemyId,
       battleResult: null,
     });
+    current.tickCombat();
+    current.refreshEcs();
   },
   closeBattleResult: () => {
     set({ battleResult: null });
@@ -549,7 +574,11 @@ export const createPlacementActions = (
     });
   },
   closeBuildingContextMenu: () => {
-    set({ selectedBuildingId: null, buildingContextMenuPosition: null });
+    set({
+      selectedBuildingId: null,
+      buildingContextMenuPosition: null,
+      buildingInfoPanelOpen: false,
+    });
   },
   setHoveredBuildingId: (buildingId) => {
     set({ hoveredBuildingId: buildingId });

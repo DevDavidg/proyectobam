@@ -6,6 +6,7 @@ type ActionButtonsProps = {
   canFortifyMore: boolean;
   canMoveBuilding: boolean;
   setDetailMode: (mode: DetailMode) => void;
+  onOpenInfo: () => void;
   handleMoveBuilding: () => void;
 };
 
@@ -15,6 +16,7 @@ export const ActionButtons = ({
   canFortifyMore,
   canMoveBuilding,
   setDetailMode,
+  onOpenInfo,
   handleMoveBuilding,
 }: ActionButtonsProps) => {
   const handleMoveKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>): void => {
@@ -25,7 +27,17 @@ export const ActionButtons = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-1">
+    <div className="space-y-1">
+      <button
+        type="button"
+        tabIndex={0}
+        aria-label="Ver informacion del edificio"
+        className="ui-button w-full border-sky-600 bg-sky-800/80 px-2 py-1 text-sky-50"
+        onClick={onOpenInfo}
+      >
+        Info
+      </button>
+      <div className="grid grid-cols-2 gap-1">
       <button
         type="button"
         className={`ui-button px-2 py-1 ${
@@ -66,6 +78,7 @@ export const ActionButtons = ({
       >
         Mover
       </button>
+      </div>
     </div>
   );
 };

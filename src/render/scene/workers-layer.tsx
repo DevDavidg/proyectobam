@@ -49,9 +49,9 @@ const MAX_SPEECH_LINES_PER_TASK = 2;
 const AMBIENT_SPEECH_INTERVAL_MS = 14000;
 
 const WORKER_LINES = {
-  walking: ['¡Voy!', '¡Ya voy!', 'En camino', '¡A trabajar!'],
-  working: ['¡Toma!', '¡Aquí vamos!', '¡Trabajando!', '¡Casi listo!'],
-  idle: ['¡Listo jefe!', '¡Terminado!', '¡Hecho!', '¡Fácil!'],
+  walking: ['?Voy!', '?Ya voy!', 'En camino', '?A trabajar!'],
+  working: ['?Toma!', '?Aqu? vamos!', '?Trabajando!', '?Casi listo!'],
+  idle: ['?Listo jefe!', '?Terminado!', '?Hecho!', '?F?cil!'],
 } as const;
 
 let workerAudioContext: AudioContext | null = null;
@@ -424,17 +424,17 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
   return (
     <group ref={rootRef} position={[worldX, 0, worldZ]} visible={worker.state !== 'IDLE'}>
       <group ref={bodyRef} position={[0, 0.34, 0]}>
-        <mesh castShadow receiveShadow>
+        <mesh receiveShadow>
           <sphereGeometry args={[0.28, 24, 24]} />
           <meshStandardMaterial color="#3b82f6" roughness={0.38} metalness={0.06} />
         </mesh>
 
         <group ref={leftEyeRef} position={[-0.12, 0.1, 0.22]}>
-          <mesh castShadow receiveShadow>
+          <mesh receiveShadow>
             <sphereGeometry args={[0.11, 14, 14]} />
             <meshStandardMaterial color="#f8fafc" roughness={0.25} />
           </mesh>
-          <mesh castShadow receiveShadow position={[0, 0, 0.07]}>
+          <mesh receiveShadow position={[0, 0, 0.07]}>
             <sphereGeometry args={[0.055, 10, 10]} />
             <meshStandardMaterial color="#0f172a" roughness={0.2} />
           </mesh>
@@ -445,11 +445,11 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
         </group>
 
         <group ref={rightEyeRef} position={[0.12, 0.1, 0.22]}>
-          <mesh castShadow receiveShadow>
+          <mesh receiveShadow>
             <sphereGeometry args={[0.11, 14, 14]} />
             <meshStandardMaterial color="#f8fafc" roughness={0.25} />
           </mesh>
-          <mesh castShadow receiveShadow position={[0, 0, 0.07]}>
+          <mesh receiveShadow position={[0, 0, 0.07]}>
             <sphereGeometry args={[0.055, 10, 10]} />
             <meshStandardMaterial color="#0f172a" roughness={0.2} />
           </mesh>
@@ -459,17 +459,17 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
           </mesh>
         </group>
 
-        <mesh ref={mouthRef} castShadow position={[0, -0.05, 0.24]}>
+        <mesh ref={mouthRef} position={[0, -0.05, 0.24]}>
           <boxGeometry args={[0.14, 0.05, 0.03]} />
           <meshStandardMaterial color="#1e3a8a" roughness={0.5} />
         </mesh>
 
         <group ref={hammerRef} position={[0.18, -0.04, 0.12]}>
-          <mesh castShadow receiveShadow position={[0, -0.14, 0]}>
+          <mesh receiveShadow position={[0, -0.14, 0]}>
             <boxGeometry args={[0.05, 0.28, 0.05]} />
             <meshStandardMaterial color="#8b5a2b" roughness={0.72} />
           </mesh>
-          <mesh castShadow receiveShadow position={[0, -0.3, 0]}>
+          <mesh receiveShadow position={[0, -0.3, 0]}>
             <boxGeometry args={[0.16, 0.07, 0.1]} />
             <meshStandardMaterial color="#9ca3af" metalness={0.55} roughness={0.3} />
           </mesh>
@@ -477,11 +477,11 @@ const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshPro
 
         {isReturning ? (
           <group position={[0, 0.2, -0.08]}>
-            <mesh castShadow receiveShadow rotation={[0.3, 0.2, 0.1]}>
+            <mesh receiveShadow rotation={[0.3, 0.2, 0.1]}>
               <boxGeometry args={[0.28, 0.16, 0.2]} />
               <meshStandardMaterial color="#8a5a2c" roughness={0.85} />
             </mesh>
-            <mesh castShadow receiveShadow position={[0, 0.11, 0]} rotation={[0.3, 0.2, 0.1]}>
+            <mesh receiveShadow position={[0, 0.11, 0]} rotation={[0.3, 0.2, 0.1]}>
               <boxGeometry args={[0.32, 0.04, 0.24]} />
               <meshStandardMaterial color="#5b3a1a" roughness={0.85} />
             </mesh>

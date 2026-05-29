@@ -36,7 +36,11 @@ const mixColors = (colorA: RgbColor, colorB: RgbColor, ratio: number): RgbColor 
   };
 };
 
-const GRASS_BASE = hexToRgb('#5aab1c');
+export const TERRAIN_GRASS_COLOR = '#5aab1c';
+/** Tint applied on the terrain material (matches visible grass in-game). */
+export const TERRAIN_MATERIAL_COLOR = '#9ad94e';
+
+const GRASS_BASE = hexToRgb(TERRAIN_GRASS_COLOR);
 const GRASS_LIGHT = hexToRgb('#84c626');
 const GRASS_SHADE = hexToRgb('#3a780d');
 const GRASS_DRY = hexToRgb('#99bc23');
@@ -276,10 +280,49 @@ const createGridTexture = (): CanvasTexture | null => {
   return texture;
 };
 
-export const Terrain = ({ worldSize, gridOpacity }: TerrainProps) => {
+type TerrainGroundProps = {
+  worldSize: number;
+  gridOpacity: number;
+  /** Multiplier for the grass plane beyond the grid (game default 4.4). */
+  extentMultiplier?: number;
+};
+
+export const TerrainGround = ({
+  worldSize,
+  gridOpacity,
+  extentMultiplier = 4.4,
+}: TerrainGroundProps) => {
   const terrainTexture = useMemo(() => createTerrainTexture(), []);
   const gridTexture = useMemo(() => createGridTexture(), []);
-  const extendedWorldSize = worldSize * 4.4;
+  const extendedWorldSize = worldSize * extentMultiplier;
+
+  return (
+    <group>
+      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.011, 0]}>
+        <planeGeometry args={[extendedWorldSize, extendedWorldSize]} />
+        <meshStandardMaterial
+          map={terrainTexture}
+          color={TERRAIN_MATERIAL_COLOR}
+          roughness={1}
+          metalness={0}
+        />
+      </mesh>
+      {gridTexture ? (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.004, 0]}>
+          <planeGeometry args={[worldSize, worldSize]} />
+          <meshBasicMaterial
+            map={gridTexture}
+            transparent
+            opacity={gridOpacity}
+            depthWrite={false}
+          />
+        </mesh>
+      ) : null}
+    </group>
+  );
+};
+
+export const Terrain = ({ worldSize, gridOpacity }: TerrainProps) => {
   const boundaryProps = useMemo(() => {
     const random = createSeededRandom(7401);
     return Array.from({ length: 34 }).map((_, index) => {
@@ -296,21 +339,7 @@ export const Terrain = ({ worldSize, gridOpacity }: TerrainProps) => {
 
   return (
     <group>
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.011, 0]}>
-        <planeGeometry args={[extendedWorldSize, extendedWorldSize]} />
-        <meshStandardMaterial map={terrainTexture} color="#9ad94e" roughness={1} metalness={0} />
-      </mesh>
-      {gridTexture ? (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.004, 0]}>
-          <planeGeometry args={[worldSize, worldSize]} />
-          <meshBasicMaterial
-            map={gridTexture}
-            transparent
-            opacity={gridOpacity}
-            depthWrite={false}
-          />
-        </mesh>
-      ) : null}
+      <TerrainGround worldSize={worldSize} gridOpacity={gridOpacity} />
       <TerrainBoundary boundaryProps={boundaryProps} />
     </group>
   );

@@ -243,7 +243,6 @@ export const BuildingVisual = ({
         footprintX={footprintX}
         footprintZ={footprintZ}
         hatcheryBusy={hatcheryBusy}
-        createMaterial={createMaterial}
       />
     );
   }

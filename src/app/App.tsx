@@ -5,6 +5,7 @@ import { BattleResultModal } from '../ui/controls/battle-result-modal';
 import { HatcheryModal } from '../ui/controls/hatchery-modal';
 import { HousingDetailsModal } from '../ui/controls/housing-details-modal';
 import { PlacementControls } from '../ui/controls/placement-controls';
+import { BuildingInfoOverlay } from '../ui/controls/building-info-overlay';
 import { ResourceHud } from '../ui/hud/resource-hud';
 
 const GameCanvas = lazy(async () => import('../render/scene/game-canvas').then((module) => ({ default: module.GameCanvas })));
@@ -21,6 +22,8 @@ export const App = () => {
   const landExpansionMode = useGameStore((state) => state.landExpansionMode);
   const movingBuildingId = useGameStore((state) => state.movingBuildingId);
   const shopOpen = useGameStore((state) => state.shopOpen);
+  const buildingInfoPanelOpen = useGameStore((state) => state.buildingInfoPanelOpen);
+  const closeBuildingInfoPanel = useGameStore((state) => state.closeBuildingInfoPanel);
   const cancelPlacementMode = useGameStore((state) => state.cancelPlacementMode);
   const cancelMovingBuilding = useGameStore((state) => state.cancelMovingBuilding);
   const setShopOpen = useGameStore((state) => state.setShopOpen);
@@ -100,6 +103,10 @@ export const App = () => {
         cancelLandExpansionMode();
         return;
       }
+      if (buildingInfoPanelOpen) {
+        closeBuildingInfoPanel();
+        return;
+      }
       if (shopOpen) {
         setShopOpen(false);
       }
@@ -108,7 +115,18 @@ export const App = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [cancelLandExpansionMode, cancelMovingBuilding, cancelPlacementMode, landExpansionMode, movingBuildingId, placementEnabled, setShopOpen, shopOpen]);
+  }, [
+    buildingInfoPanelOpen,
+    cancelLandExpansionMode,
+    cancelMovingBuilding,
+    cancelPlacementMode,
+    closeBuildingInfoPanel,
+    landExpansionMode,
+    movingBuildingId,
+    placementEnabled,
+    setShopOpen,
+    shopOpen,
+  ]);
 
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-stone-900">
@@ -117,6 +135,7 @@ export const App = () => {
       <HatcheryModal />
       <HousingDetailsModal />
       <BattleResultModal />
+      <BuildingInfoOverlay />
       <Suspense fallback={<div className="absolute inset-0 grid place-items-center text-sm text-lime-100/90">Loading scene...</div>}>
         <GameCanvas />
       </Suspense>

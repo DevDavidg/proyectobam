@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
-@import 'tailwindcss' source(none);
+@import url("https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap");
+@import "tailwindcss" source(none);
 @source './**/*.{ts,tsx}';
 
 @layer components {
@@ -11,17 +11,21 @@
     border-image-slice: 28;
     border-image-width: 14px;
     border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23603d1f'/%3E%3Crect x='4' y='4' width='40' height='40' fill='%23764d2a'/%3E%3Crect x='8' y='8' width='32' height='32' fill='%238b5e33'/%3E%3C/svg%3E");
-    box-shadow: inset 0 0 0 2px rgba(17, 24, 39, 0.35), 0 18px 40px rgba(0, 0, 0, 0.45);
+    box-shadow:
+      inset 0 0 0 2px rgba(17, 24, 39, 0.35),
+      0 18px 40px rgba(0, 0, 0, 0.45);
   }
 
   .ui-panel {
     @apply rounded-xl border border-amber-800 bg-stone-900 shadow-2xl;
-    box-shadow: inset 0 0 0 2px rgba(120, 53, 15, 0.55), 0 10px 28px rgba(0, 0, 0, 0.52);
+    box-shadow:
+      inset 0 0 0 2px rgba(120, 53, 15, 0.55),
+      0 10px 28px rgba(0, 0, 0, 0.52);
   }
 
   .ui-title {
     @apply tracking-wide text-amber-100;
-    font-family: 'Luckiest Guy', cursive;
+    font-family: "Luckiest Guy", cursive;
     letter-spacing: 0.06em;
     -webkit-text-stroke: 1.5px #000000;
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
@@ -29,7 +33,9 @@
 
   .ui-button {
     @apply rounded border border-stone-600 bg-stone-700 px-3 py-1.5 text-xs font-semibold text-stone-100 transition;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 0 rgba(0, 0, 0, 0.35);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 2px 0 rgba(0, 0, 0, 0.35);
   }
 
   .ui-button:hover {
@@ -37,7 +43,7 @@
   }
 
   .ui-resource-text {
-    font-family: 'Luckiest Guy', cursive;
+    font-family: "Luckiest Guy", cursive;
     letter-spacing: 0.04em;
     -webkit-text-stroke: 1.8px #000000;
     filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
@@ -45,7 +51,7 @@
 
   /* === Cartoon BYM Overhaul === */
   .bym-cartoon-text {
-    font-family: 'Luckiest Guy', cursive;
+    font-family: "Luckiest Guy", cursive;
     color: #ffffff;
     -webkit-text-stroke: 2px #1e1b18;
     letter-spacing: 0.05em;
@@ -53,7 +59,7 @@
   }
 
   .bym-cartoon-text-sm {
-    font-family: 'Luckiest Guy', cursive;
+    font-family: "Luckiest Guy", cursive;
     color: #ffffff;
     -webkit-text-stroke: 1px #1e1b18;
     letter-spacing: 0.04em;
@@ -61,14 +67,15 @@
   }
 
   .bym-cartoon-text-dark {
-    font-family: 'Luckiest Guy', cursive;
+    font-family: "Luckiest Guy", cursive;
     color: #1e1b18;
     letter-spacing: 0.04em;
     text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.35);
   }
 
   .bym-wood-frame {
-    background: repeating-linear-gradient(
+    background:
+      repeating-linear-gradient(
         90deg,
         rgba(0, 0, 0, 0) 0,
         rgba(0, 0, 0, 0) 6px,
@@ -84,7 +91,9 @@
     border-image-outset: 0;
     border-image-repeat: round;
     border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23311e0e'/%3E%3Crect x='2' y='2' width='60' height='60' fill='%235c391c'/%3E%3Crect x='5' y='5' width='54' height='54' fill='%237a4d27'/%3E%3Crect x='9' y='9' width='46' height='46' fill='%23a06a3a'/%3E%3Cpath d='M0 0L32 32 L0 64Z' fill='%23472815' opacity='0.55'/%3E%3Cpath d='M64 0L32 32 L64 64Z' fill='%23472815' opacity='0.55'/%3E%3Ccircle cx='10' cy='10' r='3' fill='%23d8b67a'/%3E%3Ccircle cx='54' cy='10' r='3' fill='%23d8b67a'/%3E%3Ccircle cx='10' cy='54' r='3' fill='%23d8b67a'/%3E%3Ccircle cx='54' cy='54' r='3' fill='%23d8b67a'/%3E%3C/svg%3E");
-    box-shadow: inset 0 0 0 3px rgba(26, 14, 5, 0.65), 0 14px 32px rgba(0, 0, 0, 0.55);
+    box-shadow:
+      inset 0 0 0 3px rgba(26, 14, 5, 0.65),
+      0 14px 32px rgba(0, 0, 0, 0.55);
   }
 
   .bym-card-wood {
@@ -97,7 +106,10 @@
     border-image-width: 8px;
     border-image-repeat: round;
     border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%232f1a09'/%3E%3Crect x='2' y='2' width='28' height='28' fill='%23533119'/%3E%3Crect x='5' y='5' width='22' height='22' fill='%23804b22'/%3E%3Ccircle cx='6' cy='6' r='2' fill='%23e8c884'/%3E%3Ccircle cx='26' cy='6' r='2' fill='%23e8c884'/%3E%3Ccircle cx='6' cy='26' r='2' fill='%23e8c884'/%3E%3Ccircle cx='26' cy='26' r='2' fill='%23e8c884'/%3E%3C/svg%3E");
-    box-shadow: inset 0 2px 0 rgba(255, 220, 180, 0.18), inset 0 -3px 0 rgba(40, 22, 8, 0.45), 0 6px 18px rgba(0, 0, 0, 0.45);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 220, 180, 0.18),
+      inset 0 -3px 0 rgba(40, 22, 8, 0.45),
+      0 6px 18px rgba(0, 0, 0, 0.45);
   }
 
   .bym-parchment-card {
@@ -109,12 +121,14 @@
     border-image-width: 7px;
     border-image-repeat: round;
     border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Crect width='28' height='28' fill='%234a2f15'/%3E%3Crect x='2' y='2' width='24' height='24' fill='%23a06a35'/%3E%3Crect x='5' y='5' width='18' height='18' fill='%23eed4a0'/%3E%3C/svg%3E");
-    box-shadow: inset 0 0 0 2px rgba(70, 40, 15, 0.45), 0 4px 14px rgba(0, 0, 0, 0.35);
+    box-shadow:
+      inset 0 0 0 2px rgba(70, 40, 15, 0.45),
+      0 4px 14px rgba(0, 0, 0, 0.35);
     color: #3b2615;
   }
 
   .bym-button-cartoon {
-    font-family: 'Luckiest Guy', cursive;
+    font-family: "Luckiest Guy", cursive;
     letter-spacing: 0.05em;
     position: relative;
     display: inline-flex;
@@ -127,8 +141,14 @@
     -webkit-text-stroke: 1px #1e1b18;
     text-shadow: 1px 2px 0 rgba(0, 0, 0, 0.55);
     background: linear-gradient(180deg, #58c14b 0%, #2f7d28 100%);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), inset 0 -3px 0 rgba(0, 0, 0, 0.45), 0 4px 0 #1a0f06;
-    transition: transform 80ms ease, box-shadow 80ms ease, filter 120ms ease;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -3px 0 rgba(0, 0, 0, 0.45),
+      0 4px 0 #1a0f06;
+    transition:
+      transform 80ms ease,
+      box-shadow 80ms ease,
+      filter 120ms ease;
   }
 
   .bym-button-cartoon:hover {
@@ -137,7 +157,10 @@
 
   .bym-button-cartoon:active {
     transform: translateY(2px);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), inset 0 -2px 0 rgba(0, 0, 0, 0.45), 0 2px 0 #1a0f06;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.45),
+      0 2px 0 #1a0f06;
   }
 
   .bym-button-cartoon:disabled {
@@ -160,10 +183,17 @@
   }
 
   .bym-resource-chip {
-    background: linear-gradient(180deg, rgba(28, 16, 6, 0.92) 0%, rgba(58, 36, 16, 0.92) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(28, 16, 6, 0.92) 0%,
+      rgba(58, 36, 16, 0.92) 100%
+    );
     border: 3px solid #1e1b18;
     border-radius: 14px;
-    box-shadow: inset 0 2px 0 rgba(255, 220, 160, 0.18), inset 0 -3px 0 rgba(0, 0, 0, 0.55), 0 3px 0 #1a0f06;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 220, 160, 0.18),
+      inset 0 -3px 0 rgba(0, 0, 0, 0.55),
+      0 3px 0 #1a0f06;
   }
 
   .bym-shop-frame {
@@ -176,7 +206,9 @@
     border-image-width: 22px;
     border-image-repeat: round;
     border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%2338220f'/%3E%3Crect x='3' y='3' width='74' height='74' fill='%235a3a1c'/%3E%3Crect x='8' y='8' width='64' height='64' fill='%23f5ead6'/%3E%3Cpath d='M0 0h80v10H0z' fill='%236b4423'/%3E%3Cpath d='M0 70h80v10H0z' fill='%236b4423'/%3E%3Cpath d='M0 0v80h10V0z' fill='%237a4f28'/%3E%3Cpath d='M70 0v80h10V0z' fill='%237a4f28'/%3E%3Cellipse cx='12' cy='12' rx='8' ry='6' fill='%238b5a2b'/%3E%3Cellipse cx='68' cy='12' rx='8' ry='6' fill='%238b5a2b'/%3E%3Cellipse cx='12' cy='68' rx='8' ry='6' fill='%238b5a2b'/%3E%3Cellipse cx='68' cy='68' rx='8' ry='6' fill='%238b5a2b'/%3E%3Cpath d='M6 6 Q12 2 18 6 Q12 10 6 6' fill='none' stroke='%23c9a066' stroke-width='2'/%3E%3Cpath d='M62 6 Q68 2 74 6 Q68 10 62 6' fill='none' stroke='%23c9a066' stroke-width='2'/%3E%3Cpath d='M6 74 Q12 70 18 74 Q12 78 6 74' fill='none' stroke='%23c9a066' stroke-width='2'/%3E%3Cpath d='M62 74 Q68 70 74 74 Q68 78 62 74' fill='none' stroke='%23c9a066' stroke-width='2'/%3E%3C/svg%3E");
-    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35), 0 18px 36px rgba(0, 0, 0, 0.45);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.35),
+      0 18px 36px rgba(0, 0, 0, 0.45);
   }
 
   .bym-shop-close {
@@ -193,8 +225,12 @@
     border-radius: 9999px;
     background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
     color: #ffffff;
-    box-shadow: 0 3px 0 #450a0a, 0 8px 16px rgba(0, 0, 0, 0.35);
-    transition: filter 120ms ease, transform 80ms ease;
+    box-shadow:
+      0 3px 0 #450a0a,
+      0 8px 16px rgba(0, 0, 0, 0.35);
+    transition:
+      filter 120ms ease,
+      transform 80ms ease;
   }
 
   .bym-shop-close:hover {
@@ -210,13 +246,16 @@
     border: 2px solid #1e1b18;
     background: linear-gradient(180deg, #e5e5e5 0%, #c7c7c7 100%);
     padding: 7px 14px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.02em;
     color: #1e1b18;
     text-transform: lowercase;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 2px 0 rgba(0, 0, 0, 0.25);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      0 2px 0 rgba(0, 0, 0, 0.25);
     transition: filter 120ms ease;
   }
 
@@ -226,7 +265,9 @@
 
   .bym-shop-tab--active {
     background: linear-gradient(180deg, #ffe566 0%, #f5c518 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 0 rgba(0, 0, 0, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      0 2px 0 rgba(0, 0, 0, 0.28);
   }
 
   .bym-shop-catalog {
@@ -251,8 +292,12 @@
     font-weight: 700;
     line-height: 1;
     color: #1e1b18;
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), 0 4px 0 rgba(0, 0, 0, 0.28);
-    transition: filter 120ms ease, transform 80ms ease;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.45),
+      0 4px 0 rgba(0, 0, 0, 0.28);
+    transition:
+      filter 120ms ease,
+      transform 80ms ease;
   }
 
   .bym-shop-nav-arrow:hover:not(:disabled) {
@@ -330,7 +375,9 @@
     background: linear-gradient(180deg, #f3f4f6 0%, #d1d5db 100%);
     font-size: 16px;
     line-height: 1;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 0 rgba(0, 0, 0, 0.2);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      0 2px 0 rgba(0, 0, 0, 0.2);
   }
 
   .bym-shop-preview--dimmed {

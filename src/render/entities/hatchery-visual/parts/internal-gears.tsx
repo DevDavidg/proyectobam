@@ -1,33 +1,39 @@
 import type { RefObject } from 'react';
 import { getBoxGeometry } from '../../building-visual/geometry-cache';
+import { INTERNAL_WOOD_BLOCKS } from '../constants';
 import { HATCHERY_PALETTE } from '../palette';
-import { INTERNAL_GEAR_CUBES } from '../constants';
 
-type InternalGearsProps = {
+type InternalWoodBlocksProps = {
   openingY: number;
-  gearsRef: RefObject<import('three').Group | null>;
+  blocksRef: RefObject<import('three').Group | null>;
 };
 
-export const InternalGears = ({ openingY, gearsRef }: InternalGearsProps) => (
-  <group ref={gearsRef} position={[0, openingY + 0.03, 0]}>
-    {INTERNAL_GEAR_CUBES.map((cube, index) => (
-      <group key={`internal-gear-cube-${index}`} position={cube.pos} rotation={[0, cube.rot, 0]}>
-        <mesh castShadow receiveShadow>
-          <primitive attach="geometry" object={getBoxGeometry(cube.size, cube.size * 0.92, cube.size)} />
+const WOOD_COLORS = {
+  light: HATCHERY_PALETTE.woodLight,
+  mid: HATCHERY_PALETTE.woodMid,
+  dark: HATCHERY_PALETTE.woodDark,
+} as const;
+
+export const InternalWoodBlocks = ({ openingY, blocksRef }: InternalWoodBlocksProps) => (
+  <group ref={blocksRef} position={[0, openingY - 0.08, 0]}>
+    {INTERNAL_WOOD_BLOCKS.map((block, index) => (
+      <group key={`wood-block-${index}`} position={block.pos} rotation={[0, block.rot, 0]}>
+        <mesh castShadow={false} receiveShadow>
+          <primitive
+            attach="geometry"
+            object={getBoxGeometry(block.size[0], block.size[1], block.size[2])}
+          />
           <meshStandardMaterial
-            color={HATCHERY_PALETTE.internalGear}
-            roughness={0.48}
-            metalness={0.28}
-            emissive={HATCHERY_PALETTE.internalGearShadow}
-            emissiveIntensity={0.08}
+            color={WOOD_COLORS[block.color]}
+            roughness={1}
+            metalness={0}
+            flatShading
           />
         </mesh>
-        {[0, Math.PI / 2].map((angle) => (
-          <mesh key={`cube-tooth-${index}-${angle}`} castShadow position={[0, 0.02, 0]} rotation={[0, angle, 0]}>
-            <primitive attach="geometry" object={getBoxGeometry(cube.size * 1.18, cube.size * 0.22, cube.size * 0.34)} />
-            <meshStandardMaterial color={HATCHERY_PALETTE.internalGearHighlight} roughness={0.42} metalness={0.22} flatShading />
-          </mesh>
-        ))}
+        <mesh position={[block.size[0] * 0.15, 0, block.size[2] * 0.1]} rotation={[0, 0.4, 0]}>
+          <primitive attach="geometry" object={getBoxGeometry(block.size[0] * 0.08, block.size[1] * 0.9, 0.02)} />
+          <meshStandardMaterial color={HATCHERY_PALETTE.woodGrain} roughness={0.95} metalness={0} />
+        </mesh>
       </group>
     ))}
   </group>

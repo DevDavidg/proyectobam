@@ -1,13 +1,14 @@
-import { PerfCanvas } from '../../app/perf-canvas';
-import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from 'three';
-import { GameScene } from './game-scene';
-import { PostEffects } from './post-effects';
+import { PerfCanvas } from "../../app/perf-canvas";
+import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from "three";
+import { GameScene } from "./game-scene";
+import { PostEffects } from "./post-effects";
 
 export const GameCanvas = () => (
   <PerfCanvas
     gl={{
-      antialias: true,
-      powerPreference: 'high-performance',
+      // PostEffects already applies SMAA; disabling native MSAA avoids double AA cost.
+      antialias: false,
+      powerPreference: "high-performance",
       stencil: false,
       toneMapping: ACESFilmicToneMapping,
       toneMappingExposure: 1.12,

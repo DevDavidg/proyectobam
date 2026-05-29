@@ -20,6 +20,7 @@ import { createCombatActions } from './game-store/combat-actions';
 import { createEconomyActions } from './game-store/economy-actions';
 import { createLifecycleActions } from './game-store/lifecycle-actions';
 import { createMonsterActions } from './game-store/monster-actions';
+import { createBuildingInfoActions } from './game-store/building-info-actions';
 import { createPlacementActions } from './game-store/placement-actions';
 import type { GameStore } from './game-store/types';
 
@@ -149,6 +150,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...createCameraActions(set, get),
   ...createLifecycleActions(set, get),
   ...createCombatActions(set, get),
+  ...createBuildingInfoActions(set, get),
   ...createPlacementActions(set, get),
   ...createMonsterActions(set, get),
   ...createEconomyActions(set, get),

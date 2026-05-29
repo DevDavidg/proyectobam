@@ -34,11 +34,20 @@ type OrbitDragState = {
   startTheta: number;
 };
 
+type PanDragState = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+};
+
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
 const offsetVector = new Vector3();
 const spherical = new Spherical();
 const resolvedPosition = new Vector3();
+const panRight = new Vector3();
+const panUp = new Vector3();
+const panDelta = new Vector3();
 
 const MOUSE_NONE = -1 as MOUSE;
 
@@ -80,6 +89,26 @@ const applyOrbitAngles = (
   controls.update();
 };
 
+const applyPanDrag = (
+  controls: OrbitControlsImpl,
+  orthoCamera: OrthographicCamera,
+  deltaX: number,
+  deltaY: number,
+): void => {
+  const scale = (CAMERA_PAN_SPEED * 2.4) / orthoCamera.zoom;
+
+  orthoCamera.updateMatrixWorld();
+  panRight.setFromMatrixColumn(orthoCamera.matrixWorld, 0);
+  panUp.setFromMatrixColumn(orthoCamera.matrixWorld, 1);
+
+  panDelta.copy(panRight).multiplyScalar(-deltaX * scale);
+  panDelta.add(panUp.multiplyScalar(deltaY * scale));
+
+  controls.target.add(panDelta);
+  orthoCamera.position.add(panDelta);
+  controls.update();
+};
+
 const beginCelebration = (
   controls: OrbitControlsImpl,
   orthoCamera: OrthographicCamera,
@@ -111,6 +140,7 @@ export const CameraController = ({ worldSize }: CameraControllerProps) => {
   const isUserControllingRef = useRef(false);
   const controlsConfiguredRef = useRef(false);
   const orbitDragRef = useRef<OrbitDragState | null>(null);
+  const panDragRef = useRef<PanDragState | null>(null);
 
   const cameraCelebration = useGameStore((state) => state.cameraCelebration);
   const clearCameraCelebration = useGameStore((state) => state.clearCameraCelebration);
@@ -133,13 +163,10 @@ export const CameraController = ({ worldSize }: CameraControllerProps) => {
   useEffect(() => {
     const domElement = gl.domElement;
 
-    const resetMouseButtons = (): void => {
-      const controls = controlsRef.current;
-      if (!controls) {
-        return;
+    const releasePointer = (pointerId: number): void => {
+      if (domElement.hasPointerCapture(pointerId)) {
+        domElement.releasePointerCapture(pointerId);
       }
-      controls.mouseButtons.LEFT = MOUSE_NONE;
-      controls.mouseButtons.RIGHT = MOUSE_NONE;
     };
 
     const handlePointerDown = (event: PointerEvent): void => {
@@ -150,11 +177,19 @@ export const CameraController = ({ worldSize }: CameraControllerProps) => {
 
       if (isPanModifierPressed(event)) {
         orbitDragRef.current = null;
-        controls.mouseButtons.LEFT = MOUSE.PAN;
+        panDragRef.current = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+        };
+        domElement.setPointerCapture(event.pointerId);
+        handleUserStart();
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
 
-      controls.mouseButtons.LEFT = MOUSE_NONE;
+      panDragRef.current = null;
       const { phi, theta } = readOrbitAngles(controls, camera as OrthographicCamera);
       orbitDragRef.current = {
         pointerId: event.pointerId,
@@ -166,36 +201,55 @@ export const CameraController = ({ worldSize }: CameraControllerProps) => {
       domElement.setPointerCapture(event.pointerId);
       handleUserStart();
       event.preventDefault();
+      event.stopPropagation();
     };
 
     const handlePointerMove = (event: PointerEvent): void => {
       const controls = controlsRef.current;
-      const drag = orbitDragRef.current;
-      if (!controls || !drag || drag.pointerId !== event.pointerId) {
+      if (!controls) {
         return;
       }
 
-      const deltaX = event.clientX - drag.startX;
-      const deltaY = event.clientY - drag.startY;
+      const panDrag = panDragRef.current;
+      if (panDrag && panDrag.pointerId === event.pointerId) {
+        const deltaX = event.clientX - panDrag.startX;
+        const deltaY = event.clientY - panDrag.startY;
+        applyPanDrag(controls, camera as OrthographicCamera, deltaX, deltaY);
+        event.preventDefault();
+        return;
+      }
+
+      const orbitDrag = orbitDragRef.current;
+      if (!orbitDrag || orbitDrag.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const deltaX = event.clientX - orbitDrag.startX;
+      const deltaY = event.clientY - orbitDrag.startY;
       applyOrbitAngles(
         controls,
         camera as OrthographicCamera,
-        drag.startTheta - deltaX * CAMERA_HORIZONTAL_DRAG_SENSITIVITY,
-        drag.startPhi - deltaY * CAMERA_VERTICAL_DRAG_SENSITIVITY,
+        orbitDrag.startTheta - deltaX * CAMERA_HORIZONTAL_DRAG_SENSITIVITY,
+        orbitDrag.startPhi - deltaY * CAMERA_VERTICAL_DRAG_SENSITIVITY,
       );
       event.preventDefault();
     };
 
     const handlePointerUp = (event: PointerEvent): void => {
-      const drag = orbitDragRef.current;
-      if (drag?.pointerId === event.pointerId) {
+      const orbitDrag = orbitDragRef.current;
+      const panDrag = panDragRef.current;
+
+      if (orbitDrag?.pointerId === event.pointerId) {
         orbitDragRef.current = null;
-        if (domElement.hasPointerCapture(event.pointerId)) {
-          domElement.releasePointerCapture(event.pointerId);
-        }
+        releasePointer(event.pointerId);
         handleUserEnd();
       }
-      resetMouseButtons();
+
+      if (panDrag?.pointerId === event.pointerId) {
+        panDragRef.current = null;
+        releasePointer(event.pointerId);
+        handleUserEnd();
+      }
     };
 
     domElement.addEventListener('pointerdown', handlePointerDown, true);
@@ -283,6 +337,9 @@ export const CameraController = ({ worldSize }: CameraControllerProps) => {
     controls.target.z = clamp(controls.target.z, -halfWorld, halfWorld);
     controls.target.y = 0;
 
+    orthoCamera.zoom = clamp(orthoCamera.zoom, CAMERA_MIN_ZOOM, CAMERA_MAX_ZOOM);
+    orthoCamera.updateProjectionMatrix();
+
     resolvedPosition.copy(resolveCameraCollision(orthoCamera.position, buildings));
     if (!resolvedPosition.equals(orthoCamera.position)) {
       orthoCamera.position.copy(resolvedPosition);
@@ -294,13 +351,11 @@ export const CameraController = ({ worldSize }: CameraControllerProps) => {
     <OrbitControls
       ref={controlsRef}
       target={[0, 0, 0]}
-      enablePan
+      enablePan={false}
       enableRotate={false}
       enableZoom
       enableDamping
       dampingFactor={CAMERA_DAMPING_FACTOR}
-      panSpeed={CAMERA_PAN_SPEED}
-      screenSpacePanning
       minPolarAngle={CAMERA_MIN_POLAR_ANGLE}
       maxPolarAngle={CAMERA_MAX_POLAR_ANGLE}
       minZoom={CAMERA_MIN_ZOOM}

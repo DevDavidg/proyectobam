@@ -1,11 +1,13 @@
 type ObstacleActionButtonsProps = {
   canRecycleObstacle: boolean;
   handleRecycleObstacle: () => void;
+  onOpenInfo: () => void;
 };
 
 export const ObstacleActionButtons = ({
   canRecycleObstacle,
   handleRecycleObstacle,
+  onOpenInfo,
 }: ObstacleActionButtonsProps) => {
   const handleRecycleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>): void => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -15,6 +17,16 @@ export const ObstacleActionButtons = ({
   };
 
   return (
+    <div className="space-y-1">
+      <button
+        type="button"
+        tabIndex={0}
+        aria-label="Ver informacion del obstaculo"
+        className="ui-button w-full border-sky-600 bg-sky-800/80 px-2 py-1 text-sky-50"
+        onClick={onOpenInfo}
+      >
+        Info
+      </button>
     <button
       type="button"
       tabIndex={0}
@@ -28,5 +40,6 @@ export const ObstacleActionButtons = ({
     >
       Reciclar
     </button>
+    </div>
   );
 };

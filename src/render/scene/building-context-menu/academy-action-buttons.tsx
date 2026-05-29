@@ -6,6 +6,7 @@ type MonsterAcademyActionButtonsProps = {
   canOpenAcademy: boolean;
   canUpgradeTownHall: boolean;
   setDetailMode: (mode: DetailMode) => void;
+  onOpenInfo: () => void;
   handleMoveBuilding: () => void;
   handleRecycleBuilding: () => void;
   handleOpenAcademy: () => void;
@@ -17,6 +18,7 @@ export const MonsterAcademyActionButtons = ({
   canOpenAcademy,
   canUpgradeTownHall,
   setDetailMode,
+  onOpenInfo,
   handleMoveBuilding,
   handleRecycleBuilding,
   handleOpenAcademy,
@@ -44,6 +46,15 @@ export const MonsterAcademyActionButtons = ({
 
   return (
     <div className="space-y-1">
+      <button
+        type="button"
+        tabIndex={0}
+        aria-label="Ver informacion del edificio"
+        className="ui-button w-full border-sky-600 bg-sky-800/80 px-2 py-1 text-sky-50"
+        onClick={onOpenInfo}
+      >
+        Info
+      </button>
       <button
         type="button"
         tabIndex={0}

@@ -202,6 +202,9 @@ export type GameStore = {
   battleResult: "VICTORY" | "DEFEAT" | null;
   selectedBuildingId: string | null;
   buildingContextMenuPosition: ContextMenuPosition | null;
+  buildingInfoPanelOpen: boolean;
+  openBuildingInfoPanel: () => void;
+  closeBuildingInfoPanel: () => void;
   activePenMenuBuildingId: string | null;
   housingDetailsPenId: string | null;
   movingBuildingId: string | null;

@@ -54,37 +54,37 @@ const ResidentMesh = ({
         <meshBasicMaterial color="#0f172a" transparent={true} opacity={0.24} depthWrite={false} />
       </mesh>
       <group ref={bodyRef}>
-        <mesh castShadow receiveShadow position={[0, 0.35, 0]} scale={[bodyScale, bodyScale, bodyScale]}>
+        <mesh receiveShadow position={[0, 0.35, 0]} scale={[bodyScale, bodyScale, bodyScale]}>
           <sphereGeometry args={[0.34, 14, 14]} />
           <meshStandardMaterial color={bodyColor} roughness={0.58} metalness={0.12} emissive={bodyColor} emissiveIntensity={0.12} />
         </mesh>
-        <mesh castShadow receiveShadow position={[0, 0.8, 0]}>
+        <mesh receiveShadow position={[0, 0.8, 0]}>
           <coneGeometry args={[0.24, 0.35, 8]} />
           <meshStandardMaterial color={hornColor} roughness={0.5} metalness={0.15} emissive={hornColor} emissiveIntensity={auraIntensity} />
         </mesh>
-        <mesh castShadow receiveShadow position={[0.1, 0.4, 0.24]}>
+        <mesh receiveShadow position={[0.1, 0.4, 0.24]}>
           <sphereGeometry args={[0.05, 10, 10]} />
           <meshStandardMaterial color="#f8fafc" emissive="#e2e8f0" emissiveIntensity={0.35} />
         </mesh>
-        <mesh castShadow receiveShadow position={[-0.1, 0.4, 0.24]}>
+        <mesh receiveShadow position={[-0.1, 0.4, 0.24]}>
           <sphereGeometry args={[0.05, 10, 10]} />
           <meshStandardMaterial color="#f8fafc" emissive="#e2e8f0" emissiveIntensity={0.35} />
         </mesh>
-        <mesh castShadow receiveShadow position={[0.11, 0.4, 0.28]}>
+        <mesh receiveShadow position={[0.11, 0.4, 0.28]}>
           <sphereGeometry args={[0.018, 8, 8]} />
           <meshStandardMaterial color="#0f172a" />
         </mesh>
-        <mesh castShadow receiveShadow position={[-0.11, 0.4, 0.28]}>
+        <mesh receiveShadow position={[-0.11, 0.4, 0.28]}>
           <sphereGeometry args={[0.018, 8, 8]} />
           <meshStandardMaterial color="#0f172a" />
         </mesh>
         {monsterType === 'Rambot' ? (
-          <mesh castShadow receiveShadow position={[0, 0.28, -0.25]}>
+          <mesh receiveShadow position={[0, 0.28, -0.25]}>
             <boxGeometry args={[0.24, 0.14, 0.2]} />
             <meshStandardMaterial color="#7c2d12" roughness={0.62} />
           </mesh>
         ) : (
-          <mesh castShadow receiveShadow position={[0, 0.22, -0.24]}>
+          <mesh receiveShadow position={[0, 0.22, -0.24]}>
             <sphereGeometry args={[0.11, 10, 10]} />
             <meshStandardMaterial color="#9f1239" roughness={0.72} />
           </mesh>

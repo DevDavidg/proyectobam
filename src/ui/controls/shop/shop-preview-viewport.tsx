@@ -1,7 +1,8 @@
-import { PerspectiveCamera, View } from '@react-three/drei';
+import { PerspectiveCamera } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import type { PerspectiveCamera as ThreePerspectiveCamera } from 'three';
+import { PerfCanvas } from '../../../app/perf-canvas';
 import { ENHANCED_BUILDING_CATALOG } from '../../../core/constants/catalog';
 import type { BuildingType } from '../../../core/types/building';
 import { BuildingPreviewVisual } from '../../../render/entities/building-preview-visual';
@@ -14,7 +15,7 @@ type ShopPreviewSceneProps = {
   level: number;
 };
 
-export const ShopPreviewScene = ({ type, level }: ShopPreviewSceneProps) => {
+const ShopPreviewScene = ({ type, level }: ShopPreviewSceneProps) => {
   const safeLevel = Math.max(1, level);
   const definition = ENHANCED_BUILDING_CATALOG[type];
   const sizeX = definition?.size.x ?? 2;
@@ -25,7 +26,7 @@ export const ShopPreviewScene = ({ type, level }: ShopPreviewSceneProps) => {
   const cameraRef = useRef<ThreePerspectiveCamera | null>(null);
   const invalidate = useThree((state) => state.invalidate);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     invalidate();
   }, [invalidate, type, safeLevel]);
 
@@ -36,6 +37,12 @@ export const ShopPreviewScene = ({ type, level }: ShopPreviewSceneProps) => {
     cameraRef.current.lookAt(0, heroTargetY, 0);
     cameraRef.current.updateProjectionMatrix();
     invalidate();
+    const retryTimers = [120, 400, 900].map((delay) =>
+      window.setTimeout(() => invalidate(), delay),
+    );
+    return () => {
+      retryTimers.forEach((timer) => window.clearTimeout(timer));
+    };
   }, [cameraDistance, heroTargetY, invalidate, type, safeLevel]);
 
   return (
@@ -49,17 +56,20 @@ export const ShopPreviewScene = ({ type, level }: ShopPreviewSceneProps) => {
         position={[cameraDistance * 0.78, cameraDistance * 0.32, cameraDistance * 0.78]}
       />
       <color attach="background" args={['#ffffff']} />
-      <ambientLight intensity={0.72} color="#ffffff" />
-      <hemisphereLight intensity={0.28} color="#ffffff" groundColor="#e8e8e8" />
-      <directionalLight position={[3.2, 4.5, 3.2]} intensity={1.15} color="#fff8ef" />
-      <group>
-        <BuildingPreviewVisual
-          type={type}
-          level={safeLevel}
-          sizeX={sizeX}
-          sizeY={sizeY}
-          cellSize={CELL_SIZE}
-        />
+      <ambientLight intensity={0.85} color="#ffffff" />
+      <hemisphereLight intensity={0.35} color="#ffffff" groundColor="#f0f0f0" />
+      <directionalLight position={[3.2, 4.5, 3.2]} intensity={1.25} color="#fff8ef" />
+      <directionalLight position={[-2.5, 2.8, -2.2]} intensity={0.45} color="#e8f0ff" />
+      <group position={[0, 0, 0]}>
+        <Suspense fallback={null}>
+          <BuildingPreviewVisual
+            type={type}
+            level={safeLevel}
+            sizeX={sizeX}
+            sizeY={sizeY}
+            cellSize={CELL_SIZE}
+          />
+        </Suspense>
       </group>
     </>
   );
@@ -86,12 +96,25 @@ export const ShopPreviewViewport = ({
         dimmed ? 'bym-shop-preview--dimmed' : ''
       }`}
     >
-      <View className="absolute inset-0">
+      <PerfCanvas
+        className="absolute inset-0 h-full w-full"
+        shadows={false}
+        dpr={[1, 1.5]}
+        frameloop="demand"
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: 'low-power',
+          stencil: false,
+          depth: true,
+          preserveDrawingBuffer: false,
+        }}
+      >
         <ShopPreviewScene type={type} level={safeLevel} />
-      </View>
+      </PerfCanvas>
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-[8%] left-1/2 z-[1] h-[10px] w-[58%] -translate-x-1/2 rounded-full bg-black/15 blur-[5px]"
+        className="pointer-events-none absolute bottom-[8%] left-1/2 z-[1] h-[10px] w-[58%] -translate-x-1/2 rounded-full bg-black/12 blur-[5px]"
       />
     </div>
   );

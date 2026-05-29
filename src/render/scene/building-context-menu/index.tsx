@@ -34,6 +34,8 @@ export const BuildingContextMenu = () => {
   const recycleSelectedBuilding = useGameStore((state) => state.recycleSelectedBuilding);
   const clearObstacle = useGameStore((state) => state.clearObstacle);
   const openHatcheryModal = useGameStore((state) => state.openHatcheryModal);
+  const openBuildingInfoPanel = useGameStore((state) => state.openBuildingInfoPanel);
+  const buildingInfoPanelOpen = useGameStore((state) => state.buildingInfoPanelOpen);
 
   const [detailMode, setDetailMode] = useState<DetailMode>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -43,7 +45,7 @@ export const BuildingContextMenu = () => {
     setDetailMode(null);
   }, [selectedBuildingId]);
 
-  if (!selectedBuildingId) {
+  if (!selectedBuildingId || buildingInfoPanelOpen) {
     return null;
   }
 
@@ -112,6 +114,7 @@ export const BuildingContextMenu = () => {
               <ObstacleActionButtons
                 canRecycleObstacle={data.canRecycleObstacle}
                 handleRecycleObstacle={handleRecycleObstacle}
+                onOpenInfo={openBuildingInfoPanel}
               />
             </div>
           ) : (
@@ -179,6 +182,7 @@ export const BuildingContextMenu = () => {
                 canOpenAcademy={data.canOpenMonsterAcademy}
                 canUpgradeTownHall={data.canUpgradeTownHall}
                 setDetailMode={setDetailMode}
+                onOpenInfo={openBuildingInfoPanel}
                 handleMoveBuilding={handleMoveBuilding}
                 handleRecycleBuilding={handleRecycleBuilding}
                 handleOpenAcademy={handleOpenAcademy}
@@ -190,6 +194,7 @@ export const BuildingContextMenu = () => {
                 canFortifyMore={data.canFortifyMore}
                 canMoveBuilding={data.canMoveBuilding}
                 setDetailMode={setDetailMode}
+                onOpenInfo={openBuildingInfoPanel}
                 handleMoveBuilding={handleMoveBuilding}
               />
             )}

@@ -1,6 +1,9 @@
 import { Environment, Lightformer } from "@react-three/drei";
-import { useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useMemo, useRef } from "react";
+import { AmbientLight, Color, DirectionalLight, HemisphereLight } from "three";
 import { useShallow } from "zustand/react/shallow";
+import { getDayNightCycleState } from "../../core/constants/day-night-cycle";
 import { useGameStore } from "../../state/game-store";
 import {
   CELL_SIZE,
@@ -21,8 +24,68 @@ import { PenResidentsLayer } from "./pen-residents-layer";
 import { MoveBuildingGuides } from "./move-building-guides";
 import { RangeRing } from "./range-ring";
 import { ResourceCollectionLayer } from "./resource-collection-layer";
+import { DynamicAtmosphere } from "./dynamic-atmosphere";
 import { Terrain } from "./terrain";
 import { WorkersLayer } from "./workers-layer";
+
+const mixIntensity = (day: number, night: number, nightFactor: number): number =>
+  day + (night - day) * nightFactor;
+
+const DayNightLighting = () => {
+  const hemisphereRef = useRef<HemisphereLight>(null);
+  const ambientRef = useRef<AmbientLight>(null);
+  const directionalRef = useRef<DirectionalLight>(null);
+  const daySunColor = useMemo(() => new Color("#fff9e6"), []);
+  const nightMoonColor = useMemo(() => new Color("#a3bfff"), []);
+  const mixedDirectionalColor = useMemo(() => new Color(), []);
+
+  useFrame(({ clock }) => {
+    const cycle = getDayNightCycleState(clock.getElapsedTime());
+
+    if (hemisphereRef.current) {
+      hemisphereRef.current.intensity = mixIntensity(0.45, 0.2, cycle.nightFactor);
+    }
+
+    if (ambientRef.current) {
+      ambientRef.current.intensity = mixIntensity(0.22, 0.36, cycle.nightFactor);
+    }
+
+    if (directionalRef.current) {
+      directionalRef.current.intensity = mixIntensity(2.6, 1.1, cycle.nightFactor);
+      mixedDirectionalColor.lerpColors(daySunColor, nightMoonColor, cycle.nightFactor);
+      directionalRef.current.color.copy(mixedDirectionalColor);
+    }
+  });
+
+  return (
+    <>
+      <hemisphereLight
+        ref={hemisphereRef}
+        intensity={0.45}
+        groundColor="#17340f"
+        color="#cdeeb8"
+      />
+      <ambientLight ref={ambientRef} intensity={0.22} color="#1a2e15" />
+      <directionalLight
+        ref={directionalRef}
+        castShadow
+        position={[-34, 44, -34]}
+        intensity={2.6}
+        color="#fff9e6"
+        shadow-mapSize-width={1536}
+        shadow-mapSize-height={1536}
+        shadow-camera-near={1}
+        shadow-camera-far={120}
+        shadow-camera-left={-44}
+        shadow-camera-right={44}
+        shadow-camera-top={44}
+        shadow-camera-bottom={-44}
+        shadow-bias={-0.0003}
+        shadow-normalBias={0.02}
+      />
+    </>
+  );
+};
 
 export const GameScene = () => {
   const { placementEnabled, shopOpen, movingBuildingId } = useGameStore(
@@ -40,27 +103,9 @@ export const GameScene = () => {
   return (
     <>
       <IsometricCamera />
-      <color attach="background" args={["#86c43e"]} />
-      <fogExp2 attach="fog" args={["#6ea67c", 0.0022]} />
-      <hemisphereLight intensity={0.45} groundColor="#17340f" color="#cdeeb8" />
-      <ambientLight intensity={0.22} color="#1a2e15" />
-      <directionalLight
-        castShadow
-        position={[-34, 44, -34]}
-        intensity={2.6}
-        color="#fff9e6"
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-near={1}
-        shadow-camera-far={120}
-        shadow-camera-left={-44}
-        shadow-camera-right={44}
-        shadow-camera-top={44}
-        shadow-camera-bottom={-44}
-        shadow-bias={-0.0003}
-        shadow-normalBias={0.02}
-      />
-      <Environment resolution={32}>
+      <DynamicAtmosphere />
+      <DayNightLighting />
+      <Environment resolution={16} frames={1}>
         <Lightformer
           intensity={1.05}
           color="#fff4dc"

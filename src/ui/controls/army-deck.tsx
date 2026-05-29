@@ -1,14 +1,18 @@
-import { useGameStore } from '../../state/game-store';
+import { useGameStore } from "../../state/game-store";
 
 export const ArmyDeck = () => {
   const armyInventory = useGameStore((state) => state.armyInventory);
-  const selectedArmyMonster = useGameStore((state) => state.selectedArmyMonster);
-  const setSelectedArmyMonster = useGameStore((state) => state.setSelectedArmyMonster);
+  const selectedArmyMonster = useGameStore(
+    (state) => state.selectedArmyMonster,
+  );
+  const setSelectedArmyMonster = useGameStore(
+    (state) => state.setSelectedArmyMonster,
+  );
   const toggleBattleMode = useGameStore((state) => state.toggleBattleMode);
 
-  const cards: Array<{ type: 'Pokey' | 'Rambot'; label: string }> = [
-    { type: 'Pokey', label: 'Pokey' },
-    { type: 'Rambot', label: 'Rambot' },
+  const cards: Array<{ type: "Pokey" | "Rambot"; label: string }> = [
+    { type: "Pokey", label: "Pokey" },
+    { type: "Rambot", label: "Rambot" },
   ];
 
   return (
@@ -29,7 +33,9 @@ export const ArmyDeck = () => {
               key={card.type}
               type="button"
               className={`flex-1 rounded border px-3 py-2 text-left ${
-                active ? 'border-emerald-400 bg-emerald-600/20' : 'border-slate-700 bg-slate-800 hover:bg-slate-700'
+                active
+                  ? "border-emerald-400 bg-emerald-600/20"
+                  : "border-slate-700 bg-slate-800 hover:bg-slate-700"
               }`}
               disabled={amount <= 0}
               onClick={() => setSelectedArmyMonster(active ? null : card.type)}

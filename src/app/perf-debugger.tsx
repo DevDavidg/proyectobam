@@ -1,5 +1,5 @@
 import { Profiler, type ProfilerOnRenderCallback, type ReactNode } from 'react';
-import { WebGLRenderer } from 'three';
+import type { WebGLRenderer } from 'three';
 
 const LONG_TASK_THRESHOLD_MS = 50;
 const COMMIT_WARN_THRESHOLD_MS = 50;
@@ -47,7 +47,6 @@ const NATIVE_SET_INTERVAL: typeof globalThis.setInterval =
 let longTaskObserver: PerformanceObserver | null = null;
 let consoleWarnPatched = false;
 let consoleErrorPatched = false;
-let webglRenderPatched = false;
 let timersPatched = false;
 let keyDumpInstalled = false;
 let statsDumperInstalled = false;
@@ -69,6 +68,7 @@ const frameSnapshots: FrameSnapshot[] = [];
 let currentFrameGlRenderMs = 0;
 let currentFrameDrawCalls = 0;
 let currentFrameTriangles = 0;
+let renderHappenedThisFrame = false;
 let longTaskTotalMsInWindow = 0;
 let longTaskCountInWindow = 0;
 
@@ -151,6 +151,8 @@ const computeAverage = (values: number[]): number => {
   return total / values.length;
 };
 
+const formatMs = (value: number): string => value.toFixed(1);
+
 const dumpPeriodicSummary = (): void => {
   if (frameSnapshots.length === 0 && longTaskCountInWindow === 0) {
     return;
@@ -167,9 +169,10 @@ const dumpPeriodicSummary = (): void => {
     const p95Uf = computePercentile(useFrameSorted, 95);
     const avgDraws = computeAverage(frameSnapshots.map((snapshot) => snapshot.drawCalls));
     const avgTris = computeAverage(frameSnapshots.map((snapshot) => snapshot.triangles));
-    const actualFps = frameSnapshots.length / (STATS_DUMP_INTERVAL_MS / 1000);
+    const renderFrames = frameSnapshots.filter((snapshot) => snapshot.drawCalls > 0 || snapshot.glRenderMs > 0).length;
+    const renderFps = renderFrames / (STATS_DUMP_INTERVAL_MS / 1000);
     console.warn(
-      `[perf-debugger] last ${STATS_DUMP_INTERVAL_MS / 1000}s | ${frameSnapshots.length} frames (${actualFps.toFixed(1)} fps) | raf avg=${avgTotal.toFixed(0)}ms p95=${p95Total.toFixed(0)}ms | useFrame avg=${avgUf.toFixed(0)}ms p95=${p95Uf.toFixed(0)}ms | gl.render avg=${avgGl.toFixed(0)}ms p95=${p95Gl.toFixed(0)}ms | avg ${avgDraws.toFixed(0)} draws / ${(avgTris / 1000).toFixed(1)}k tris`,
+      `[perf-debugger] last ${STATS_DUMP_INTERVAL_MS / 1000}s | ${frameSnapshots.length} rAF (${(frameSnapshots.length / (STATS_DUMP_INTERVAL_MS / 1000)).toFixed(1)} hz) | render ${renderFrames} (${renderFps.toFixed(1)} fps) | raf avg=${formatMs(avgTotal)}ms p95=${formatMs(p95Total)}ms | useFrame avg=${formatMs(avgUf)}ms p95=${formatMs(p95Uf)}ms | gl.render avg=${formatMs(avgGl)}ms p95=${formatMs(p95Gl)}ms | avg ${avgDraws.toFixed(0)} draws / ${(avgTris / 1000).toFixed(1)}k tris`,
     );
   }
   if (longTaskCountInWindow > 0) {
@@ -364,19 +367,22 @@ const wrapRequestAnimationFrame = (host: WindowTimerHost): void => {
       currentFrameGlRenderMs = 0;
       currentFrameDrawCalls = 0;
       currentFrameTriangles = 0;
+      renderHappenedThisFrame = false;
       const start = performance.now();
       try {
         callback(time);
       } finally {
         const duration = performance.now() - start;
         const useFrameDuration = Math.max(0, duration - currentFrameGlRenderMs);
-        frameSnapshots.push({
-          rafTotalMs: duration,
-          glRenderMs: currentFrameGlRenderMs,
-          useFrameMs: useFrameDuration,
-          drawCalls: currentFrameDrawCalls,
-          triangles: currentFrameTriangles,
-        });
+        if (renderHappenedThisFrame) {
+          frameSnapshots.push({
+            rafTotalMs: duration,
+            glRenderMs: currentFrameGlRenderMs,
+            useFrameMs: useFrameDuration,
+            drawCalls: currentFrameDrawCalls,
+            triangles: currentFrameTriangles,
+          });
+        }
         if (duration >= SLOW_CALLBACK_THRESHOLD_MS) {
           trackCallsite('requestAnimationFrame', origin, duration);
           if (duration >= SLOW_CALLBACK_THRESHOLD_MS * 3) {
@@ -407,33 +413,33 @@ export const installTimerOriginTracker = (): void => {
   timersPatched = true;
 };
 
-export const installWebGLRenderTimer = (): void => {
-  if (webglRenderPatched) {
+type PerfWrappedRenderer = WebGLRenderer & { __perfRenderWrapped?: boolean };
+
+export const wrapRendererInstance = (renderer: WebGLRenderer): void => {
+  const marked = renderer as PerfWrappedRenderer;
+  if (marked.__perfRenderWrapped) {
     return;
   }
-  const originalRender = WebGLRenderer.prototype.render;
-  const patchedRender = function patchedRender(
-    this: WebGLRenderer,
-    scene: Parameters<typeof originalRender>[0],
-    camera: Parameters<typeof originalRender>[1]
-  ): void {
+  marked.__perfRenderWrapped = true;
+
+  const originalRender = renderer.render.bind(renderer);
+  renderer.render = (scene, camera) => {
     const start = performance.now();
-    originalRender.call(this, scene, camera);
+    originalRender(scene, camera);
     const duration = performance.now() - start;
+    renderHappenedThisFrame = true;
     currentFrameGlRenderMs += duration;
-    currentFrameDrawCalls += this.info.render.calls;
-    currentFrameTriangles += this.info.render.triangles;
+    currentFrameDrawCalls += renderer.info.render.calls;
+    currentFrameTriangles += renderer.info.render.triangles;
     if (duration >= SLOW_GL_RENDER_THRESHOLD_MS) {
-      const programsCount = this.info.programs?.length ?? 0;
+      const programsCount = renderer.info.programs?.length ?? 0;
       trackCallsite(
         'gl.render',
-        `draws=${this.info.render.calls} tris=${this.info.render.triangles} programs=${programsCount}`,
+        `draws=${renderer.info.render.calls} tris=${renderer.info.render.triangles} programs=${programsCount}`,
         duration,
       );
     }
-  } as typeof originalRender;
-  WebGLRenderer.prototype.render = patchedRender;
-  webglRenderPatched = true;
+  };
 };
 
 const handleKeyboardShortcut = (event: KeyboardEvent): void => {
@@ -447,6 +453,10 @@ const handleKeyboardShortcut = (event: KeyboardEvent): void => {
     resetAccumulators();
     console.info('[perf-debugger] accumulators reset');
   }
+};
+
+export const installWebGLRenderTimer = (): void => {
+  // Render timing attaches per Canvas via PerfCanvas onCreated → wrapRendererInstance().
 };
 
 export const installKeyboardDump = (): void => {

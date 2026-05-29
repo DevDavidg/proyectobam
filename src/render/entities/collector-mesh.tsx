@@ -1,6 +1,9 @@
 import type { ThreeEvent } from '@react-three/fiber';
 import { memo, useMemo } from 'react';
-import type { BuildingType } from '../../core/types/building';
+import { computeGooCollectorBuffer } from '../../core/constants/goo-factory-catalog';
+import { computePebbleShinerBuffer } from '../../core/constants/pebble-shiner-catalog';
+import { computePuttySquisherBuffer } from '../../core/constants/putty-squisher-catalog';
+import { BUILDING_TYPES, type BuildingType } from '../../core/types/building';
 import { EntityType } from '../../ecs/components/components';
 import type { RenderEntitySnapshot } from '../../ecs/systems/sync-grid-system';
 import { useGameStore } from '../../state/game-store';
@@ -46,6 +49,9 @@ type CollectorVisualOverlayProps = {
   fallbackLevel: number;
   entity: RenderEntitySnapshot;
   isTwigCollector: boolean;
+  isGooCollector: boolean;
+  isPebbleCollector: boolean;
+  isPuttyCollector: boolean;
   isStorage: boolean;
   isHatchery: boolean;
 };
@@ -56,6 +62,9 @@ const CollectorVisualOverlay = ({
   fallbackLevel,
   entity,
   isTwigCollector,
+  isGooCollector,
+  isPebbleCollector,
+  isPuttyCollector,
   isStorage,
   isHatchery,
 }: CollectorVisualOverlayProps) => {
@@ -66,10 +75,58 @@ const CollectorVisualOverlay = ({
     const building = state.engine.getState().buildings.find((item) => item.id === sourceId);
     return building?.level ?? fallbackLevel;
   });
-  const isFull = useGameStore((state) =>
-    isTwigCollector ? state.resources.twigs.current >= state.resources.twigs.max : false
-  );
+  const gooBufferRatio = useGameStore((state) => {
+    if (!isGooCollector || !sourceId) {
+      return 0;
+    }
+    const building = state.engine.getState().buildings.find((item) => item.id === sourceId);
+    if (building?.type !== BUILDING_TYPES.RESOURCE_GOO_COLLECTOR) {
+      return 0;
+    }
+    const referenceTime = Math.max(state.lastResourceTick, building.lastHarvested ?? 0);
+    return computeGooCollectorBuffer(building, referenceTime).ratio;
+  });
+  const pebbleBufferRatio = useGameStore((state) => {
+    if (!isPebbleCollector || !sourceId) {
+      return 0;
+    }
+    const building = state.engine.getState().buildings.find((item) => item.id === sourceId);
+    if (building?.type !== BUILDING_TYPES.RESOURCE_PEBBLE_COLLECTOR) {
+      return 0;
+    }
+    const referenceTime = Math.max(state.lastResourceTick, building.lastHarvested ?? 0);
+    return computePebbleShinerBuffer(building, referenceTime).ratio;
+  });
+  const puttyBufferRatio = useGameStore((state) => {
+    if (!isPuttyCollector || !sourceId) {
+      return 0;
+    }
+    const building = state.engine.getState().buildings.find((item) => item.id === sourceId);
+    if (building?.type !== BUILDING_TYPES.RESOURCE_PUTTY_COLLECTOR) {
+      return 0;
+    }
+    const referenceTime = Math.max(state.lastResourceTick, building.lastHarvested ?? 0);
+    return computePuttySquisherBuffer(building, referenceTime).ratio;
+  });
+  const twigFillRatio = useGameStore((state) => {
+    if (!isTwigCollector) return 0;
+    return state.resources.twigs.max > 0
+      ? Math.min(1, state.resources.twigs.current / state.resources.twigs.max)
+      : 0;
+  });
   const storageFillRatio = useGameStore((state) => {
+    if (isGooCollector) {
+      return gooBufferRatio;
+    }
+    if (isPebbleCollector) {
+      return pebbleBufferRatio;
+    }
+    if (isPuttyCollector) {
+      return puttyBufferRatio;
+    }
+    if (isTwigCollector) {
+      return twigFillRatio;
+    }
     if (!isStorage) {
       return 0;
     }
@@ -96,20 +153,19 @@ const CollectorVisualOverlay = ({
       sizeX={entity.sizeX}
       sizeY={entity.sizeY}
       cellSize={CELL_SIZE}
-      materialMode={isFull ? 'highlight' : 'default'}
+      materialMode='default'
       hatcheryBusy={isHatcheryBusy}
       status={entity.status as 'PENDING' | 'UNDER_CONSTRUCTION' | 'ACTIVE' | undefined}
       hp={entity.hp}
       maxHp={entity.maxHp}
       storageFillRatio={storageFillRatio}
+      constructionProgress={entity.constructionProgress}
     />
   );
 };
 
 const CollectorMeshImpl = ({ entity }: CollectorMeshProps) => {
-  const collectFromCollector = useGameStore((state) => state.collectFromCollector);
   const openBuildingContextMenu = useGameStore((state) => state.openBuildingContextMenu);
-  const openHatcheryModal = useGameStore((state) => state.openHatcheryModal);
   const groupRef = useSpawnScale(entity.sourceId);
   const position = useMemo(
     () => gridToWorldCenter(entity.x, entity.y, entity.sizeX, entity.sizeY, GRID_SIZE, CELL_SIZE),
@@ -135,14 +191,15 @@ const CollectorMeshImpl = ({ entity }: CollectorMeshProps) => {
 
   const handleCollectorClick = (event: ThreeEvent<MouseEvent>): void => {
     event.stopPropagation();
-    if (sourceId && isHatchery && entity.status === 'ACTIVE') {
-      openHatcheryModal(sourceId);
+    if (!sourceId) {
       return;
     }
-    if (!sourceId || !isTwigCollector) {
-      return;
+    if (isGooCollector || isPebbleCollector || isPuttyCollector || isTwigCollector || isHatchery) {
+      openBuildingContextMenu(sourceId, {
+        x: event.nativeEvent.clientX,
+        y: event.nativeEvent.clientY,
+      });
     }
-    collectFromCollector(sourceId);
   };
 
   const handleContextMenu = (event: ThreeEvent<MouseEvent>): void => {
@@ -159,13 +216,16 @@ const CollectorMeshImpl = ({ entity }: CollectorMeshProps) => {
 
   return (
     <group ref={groupRef} position={[position[0], 0, position[2]]} onClick={handleCollectorClick} onContextMenu={handleContextMenu}>
-      <BuildingDirtDecal sizeX={entity.sizeX} sizeY={entity.sizeY} status={entity.status} />
+      {isHatchery ? null : <BuildingDirtDecal sizeX={entity.sizeX} sizeY={entity.sizeY} status={entity.status} />}
       <CollectorVisualOverlay
         sourceId={sourceId}
         visualType={visualType}
         fallbackLevel={fallbackLevel}
         entity={entity}
         isTwigCollector={isTwigCollector}
+        isGooCollector={isGooCollector}
+        isPebbleCollector={isPebbleCollector}
+        isPuttyCollector={isPuttyCollector}
         isStorage={isStorage}
         isHatchery={isHatchery}
       />

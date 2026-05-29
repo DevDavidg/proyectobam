@@ -7,6 +7,7 @@ import {
 } from '../../core/constants/monster-catalog';
 import { BUILDING_TYPES } from '../../core/types/building';
 import type { Enemy } from '../../core/types/enemy';
+import { isUnrestrictedMode } from './helpers';
 import type { GameStore, GameStoreGet, GameStoreSet } from './types';
 
 type MonsterActions = Pick<
@@ -28,7 +29,7 @@ export const createMonsterActions = (set: GameStoreSet, get: GameStoreGet): Mons
   openHatcheryModal: (buildingId) => {
     const current = get();
     const hatchery = current.engine.getState().buildings.find((building) => building.id === buildingId);
-    if (!hatchery || hatchery.type !== BUILDING_TYPES.ARMY_HATCHERY || hatchery.status !== 'ACTIVE') {
+    if (!hatchery || hatchery.type !== BUILDING_TYPES.ARMY_HATCHERY || hatchery.status !== 'ACTIVE' || hatchery.hp <= 0) {
       return;
     }
     set({ hatcheryModalBuildingId: buildingId });
@@ -42,6 +43,10 @@ export const createMonsterActions = (set: GameStoreSet, get: GameStoreGet): Mons
     if (!hatcheryId) {
       return;
     }
+    const hatchery = current.engine.getState().buildings.find((building) => building.id === hatcheryId);
+    if (!hatchery || hatchery.type !== BUILDING_TYPES.ARMY_HATCHERY || hatchery.status !== 'ACTIVE' || hatchery.hp <= 0) {
+      return;
+    }
     const monsterLevel = current.monsterLevels[monsterType] ?? 0;
     if (monsterLevel < 1) {
       return;
@@ -50,11 +55,12 @@ export const createMonsterActions = (set: GameStoreSet, get: GameStoreGet): Mons
     if (!levelSpec) {
       return;
     }
-    if (!current.freeBuildMode && current.resources.goo.current < levelSpec.gooCost) {
+    const trainingUnrestricted = isUnrestrictedMode(current);
+    if (!trainingUnrestricted && current.resources.goo.current < levelSpec.gooCost) {
       return;
     }
 
-    const nextResources = current.freeBuildMode
+    const nextResources = trainingUnrestricted
       ? current.resources
       : {
           ...current.resources,
@@ -84,17 +90,18 @@ export const createMonsterActions = (set: GameStoreSet, get: GameStoreGet): Mons
       (building) => building.id === current.hatcheryModalBuildingId && building.type === BUILDING_TYPES.ARMY_HATCHERY
     );
     const townHall = state.buildings.find((building) => building.type === BUILDING_TYPES.TOWN_HALL);
-    if (!lab || lab.status !== 'ACTIVE' || !townHall) {
+    if (!lab || lab.status !== 'ACTIVE' || lab.hp <= 0 || !townHall) {
       return false;
     }
     if (current.activeResearch.monsterType) {
       return false;
     }
 
+    const upgradeUnrestricted = isUnrestrictedMode(current);
     const currentLevel = current.monsterLevels[monsterType] ?? 0;
     const nextLevel = currentLevel + 1;
     const maxLevel = getMonsterMaxLevel(monsterType);
-    if (nextLevel > maxLevel) {
+    if (!upgradeUnrestricted && nextLevel > maxLevel) {
       return false;
     }
 
@@ -102,18 +109,21 @@ export const createMonsterActions = (set: GameStoreSet, get: GameStoreGet): Mons
     if (!nextLevelDef) {
       return false;
     }
-    if (lab.level < nextLevelDef.requiredLaboratoryLevel || townHall.level < nextLevelDef.requiredTownHallLevel) {
+    if (
+      !upgradeUnrestricted &&
+      (lab.level < nextLevelDef.requiredLaboratoryLevel || townHall.level < nextLevelDef.requiredTownHallLevel)
+    ) {
       return false;
     }
     if (
-      !current.freeBuildMode &&
+      !upgradeUnrestricted &&
       (current.resources.putty.current < nextLevelDef.researchCost.putty ||
         current.resources.pebbles.current < nextLevelDef.researchCost.pebbles)
     ) {
       return false;
     }
 
-    const nextResources = current.freeBuildMode
+    const nextResources = upgradeUnrestricted
       ? current.resources
       : {
           ...current.resources,
@@ -162,11 +172,12 @@ export const createMonsterActions = (set: GameStoreSet, get: GameStoreGet): Mons
       return;
     }
     const shinyCost = getInstantFinishShinyCost(remainingMs);
-    if (!current.developerModeEnabled && current.shiny < shinyCost) {
+    const finishUnrestricted = isUnrestrictedMode(current);
+    if (!finishUnrestricted && current.shiny < shinyCost) {
       return;
     }
     set({
-      shiny: current.developerModeEnabled ? current.shiny : Math.max(0, current.shiny - shinyCost),
+      shiny: finishUnrestricted ? current.shiny : Math.max(0, current.shiny - shinyCost),
       activeResearch: {
         ...current.activeResearch,
         endTime: Date.now(),

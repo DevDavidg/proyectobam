@@ -8,6 +8,7 @@ import {
   DEFAULT_MONSTER_LEVELS,
   INITIAL_UNLOCKED_GRID_SIZE,
   MAX_UNLOCKED_GRID_SIZE,
+  getRandomObstacleRespawnDelayMs,
   resolveWorkerHomeCells,
   engine,
   persistedState,
@@ -52,6 +53,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   projectiles: [],
   impacts: [],
   floatingTexts: [],
+  resourceOrbs: [],
   resources: engine.getState().resources,
   shiny: persistedShiny,
   workers: [
@@ -142,6 +144,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   lastCombatTick: Date.now(),
   lastConstructionTick: Date.now(),
   lastHatcheryTick: Date.now(),
+  nextObstacleRespawnAt: Date.now() + getRandomObstacleRespawnDelayMs(),
   ...createLifecycleActions(set, get),
   ...createCombatActions(set, get),
   ...createPlacementActions(set, get),

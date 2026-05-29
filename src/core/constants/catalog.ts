@@ -4,6 +4,7 @@ import type { ResourceType } from '../types/resources';
 import { getCannonTowerLevelSpec } from './cannon-tower-catalog';
 import { getGooFactoryLevelSpec, getGooFactoryProductionPerMs } from './goo-factory-catalog';
 import { getLaserTowerLevelSpec } from './laser-tower-catalog';
+import { getMonsterAcademyLevelSpec } from './monster-academy-catalog';
 import { getPebbleShinerLevelSpec, getPebbleShinerProductionPerMs } from './pebble-shiner-catalog';
 import { getPuttySquisherLevelSpec, getPuttySquisherProductionPerMs } from './putty-squisher-catalog';
 import { getSniperTowerLevelSpec } from './sniper-tower-catalog';
@@ -37,6 +38,7 @@ const storageSiloLevelOne = getStorageSiloLevelSpec(1);
 const sniperTowerLevelOne = getSniperTowerLevelSpec(1);
 const cannonTowerLevelOne = getCannonTowerLevelSpec(1);
 const laserTowerLevelOne = getLaserTowerLevelSpec(1);
+const monsterAcademyLevelOne = getMonsterAcademyLevelSpec(1);
 
 export const ENHANCED_BUILDING_CATALOG: Record<Exclude<BuildingType, 'PREVIEW'>, BuildingDefinition> = {
   TOWN_HALL: {
@@ -92,13 +94,14 @@ export const ENHANCED_BUILDING_CATALOG: Record<Exclude<BuildingType, 'PREVIEW'>,
   },
   RESOURCE_WOOD_SILO: {
     type: BUILDING_TYPES.RESOURCE_WOOD_SILO,
-    name: 'Storage Silo',
+    name: 'Storage Silo (legacy)',
     category: 'RESOURCES',
     cost: storageSiloLevelOne.upgradeCost,
     size: { x: 4, y: 4 },
     baseHp: storageSiloLevelOne.hp,
     constructionMs: storageSiloLevelOne.buildTimeMs,
     storage: getStorageSiloCapacity(1),
+    tags: ['legacy'],
   },
   RESOURCE_STONE_SILO: {
     type: BUILDING_TYPES.RESOURCE_STONE_SILO,
@@ -182,12 +185,12 @@ export const ENHANCED_BUILDING_CATALOG: Record<Exclude<BuildingType, 'PREVIEW'>,
   },
   ARMY_HATCHERY: {
     type: BUILDING_TYPES.ARMY_HATCHERY,
-    name: 'Laboratorio de Monstruos',
+    name: 'Monster Academy',
     category: 'ARMY',
-    cost: { twigs: 180, pebbles: 220, putty: 80, goo: 240 },
-    size: { x: 3, y: 3 },
-    baseHp: 1100,
-    constructionMs: 26000,
+    cost: monsterAcademyLevelOne.upgradeCost,
+    size: { x: 5, y: 5 },
+    baseHp: monsterAcademyLevelOne.hp,
+    constructionMs: monsterAcademyLevelOne.buildTimeMs,
   },
   ARMY_MONSTER_PEN: {
     type: BUILDING_TYPES.ARMY_MONSTER_PEN,

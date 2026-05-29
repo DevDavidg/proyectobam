@@ -29,6 +29,17 @@ const defaultTownHall: Omit<Building, 'id'> = {
 export const engine = new GameEngine(GRID_SIZE);
 export const persistedState = typeof window !== 'undefined' ? loadPersistedGameData() : null;
 export const persistedShiny = persistedState?.shiny ?? 140;
+export const INITIAL_OBSTACLE_SEED_COUNT = 9;
+export const OBSTACLE_RESPAWN_MIN_MS = 20 * 60 * 1000;
+export const OBSTACLE_RESPAWN_MAX_MS = 60 * 60 * 1000;
+export const OBSTACLE_RESPAWN_TARGET_COUNT = 36;
+const TOWN_HALL_SAFE_MIN = 6;
+const TOWN_HALL_SAFE_MAX = 13;
+const OBSTACLE_TYPES = [
+  BUILDING_TYPES.OBSTACLE_TREE,
+  BUILDING_TYPES.OBSTACLE_ROCK,
+  BUILDING_TYPES.OBSTACLE_MUSHROOM,
+] as const;
 
 if (persistedState) {
   engine.loadSnapshot(persistedState);
@@ -40,20 +51,15 @@ if (!engine.getState().buildings.some((building) => building.type === BUILDING_T
 if (!persistedState) {
   let seeded = 0;
   let attempts = 0;
-  while (seeded < 36 && attempts < 300) {
+  while (seeded < INITIAL_OBSTACLE_SEED_COUNT && attempts < 300) {
     attempts += 1;
     const x = Math.floor(Math.random() * GRID_SIZE);
     const y = Math.floor(Math.random() * GRID_SIZE);
-    const isNearTownHall = x >= 6 && x <= 13 && y >= 6 && y <= 13;
+    const isNearTownHall = x >= TOWN_HALL_SAFE_MIN && x <= TOWN_HALL_SAFE_MAX && y >= TOWN_HALL_SAFE_MIN && y <= TOWN_HALL_SAFE_MAX;
     if (isNearTownHall) {
       continue;
     }
-    const obstacleType =
-      seeded % 3 === 0
-        ? BUILDING_TYPES.OBSTACLE_TREE
-        : seeded % 3 === 1
-          ? BUILDING_TYPES.OBSTACLE_ROCK
-          : BUILDING_TYPES.OBSTACLE_MUSHROOM;
+    const obstacleType = OBSTACLE_TYPES[seeded % OBSTACLE_TYPES.length];
     const obstacleDef = ENHANCED_BUILDING_CATALOG[obstacleType];
     const placed = engine.placeBuilding({
       type: obstacleType,
@@ -77,6 +83,14 @@ export const world = createEcsWorld();
 export const INITIAL_UNLOCKED_GRID_SIZE = 14;
 export const MAX_UNLOCKED_GRID_SIZE = GRID_SIZE;
 export const MAX_WORKERS = 5;
+
+type UnrestrictedFlags = {
+  freeBuildMode?: boolean;
+  developerModeEnabled?: boolean;
+};
+
+export const isUnrestrictedMode = (flags: UnrestrictedFlags): boolean =>
+  Boolean(flags.freeBuildMode || flags.developerModeEnabled);
 export const createLandCellKey = (x: number, y: number): string => `${x},${y}`;
 export const getWorkerShinyCost = (nextWorkerNumber: number): number => {
   if (nextWorkerNumber <= 1) {
@@ -87,6 +101,12 @@ export const getWorkerShinyCost = (nextWorkerNumber: number): number => {
   }
   return 250 * 2 ** (nextWorkerNumber - 2);
 };
+
+export const OBSTACLE_CLEAR_SHINY_MIN = 0;
+export const OBSTACLE_CLEAR_SHINY_MAX = 50;
+
+export const rollObstacleClearShinyReward = (): number =>
+  OBSTACLE_CLEAR_SHINY_MIN + Math.floor(Math.random() * (OBSTACLE_CLEAR_SHINY_MAX - OBSTACLE_CLEAR_SHINY_MIN + 1));
 
 export const createInitialUnlockedLandCells = (unlockedGridSize: number): Record<string, true> => {
   const unlockedLandCells: Record<string, true> = {};
@@ -283,6 +303,48 @@ export const toCellCenter = (cell: GridPoint): { x: number; y: number } => ({
 });
 
 export const resolveResidentSpeed = (monsterType: MonsterType): number => (monsterType === 'Pokey' ? 1.1 : 0.9);
+
+export const getRandomObstacleRespawnDelayMs = (): number => {
+  const windowMs = OBSTACLE_RESPAWN_MAX_MS - OBSTACLE_RESPAWN_MIN_MS;
+  return OBSTACLE_RESPAWN_MIN_MS + Math.floor(Math.random() * (windowMs + 1));
+};
+
+export const trySpawnRandomObstacle = (
+  unlockedLandCells: Record<string, true>
+): boolean => {
+  let attempts = 0;
+  while (attempts < 120) {
+    attempts += 1;
+    const x = Math.floor(Math.random() * GRID_SIZE);
+    const y = Math.floor(Math.random() * GRID_SIZE);
+    const cellKey = createLandCellKey(x, y);
+    if (!unlockedLandCells[cellKey]) {
+      continue;
+    }
+    const isNearTownHall = x >= TOWN_HALL_SAFE_MIN && x <= TOWN_HALL_SAFE_MAX && y >= TOWN_HALL_SAFE_MIN && y <= TOWN_HALL_SAFE_MAX;
+    if (isNearTownHall) {
+      continue;
+    }
+    const obstacleType = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
+    const obstacleDef = ENHANCED_BUILDING_CATALOG[obstacleType];
+    const placed = engine.placeBuilding({
+      type: obstacleType,
+      level: 1,
+      x,
+      y,
+      sizeX: obstacleDef.size.x,
+      sizeY: obstacleDef.size.y,
+      hp: obstacleDef.baseHp,
+      maxHp: obstacleDef.baseHp,
+      status: 'ACTIVE',
+      tags: ['obstacle'],
+    });
+    if (placed) {
+      return true;
+    }
+  }
+  return false;
+};
 
 export const resolveWorkerHomeCells = (buildings: Building[], count: number): GridPoint[] => {
   const walkable = getWalkableGridFromState(buildings, GRID_SIZE);

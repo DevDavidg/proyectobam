@@ -44,7 +44,16 @@ const TownHallMeshImpl = ({ entity }: TownHallMeshProps) => {
   return (
     <group ref={groupRef} position={[position[0], 0, position[2]]} onContextMenu={handleContextMenu}>
       <BuildingDirtDecal sizeX={entity.sizeX} sizeY={entity.sizeY} status={entity.status} intensity={1.1} />
-      <BuildingPreviewVisual type="TOWN_HALL" level={effectiveLevel} sizeX={entity.sizeX} sizeY={entity.sizeY} cellSize={CELL_SIZE} />
+      <BuildingPreviewVisual
+        type="TOWN_HALL"
+        level={effectiveLevel}
+        sizeX={entity.sizeX}
+        sizeY={entity.sizeY}
+        cellSize={CELL_SIZE}
+        interactive
+        status={entity.status}
+        constructionProgress={entity.constructionProgress}
+      />
       {entity.status === 'UNDER_CONSTRUCTION' || entity.status === 'PENDING' ? (
         <ConstructionOverlay sizeX={entity.sizeX * CELL_SIZE} sizeY={entity.sizeY * CELL_SIZE} progress={entity.constructionProgress ?? 0} />
       ) : null}

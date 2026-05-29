@@ -30,6 +30,8 @@ export const ResourceHud = () => {
   const resources = useGameStore((state) => state.resources);
   const shiny = useGameStore((state) => state.shiny);
   const developerModeEnabled = useGameStore((state) => state.developerModeEnabled);
+  const freeBuildMode = useGameStore((state) => state.freeBuildMode);
+  const unlimitedShiny = developerModeEnabled || freeBuildMode;
   const landLevel = useGameStore((state) => state.landLevel);
   const maxLandLevel = useGameStore((state) => state.maxLandLevel);
   const engine = useGameStore((state) => state.engine);
@@ -125,7 +127,7 @@ export const ResourceHud = () => {
 
             <div className="bym-resource-chip mt-1 flex items-center justify-between px-2.5 py-1.5">
               <span className="bym-cartoon-text-sm text-[12px]">SHINY</span>
-              <span className="bym-cartoon-text-sm text-[12px]">{developerModeEnabled ? '∞' : formatValue(shiny)}</span>
+              <span className="bym-cartoon-text-sm text-[12px]">{unlimitedShiny ? '∞' : formatValue(shiny)}</span>
             </div>
           </div>
         </div>

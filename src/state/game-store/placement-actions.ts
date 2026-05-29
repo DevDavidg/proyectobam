@@ -14,6 +14,10 @@ import {
   getLaserTowerMaxLevel,
 } from "../../core/constants/laser-tower-catalog";
 import {
+  getMonsterAcademyLevelSpec,
+  getMonsterAcademyMaxLevel,
+} from "../../core/constants/monster-academy-catalog";
+import {
   getPebbleShinerLevelSpec,
   getPebbleShinerMaxLevel,
   getPebbleShinerProductionPerMs,
@@ -44,7 +48,7 @@ import {
 import { BUILDING_TYPES, type Building } from "../../core/types/building";
 import { runPreviewUpdateSystem } from "../../ecs/systems/preview-update-system";
 import { clearPersistedGameData, savePersistedGameData } from "../persistence";
-import { isWithinUnlockedArea, spendResources } from "./helpers";
+import { isUnrestrictedMode, isWithinUnlockedArea, spendResources } from "./helpers";
 import type {
   GameStore,
   GameStoreGet,
@@ -79,6 +83,7 @@ type PlacementActions = Pick<
   | "upgradeSelectedBuilding"
   | "repairSelectedBuilding"
   | "fortifySelectedBuilding"
+  | "recycleSelectedBuilding"
 >;
 
 const rectanglesOverlap = (
@@ -193,6 +198,7 @@ export const createPlacementActions = (
       return;
     }
     if (
+      !isUnrestrictedMode(current) &&
       !isWithinUnlockedArea(
         x,
         y,
@@ -488,6 +494,7 @@ export const createPlacementActions = (
       movingBuildingOrigin: null,
       activeCell: null,
       placementValid: false,
+      placementEnabled: false,
     });
     current.refreshEcs();
   },
@@ -564,53 +571,77 @@ export const createPlacementActions = (
       return;
     }
     const nextLevel = building.level + 1;
+    const unrestricted = isUnrestrictedMode(current);
     if (
+      !unrestricted &&
       building.type === BUILDING_TYPES.RESOURCE_TWIG_COLLECTOR &&
       building.level >= getTwigSnapperMaxLevel()
     ) {
       return;
     }
     if (
+      !unrestricted &&
       building.type === BUILDING_TYPES.RESOURCE_GOO_COLLECTOR &&
       building.level >= getGooFactoryMaxLevel()
     ) {
       return;
     }
     if (
+      !unrestricted &&
       building.type === BUILDING_TYPES.RESOURCE_PEBBLE_COLLECTOR &&
       building.level >= getPebbleShinerMaxLevel()
     ) {
       return;
     }
     if (
+      !unrestricted &&
       building.type === BUILDING_TYPES.RESOURCE_PUTTY_COLLECTOR &&
       building.level >= getPuttySquisherMaxLevel()
     ) {
       return;
     }
     if (
+      !unrestricted &&
       (building.type === BUILDING_TYPES.RESOURCE_WOOD_SILO || building.type === BUILDING_TYPES.RESOURCE_STONE_SILO) &&
       building.level >= getStorageSiloMaxLevel()
     ) {
       return;
     }
     if (
+      !unrestricted &&
       building.type === BUILDING_TYPES.DEFENSE_TURRET_RAPID &&
       building.level >= getSniperTowerMaxLevel()
     ) {
       return;
     }
     if (
+      !unrestricted &&
       building.type === BUILDING_TYPES.DEFENSE_LASER_TOWER &&
       building.level >= getLaserTowerMaxLevel()
     ) {
       return;
     }
     if (
+      !unrestricted &&
       building.type === BUILDING_TYPES.DEFENSE_MORTAR &&
       building.level >= getCannonTowerMaxLevel()
     ) {
       return;
+    }
+    if (
+      !unrestricted &&
+      building.type === BUILDING_TYPES.ARMY_HATCHERY &&
+      building.level >= getMonsterAcademyMaxLevel()
+    ) {
+      return;
+    }
+    if (!unrestricted && building.type === BUILDING_TYPES.ARMY_HATCHERY) {
+      const hasPendingTraining = (current.hatcheryTrainingQueues[building.id] ?? []).length > 0;
+      const hasActiveResearchInAcademy =
+        current.activeResearch.labId === building.id && !!current.activeResearch.monsterType;
+      if (hasPendingTraining || hasActiveResearchInAcademy) {
+        return;
+      }
     }
     const nextTwigSnapperSpec =
       building.type === BUILDING_TYPES.RESOURCE_TWIG_COLLECTOR
@@ -644,6 +675,10 @@ export const createPlacementActions = (
       building.type === BUILDING_TYPES.DEFENSE_MORTAR
         ? getCannonTowerLevelSpec(nextLevel)
         : null;
+    const nextMonsterAcademySpec =
+      building.type === BUILDING_TYPES.ARMY_HATCHERY
+        ? getMonsterAcademyLevelSpec(nextLevel)
+        : null;
     const requiredTownHallLevel =
       building.type === BUILDING_TYPES.TOWN_HALL
         ? nextLevel - 1
@@ -655,9 +690,22 @@ export const createPlacementActions = (
           nextSniperTowerSpec?.requiredTownHallLevel ??
           nextLaserTowerSpec?.requiredTownHallLevel ??
           nextCannonTowerSpec?.requiredTownHallLevel ??
+          nextMonsterAcademySpec?.requiredTownHallLevel ??
           nextLevel;
-    if (townHall.level < requiredTownHallLevel) {
+    if (!unrestricted && townHall.level < requiredTownHallLevel) {
       return;
+    }
+    if (!unrestricted && nextMonsterAcademySpec) {
+      const highestMonsterPenLevel = state.buildings
+        .filter(
+          (item) =>
+            item.type === BUILDING_TYPES.ARMY_MONSTER_PEN &&
+            (item.status === "ACTIVE" || item.status === "UNDER_CONSTRUCTION"),
+        )
+        .reduce((maxLevel, item) => Math.max(maxLevel, item.level), 0);
+      if (highestMonsterPenLevel < nextMonsterAcademySpec.requiredMonsterPenLevel) {
+        return;
+      }
     }
     const baseCost = ENHANCED_BUILDING_CATALOG[building.type].cost;
     const upgradeCost = nextTwigSnapperSpec?.upgradeCost ??
@@ -667,14 +715,15 @@ export const createPlacementActions = (
       nextStorageSiloSpec?.upgradeCost ??
       nextSniperTowerSpec?.upgradeCost ??
       nextLaserTowerSpec?.upgradeCost ??
-      nextCannonTowerSpec?.upgradeCost ?? {
-      twigs: Math.round(baseCost.twigs * (1 + nextLevel * 0.55)),
-      pebbles: Math.round(baseCost.pebbles * (1 + nextLevel * 0.55)),
-      putty: Math.round(baseCost.putty * (1 + nextLevel * 0.55)),
-      goo: Math.round(baseCost.goo * (1 + nextLevel * 0.55)),
-    };
+      nextCannonTowerSpec?.upgradeCost ??
+      nextMonsterAcademySpec?.upgradeCost ?? {
+        twigs: Math.round(baseCost.twigs * (1 + nextLevel * 0.55)),
+        pebbles: Math.round(baseCost.pebbles * (1 + nextLevel * 0.55)),
+        putty: Math.round(baseCost.putty * (1 + nextLevel * 0.55)),
+        goo: Math.round(baseCost.goo * (1 + nextLevel * 0.55)),
+      };
     const canAfford =
-      current.freeBuildMode ||
+      unrestricted ||
       (current.resources.twigs.current >= upgradeCost.twigs &&
         current.resources.pebbles.current >= upgradeCost.pebbles &&
         current.resources.putty.current >= upgradeCost.putty &&
@@ -682,7 +731,7 @@ export const createPlacementActions = (
     if (!canAfford) {
       return;
     }
-    const nextResources = current.freeBuildMode
+    const nextResources = unrestricted
       ? current.resources
       : spendResources(current.resources, upgradeCost);
     current.engine.setResources(nextResources);
@@ -702,6 +751,8 @@ export const createPlacementActions = (
         ? nextLaserTowerSpec.buildTimeMs
       : nextCannonTowerSpec
         ? nextCannonTowerSpec.buildTimeMs
+      : nextMonsterAcademySpec
+        ? nextMonsterAcademySpec.buildTimeMs
       : 12000 + nextLevel * 2500;
     const nextMaxHp = nextTwigSnapperSpec
       ? nextTwigSnapperSpec.hp
@@ -719,6 +770,8 @@ export const createPlacementActions = (
         ? nextLaserTowerSpec.hp
       : nextCannonTowerSpec
         ? nextCannonTowerSpec.hp
+      : nextMonsterAcademySpec
+        ? nextMonsterAcademySpec.hp
       : Math.round(building.maxHp * 1.35);
     const nextProductionPerMs = nextTwigSnapperSpec
       ? getTwigSnapperProductionPerMs(nextLevel)
@@ -812,20 +865,25 @@ export const createPlacementActions = (
       building.type === BUILDING_TYPES.DEFENSE_MORTAR
         ? getCannonTowerLevelSpec(building.level)
         : null;
+    const monsterAcademySpec =
+      building.type === BUILDING_TYPES.ARMY_HATCHERY
+        ? getMonsterAcademyLevelSpec(building.level)
+        : null;
     const repairCost = {
       twigs: Math.round(baseCost.twigs * missingRatio * 0.45),
       pebbles: Math.round(baseCost.pebbles * missingRatio * 0.45),
       putty: Math.round(baseCost.putty * missingRatio * 0.45),
       goo: Math.round(baseCost.goo * missingRatio * 0.45),
     };
+    const repairUnrestricted = isUnrestrictedMode(current);
     const idleWorker = current.workers.find(
       (worker) => worker.state === "IDLE",
     );
-    if (!idleWorker) {
+    if (!repairUnrestricted && !idleWorker) {
       return;
     }
     const canAfford =
-      current.freeBuildMode ||
+      repairUnrestricted ||
       (current.resources.twigs.current >= repairCost.twigs &&
         current.resources.pebbles.current >= repairCost.pebbles &&
         current.resources.putty.current >= repairCost.putty &&
@@ -833,7 +891,7 @@ export const createPlacementActions = (
     if (!canAfford) {
       return;
     }
-    const nextResources = current.freeBuildMode
+    const nextResources = repairUnrestricted
       ? current.resources
       : spendResources(current.resources, repairCost);
     current.engine.setResources(nextResources);
@@ -841,7 +899,7 @@ export const createPlacementActions = (
       ...item,
       status: "PENDING",
       buildStartedAt: Date.now(),
-      buildEndsAt: Date.now() + (twigSnapperSpec?.repairTimeMs ?? gooFactorySpec?.repairTimeMs ?? pebbleShinerSpec?.repairTimeMs ?? puttySquisherSpec?.repairTimeMs ?? storageSiloSpec?.repairTimeMs ?? sniperTowerSpec?.repairTimeMs ?? laserTowerSpec?.repairTimeMs ?? cannonTowerSpec?.repairTimeMs ?? 6000),
+      buildEndsAt: Date.now() + (twigSnapperSpec?.repairTimeMs ?? gooFactorySpec?.repairTimeMs ?? pebbleShinerSpec?.repairTimeMs ?? puttySquisherSpec?.repairTimeMs ?? storageSiloSpec?.repairTimeMs ?? sniperTowerSpec?.repairTimeMs ?? laserTowerSpec?.repairTimeMs ?? cannonTowerSpec?.repairTimeMs ?? monsterAcademySpec?.repairTimeMs ?? 6000),
     }));
     set({ resources: nextResources });
     current.tickConstruction();
@@ -863,15 +921,16 @@ export const createPlacementActions = (
     if (!building || !townHall) {
       return;
     }
+    const fortifyUnrestricted = isUnrestrictedMode(current);
     if (
-      townHall.level < 5 ||
       building.type !== BUILDING_TYPES.TOWN_HALL ||
-      building.status !== "ACTIVE"
+      building.status !== "ACTIVE" ||
+      (!fortifyUnrestricted && townHall.level < 5)
     ) {
       return;
     }
     const fortificationLevel = building.fortificationLevel ?? 0;
-    if (fortificationLevel >= 3) {
+    if (!fortifyUnrestricted && fortificationLevel >= 3) {
       return;
     }
     const nextFortificationLevel = fortificationLevel + 1;
@@ -883,7 +942,7 @@ export const createPlacementActions = (
       goo: Math.round(180 + baseCost.goo * nextFortificationLevel * 3),
     };
     const canAfford =
-      current.freeBuildMode ||
+      fortifyUnrestricted ||
       (current.resources.twigs.current >= fortifyCost.twigs &&
         current.resources.pebbles.current >= fortifyCost.pebbles &&
         current.resources.putty.current >= fortifyCost.putty &&
@@ -891,7 +950,7 @@ export const createPlacementActions = (
     if (!canAfford) {
       return;
     }
-    const nextResources = current.freeBuildMode
+    const nextResources = fortifyUnrestricted
       ? current.resources
       : spendResources(current.resources, fortifyCost);
     current.engine.setResources(nextResources);
@@ -906,6 +965,85 @@ export const createPlacementActions = (
       };
     });
     set({ resources: nextResources });
+    current.refreshEcs();
+  },
+  recycleSelectedBuilding: () => {
+    const current = get();
+    const selectedBuildingId = current.selectedBuildingId;
+    if (!selectedBuildingId) {
+      return;
+    }
+    const state = current.engine.getState();
+    const building = state.buildings.find((item) => item.id === selectedBuildingId);
+    if (!building || building.type !== BUILDING_TYPES.ARMY_HATCHERY) {
+      return;
+    }
+    if (building.status !== 'ACTIVE' || building.hp <= 0) {
+      return;
+    }
+    const hasPendingTraining = (current.hatcheryTrainingQueues[building.id] ?? []).length > 0;
+    const hasActiveResearchInAcademy =
+      current.activeResearch.labId === building.id && !!current.activeResearch.monsterType;
+    if (hasPendingTraining || hasActiveResearchInAcademy) {
+      return;
+    }
+
+    const catalogEntry = ENHANCED_BUILDING_CATALOG[building.type];
+    const baseCost = catalogEntry?.cost ?? { twigs: 0, pebbles: 0, putty: 0, goo: 0 };
+    const refund = {
+      twigs: Math.floor(baseCost.twigs * 0.5),
+      pebbles: Math.floor(baseCost.pebbles * 0.5),
+      putty: Math.floor(baseCost.putty * 0.5),
+      goo: Math.floor(baseCost.goo * 0.5),
+    };
+    const nextResources = {
+      twigs: {
+        ...current.resources.twigs,
+        current: Math.min(current.resources.twigs.max, current.resources.twigs.current + refund.twigs),
+      },
+      pebbles: {
+        ...current.resources.pebbles,
+        current: Math.min(current.resources.pebbles.max, current.resources.pebbles.current + refund.pebbles),
+      },
+      putty: {
+        ...current.resources.putty,
+        current: Math.min(current.resources.putty.max, current.resources.putty.current + refund.putty),
+      },
+      goo: {
+        ...current.resources.goo,
+        current: Math.min(current.resources.goo.max, current.resources.goo.current + refund.goo),
+      },
+    };
+
+    const removeOk = current.engine.removeBuilding(building.id);
+    if (!removeOk) {
+      return;
+    }
+    current.engine.setResources(nextResources);
+
+    const nextTrainingQueues = { ...current.hatcheryTrainingQueues };
+    delete nextTrainingQueues[building.id];
+
+    set({
+      resources: nextResources,
+      hatcheryTrainingQueues: nextTrainingQueues,
+      activeResearch:
+        current.activeResearch.labId === building.id
+          ? {
+              monsterType: null,
+              endTime: null,
+              durationTotal: 0,
+              startedAt: null,
+              targetLevel: null,
+              labId: null,
+            }
+          : current.activeResearch,
+      hatcheryModalBuildingId:
+        current.hatcheryModalBuildingId === building.id ? null : current.hatcheryModalBuildingId,
+      selectedBuildingId: null,
+      buildingContextMenuPosition: null,
+    });
+    current.recalculateMaxCapacities();
     current.refreshEcs();
   },
 });

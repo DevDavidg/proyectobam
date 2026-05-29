@@ -7,10 +7,41 @@ import { useGameStore } from '../../state/game-store';
 import type { RenderEntitySnapshot } from '../../ecs/systems/sync-grid-system';
 import type { Worker } from '../../state/game-store/types';
 import { CELL_SIZE, GRID_SIZE, gridToWorldCenter } from '../../utils/coordinates';
+import { computeTownHallDoorWorld } from '../entities/town-hall-visual/world-anchors';
+import {
+  applyWalkPose,
+  applyWorkingPose,
+  hideWorkParticles,
+  stepFractionTowards,
+  type WorkerAnimRefs,
+} from './worker-animation';
+
+type DoorWorldPosition = {
+  x: number;
+  z: number;
+};
 
 type WorkerMeshProps = {
   worker: Worker;
   targetBuilding?: RenderEntitySnapshot;
+  doorWorldPosition: DoorWorldPosition | null;
+};
+
+const EMERGE_DURATION_MS = 1100;
+const ENTER_DURATION_MS = 1100;
+const DOOR_INSIDE_DEPTH = 0.7;
+const DOOR_OUTSIDE_OFFSET = 0.12;
+const EMERGE_SCALE_END = 0.18;
+const EMERGE_THROUGH_DOOR_END = 0.62;
+const ENTER_THROUGH_DOOR_START = 0.45;
+const ENTER_SCALE_START = 0.84;
+
+const easeInOutCubic = (t: number): number => t * t * (3 - 2 * t);
+const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+
+type TransitionState = {
+  type: 'emerging' | 'entering';
+  startedAt: number;
 };
 
 const WORKER_LINES = {
@@ -74,9 +105,10 @@ const normalizeAngle = (angle: number): number => {
   return normalized;
 };
 
-const WorkerMesh = ({ worker, targetBuilding }: WorkerMeshProps) => {
+const WorkerMesh = ({ worker, targetBuilding, doorWorldPosition }: WorkerMeshProps) => {
   const rootRef = useRef<Group>(null);
   const torsoRef = useRef<Group>(null);
+  const headRef = useRef<Group>(null);
   const leftArmRef = useRef<Group>(null);
   const rightArmRef = useRef<Group>(null);
   const leftLegRef = useRef<Group>(null);
@@ -85,6 +117,14 @@ const WorkerMesh = ({ worker, targetBuilding }: WorkerMeshProps) => {
   const workParticleRefs = useRef<Array<Mesh | null>>([]);
   const animationOffset = useMemo(() => Math.random() * Math.PI * 2, []);
   const previousStateRef = useRef(worker.state);
+  const transitionRef = useRef<TransitionState | null>(null);
+  const renderPositionRef = useRef<{ x: number; z: number } | null>(null);
+  const lastRenderPositionRef = useRef<{ x: number; z: number } | null>(null);
+  const renderHeadingRef = useRef<number | null>(null);
+  const walkPhaseRef = useRef<number>(0);
+  const walkWeightRef = useRef<number>(0);
+  const workWeightRef = useRef<number>(0);
+  const renderSpeedRef = useRef<number>(0);
   const nextAmbientLineAtRef = useRef<number>(Date.now() + 3500 + Math.random() * 3500);
   const lastSfxAtRef = useRef<number>(0);
   const [speechLine, setSpeechLine] = useState<string>('');
@@ -123,6 +163,11 @@ const WorkerMesh = ({ worker, targetBuilding }: WorkerMeshProps) => {
     if (previous === worker.state) {
       return;
     }
+    if (previous === 'IDLE' && worker.state === 'MOVING_TO_TASK') {
+      transitionRef.current = { type: 'emerging', startedAt: performance.now() };
+    } else if (worker.state === 'IDLE' && previous !== 'IDLE') {
+      transitionRef.current = { type: 'entering', startedAt: performance.now() };
+    }
     if (worker.state === 'MOVING_TO_TASK' || worker.state === 'RETURNING') {
       pushSpeech(pickRandomLine(WORKER_LINES.walking), worker.state);
     } else if (worker.state === 'WORKING') {
@@ -133,9 +178,182 @@ const WorkerMesh = ({ worker, targetBuilding }: WorkerMeshProps) => {
     previousStateRef.current = worker.state;
   }, [worker.state]);
 
-  useFrame((state) => {
+  useFrame((state, rawDelta) => {
+    if (!rootRef.current) {
+      return;
+    }
+
+    const dt = Math.max(0, Math.min(0.05, rawDelta));
+    const transition = transitionRef.current;
+    const door = doorWorldPosition;
+    const performanceNow = performance.now();
+
+    let targetX = worldX;
+    let targetZ = worldZ;
+    let snapPosition = false;
+    let visibleNow = true;
+    let scaleNow = 1;
+
+    if (transition && door) {
+      const elapsed = performanceNow - transition.startedAt;
+      const duration = transition.type === 'emerging' ? EMERGE_DURATION_MS : ENTER_DURATION_MS;
+      const insideX = door.x;
+      const insideZ = door.z - DOOR_INSIDE_DEPTH;
+      const outsideX = door.x;
+      const outsideZ = door.z + DOOR_OUTSIDE_OFFSET;
+
+      if (elapsed >= duration) {
+        transitionRef.current = null;
+        if (transition.type === 'entering') {
+          visibleNow = false;
+          scaleNow = 0.0001;
+          targetX = insideX;
+          targetZ = insideZ;
+          snapPosition = true;
+        } else {
+          targetX = worldX;
+          targetZ = worldZ;
+          snapPosition = true;
+        }
+      } else {
+        const progress = elapsed / duration;
+        if (transition.type === 'emerging') {
+          if (progress < EMERGE_SCALE_END) {
+            const localT = easeOutCubic(progress / EMERGE_SCALE_END);
+            scaleNow = localT;
+            targetX = insideX;
+            targetZ = insideZ;
+          } else if (progress < EMERGE_THROUGH_DOOR_END) {
+            const localT = easeInOutCubic(
+              (progress - EMERGE_SCALE_END) / (EMERGE_THROUGH_DOOR_END - EMERGE_SCALE_END),
+            );
+            scaleNow = 1;
+            targetX = insideX + (outsideX - insideX) * localT;
+            targetZ = insideZ + (outsideZ - insideZ) * localT;
+          } else {
+            const localT = easeInOutCubic(
+              (progress - EMERGE_THROUGH_DOOR_END) / (1 - EMERGE_THROUGH_DOOR_END),
+            );
+            scaleNow = 1;
+            targetX = outsideX + (worldX - outsideX) * localT;
+            targetZ = outsideZ + (worldZ - outsideZ) * localT;
+          }
+        } else if (progress < ENTER_THROUGH_DOOR_START) {
+          const localT = easeInOutCubic(progress / ENTER_THROUGH_DOOR_START);
+          scaleNow = 1;
+          targetX = worldX + (outsideX - worldX) * localT;
+          targetZ = worldZ + (outsideZ - worldZ) * localT;
+        } else if (progress < ENTER_SCALE_START) {
+          const localT = easeInOutCubic(
+            (progress - ENTER_THROUGH_DOOR_START) / (ENTER_SCALE_START - ENTER_THROUGH_DOOR_START),
+          );
+          scaleNow = 1;
+          targetX = outsideX + (insideX - outsideX) * localT;
+          targetZ = outsideZ + (insideZ - outsideZ) * localT;
+        } else {
+          const localT = easeInOutCubic((progress - ENTER_SCALE_START) / (1 - ENTER_SCALE_START));
+          scaleNow = Math.max(0.0001, 1 - localT);
+          targetX = insideX;
+          targetZ = insideZ;
+        }
+        snapPosition = true;
+      }
+    } else if (worker.state === 'IDLE') {
+      visibleNow = false;
+    }
+
+    if (!visibleNow) {
+      rootRef.current.visible = false;
+      rootRef.current.scale.setScalar(scaleNow);
+      renderPositionRef.current = null;
+      lastRenderPositionRef.current = null;
+      renderHeadingRef.current = null;
+      walkWeightRef.current = 0;
+      workWeightRef.current = 0;
+      renderSpeedRef.current = 0;
+      walkPhaseRef.current = 0;
+      hideWorkParticles(workParticleRefs.current);
+      return;
+    }
+
+    rootRef.current.visible = true;
+    rootRef.current.scale.setScalar(scaleNow);
+
+    const previousRender = renderPositionRef.current;
+    let renderX: number;
+    let renderZ: number;
+    if (snapPosition || !previousRender) {
+      renderX = targetX;
+      renderZ = targetZ;
+    } else {
+      const positionLerp = stepFractionTowards(dt, 14);
+      renderX = previousRender.x + (targetX - previousRender.x) * positionLerp;
+      renderZ = previousRender.z + (targetZ - previousRender.z) * positionLerp;
+    }
+    renderPositionRef.current = { x: renderX, z: renderZ };
+    rootRef.current.position.set(renderX, 0, renderZ);
+
+    const lastRender = lastRenderPositionRef.current;
+    let frameSpeed = renderSpeedRef.current;
+    if (lastRender && dt > 0) {
+      const dx = renderX - lastRender.x;
+      const dz = renderZ - lastRender.z;
+      const instSpeed = Math.hypot(dx, dz) / dt;
+      const speedLerp = stepFractionTowards(dt, 8);
+      frameSpeed = frameSpeed + (instSpeed - frameSpeed) * speedLerp;
+    }
+    renderSpeedRef.current = frameSpeed;
+    lastRenderPositionRef.current = { x: renderX, z: renderZ };
+
+    const wantsWalk = !isWorking && frameSpeed > 0.45;
+    const targetWalkWeight = wantsWalk ? 1 : 0;
+    walkWeightRef.current += (targetWalkWeight - walkWeightRef.current) * stepFractionTowards(dt, 7);
+    const walkWeight = walkWeightRef.current;
+
+    const targetWorkWeight = isWorking ? 1 : 0;
+    workWeightRef.current += (targetWorkWeight - workWeightRef.current) * stepFractionTowards(dt, 7);
+    const workWeight = workWeightRef.current;
+
+    const minWalkPhaseSpeed = 2.4;
+    const maxWalkPhaseSpeed = 11;
+    const speedDrivenPhase = Math.min(
+      maxWalkPhaseSpeed,
+      Math.max(minWalkPhaseSpeed, frameSpeed * 3.0),
+    );
+    const phaseSpeed = walkWeight > 0.05 ? speedDrivenPhase : minWalkPhaseSpeed * 0.25;
+    walkPhaseRef.current = (walkPhaseRef.current + phaseSpeed * dt) % (Math.PI * 2);
+
+    let effectiveHeading = desiredHeading;
+    if (transition && door) {
+      const refX = renderX;
+      const refZ = renderZ;
+      if (transition.type === 'entering') {
+        const targetHeadingX = door.x - refX;
+        const targetHeadingZ = door.z - DOOR_INSIDE_DEPTH - refZ;
+        if (Math.hypot(targetHeadingX, targetHeadingZ) > 0.05) {
+          effectiveHeading = Math.atan2(targetHeadingX, targetHeadingZ);
+        }
+      } else if (transition.type === 'emerging') {
+        const elapsed = performanceNow - transition.startedAt;
+        const progress = elapsed / EMERGE_DURATION_MS;
+        if (progress < EMERGE_THROUGH_DOOR_END) {
+          const targetHeadingX = door.x - refX;
+          const targetHeadingZ = door.z + DOOR_OUTSIDE_OFFSET - refZ;
+          if (Math.hypot(targetHeadingX, targetHeadingZ) > 0.05) {
+            effectiveHeading = Math.atan2(targetHeadingX, targetHeadingZ);
+          }
+        }
+      }
+    }
+
+    const previousHeading = renderHeadingRef.current ?? effectiveHeading;
+    const angDelta = normalizeAngle(effectiveHeading - previousHeading);
+    const headingLerp = stepFractionTowards(dt, 9);
+    const nextHeading = previousHeading + angDelta * headingLerp;
+    renderHeadingRef.current = nextHeading;
+    rootRef.current.rotation.y = nextHeading;
+
     if (
-      !rootRef.current ||
       !torsoRef.current ||
       !leftArmRef.current ||
       !rightArmRef.current ||
@@ -155,89 +373,56 @@ const WorkerMesh = ({ worker, targetBuilding }: WorkerMeshProps) => {
       nextAmbientLineAtRef.current = nowMs + 6000 + Math.random() * 5000;
     }
 
-    const t = state.clock.elapsedTime + animationOffset;
-    if (rootRef.current) {
-      const currentHeading = normalizeAngle(rootRef.current.rotation.y);
-      const nextHeading = currentHeading + normalizeAngle(desiredHeading - currentHeading) * 0.22;
-      rootRef.current.rotation.y = nextHeading;
-    }
-    if (isMoving) {
-      const walkSpeed = isReturning ? 7.4 : 10;
-      const legSwing = Math.sin(t * walkSpeed) * (isReturning ? 0.4 : 0.55);
-      const armSwing = Math.sin(t * walkSpeed + Math.PI) * (isReturning ? 0.22 : 0.45);
-      const bobAmplitude = isReturning ? 0.025 : 0.035;
-      const baseHeight = isReturning ? 0.52 : 0.6;
-      torsoRef.current.position.y = baseHeight + Math.sin(t * walkSpeed * 2) * bobAmplitude;
-      torsoRef.current.rotation.x = isReturning ? 0.28 : 0;
-      torsoRef.current.rotation.z = Math.sin(t * walkSpeed) * (isReturning ? 0.1 : 0.06);
-      leftLegRef.current.rotation.x = legSwing;
-      rightLegRef.current.rotation.x = -legSwing;
-      leftArmRef.current.rotation.x = -armSwing + (isReturning ? 0.55 : 0);
-      rightArmRef.current.rotation.x = armSwing + (isReturning ? 0.55 : 0);
-      toolRef.current.rotation.z = Math.sin(t * walkSpeed) * (isReturning ? 0.05 : 0.25);
-      return;
-    }
+    const ambientTime = state.clock.elapsedTime + animationOffset;
+    const animRefs: WorkerAnimRefs = {
+      torso: torsoRef.current,
+      leftArm: leftArmRef.current,
+      rightArm: rightArmRef.current,
+      leftLeg: leftLegRef.current,
+      rightLeg: rightLegRef.current,
+      tool: toolRef.current,
+      head: headRef.current,
+    };
 
-    if (isWorking) {
-      const hammerSwing = Math.sin(t * 7) * 0.9;
-      torsoRef.current.position.y = 0.58 + Math.sin(t * 7) * 0.015;
-      torsoRef.current.rotation.x = 0.18;
-      leftLegRef.current.rotation.x = 0.1;
-      rightLegRef.current.rotation.x = -0.1;
-      leftArmRef.current.rotation.x = 0.2;
-      rightArmRef.current.rotation.x = -1.1 + hammerSwing;
-      toolRef.current.rotation.z = -0.2 + Math.sin(t * 14) * 0.45;
-      torsoRef.current.rotation.z = Math.sin(t * 7) * 0.04;
-      workParticleRefs.current.forEach((particle, index) => {
-        if (!particle) {
-          return;
-        }
-        const phase = t * 4 + index * 1.2;
-        const lateral = Math.sin(phase) * 0.08;
-        const forward = 0.22 + Math.abs(Math.cos(phase * 1.35)) * 0.15;
-        particle.visible = true;
-        particle.position.set(lateral, 0.14 + Math.abs(Math.sin(phase * 1.4)) * 0.32, forward);
-        const scale = 0.04 + Math.abs(Math.sin(phase * 2)) * 0.03;
-        particle.scale.setScalar(scale);
+    if (workWeight > 0.01) {
+      applyWorkingPose(
+        animRefs,
+        { time: ambientTime, weight: workWeight },
+        workParticleRefs.current,
+      );
+    } else {
+      applyWalkPose(animRefs, {
+        phase: walkPhaseRef.current,
+        weight: walkWeight,
+        isReturning,
+        speed: frameSpeed,
+        ambientTime,
       });
-      return;
+      hideWorkParticles(workParticleRefs.current);
     }
-
-    torsoRef.current.position.y = 0.6 + Math.sin(t * 2.5) * 0.02;
-    torsoRef.current.rotation.x = 0;
-    torsoRef.current.rotation.z = 0;
-    leftLegRef.current.rotation.x = 0;
-    rightLegRef.current.rotation.x = 0;
-    leftArmRef.current.rotation.x = Math.sin(t * 2.2) * 0.08;
-    rightArmRef.current.rotation.x = -Math.sin(t * 2.2) * 0.08;
-    toolRef.current.rotation.z = 0;
-    workParticleRefs.current.forEach((particle) => {
-      if (!particle) {
-        return;
-      }
-      particle.visible = false;
-    });
   });
 
   return (
-    <group ref={rootRef} position={[worldX, 0, worldZ]}>
+    <group ref={rootRef} position={[worldX, 0, worldZ]} visible={worker.state !== 'IDLE'}>
       <group ref={torsoRef} position={[0, 0.6, 0]}>
         <mesh castShadow receiveShadow position={[0, 0.25, 0]}>
           <capsuleGeometry args={[0.17, 0.25, 6, 12]} />
           <meshStandardMaterial color="#3b82f6" roughness={0.45} metalness={0.08} />
         </mesh>
-        <mesh castShadow receiveShadow position={[0, 0.58, 0]}>
-          <sphereGeometry args={[0.17, 16, 16]} />
-          <meshStandardMaterial color="#60a5fa" roughness={0.4} metalness={0.05} />
-        </mesh>
-        <mesh castShadow receiveShadow position={[0.06, 0.6, 0.15]}>
-          <sphereGeometry args={[0.03, 10, 10]} />
-          <meshStandardMaterial color="#e5e7eb" emissive="#1d4ed8" emissiveIntensity={0.5} />
-        </mesh>
-        <mesh castShadow receiveShadow position={[-0.06, 0.6, 0.15]}>
-          <sphereGeometry args={[0.03, 10, 10]} />
-          <meshStandardMaterial color="#e5e7eb" emissive="#1d4ed8" emissiveIntensity={0.5} />
-        </mesh>
+        <group ref={headRef} position={[0, 0.58, 0]}>
+          <mesh castShadow receiveShadow>
+            <sphereGeometry args={[0.17, 16, 16]} />
+            <meshStandardMaterial color="#60a5fa" roughness={0.4} metalness={0.05} />
+          </mesh>
+          <mesh castShadow receiveShadow position={[0.06, 0.02, 0.15]}>
+            <sphereGeometry args={[0.03, 10, 10]} />
+            <meshStandardMaterial color="#e5e7eb" emissive="#1d4ed8" emissiveIntensity={0.5} />
+          </mesh>
+          <mesh castShadow receiveShadow position={[-0.06, 0.02, 0.15]}>
+            <sphereGeometry args={[0.03, 10, 10]} />
+            <meshStandardMaterial color="#e5e7eb" emissive="#1d4ed8" emissiveIntensity={0.5} />
+          </mesh>
+        </group>
         <mesh castShadow receiveShadow position={[0, 0.25, -0.14]}>
           <boxGeometry args={[0.2, 0.2, 0.1]} />
           <meshStandardMaterial color="#1e3a8a" roughness={0.7} />
@@ -354,6 +539,17 @@ export const WorkersLayer = () => {
     [entities]
   );
 
+  const doorWorldPosition = useMemo<DoorWorldPosition | null>(() => {
+    const townHall = entities.find(
+      (entity) => entity.kind === EntityType.TOWN_HALL && entity.status !== 'DESTROYED'
+    );
+    if (!townHall) {
+      return null;
+    }
+    const anchor = computeTownHallDoorWorld(townHall);
+    return { x: anchor.x, z: anchor.z };
+  }, [entities]);
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -374,7 +570,12 @@ export const WorkersLayer = () => {
   return (
     <>
       {workers.map((worker) => (
-        <WorkerMesh key={worker.id} worker={worker} targetBuilding={worker.assignedBuildingId ? targetBuildingById.get(worker.assignedBuildingId) : undefined} />
+        <WorkerMesh
+          key={worker.id}
+          worker={worker}
+          targetBuilding={worker.assignedBuildingId ? targetBuildingById.get(worker.assignedBuildingId) : undefined}
+          doorWorldPosition={doorWorldPosition}
+        />
       ))}
     </>
   );

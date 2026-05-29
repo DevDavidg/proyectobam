@@ -1,7 +1,8 @@
 import { PerspectiveCamera } from '@react-three/drei';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import type { Group, PerspectiveCamera as ThreePerspectiveCamera } from 'three';
+import { PerfCanvas } from '../../app/perf-canvas';
 import { ENHANCED_BUILDING_CATALOG } from '../../core/constants/catalog';
 import type { BuildingType } from '../../core/types/building';
 import { BuildingPreviewVisual } from '../../render/entities/building-preview-visual';
@@ -96,7 +97,7 @@ export const BuildingPreview = ({ type, level, className }: BuildingPreviewProps
         'h-[300px] w-[300px] overflow-hidden rounded-xl border border-amber-900/35 bg-gradient-to-b from-amber-950/40 via-stone-900/30 to-slate-950/55'
       }
     >
-      <Canvas
+      <PerfCanvas
         shadows={false}
         dpr={[1, 1.25]}
         frameloop='demand'
@@ -138,7 +139,7 @@ export const BuildingPreview = ({ type, level, className }: BuildingPreviewProps
           <circleGeometry args={[groundRadius, 28]} />
           <meshStandardMaterial color='#2a190f' roughness={0.95} metalness={0.05} />
         </mesh>
-      </Canvas>
+      </PerfCanvas>
     </div>
   );
 };

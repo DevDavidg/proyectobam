@@ -1,34 +1,38 @@
 type ShopItemCardProps = {
-  name: string;
-  description: string;
-  sizeLabel: string;
-  currentCount: number;
-  maxAllowed: number;
-  isSingleRow?: boolean;
-  isActive: boolean;
-  onSelect: () => void;
+  technicalName: string;
+  currentCount?: number;
+  maxAllowed?: number;
+  footerLabel?: string;
+  isActive?: boolean;
+  isDisabled?: boolean;
+  isLocked?: boolean;
+  isTerrainCurrent?: boolean;
+  compact?: boolean;
+  onSelect?: () => void;
   previewSlot?: React.ReactNode;
 };
 
 export const ShopItemCard = ({
-  name,
-  description,
-  sizeLabel,
+  technicalName,
   currentCount,
   maxAllowed,
-  isSingleRow = false,
-  isActive,
+  footerLabel,
+  isActive = false,
+  isDisabled = false,
+  isLocked = false,
+  isTerrainCurrent = false,
+  compact = false,
   onSelect,
   previewSlot,
 }: ShopItemCardProps) => {
-  const isAtCap = currentCount >= maxAllowed;
-  const isLocked = maxAllowed <= 0;
-  const stateClass = isActive
-    ? 'ring-[3px] ring-yellow-300 ring-offset-2 ring-offset-[#3a2412]'
-    : isAtCap
-      ? 'opacity-95'
-      : '';
+  const isInteractive = Boolean(onSelect) && !isLocked;
+  const resolvedFooterLabel =
+    footerLabel ?? (currentCount !== undefined && maxAllowed !== undefined ? `${currentCount} / ${maxAllowed}` : '');
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
+    if (!isInteractive || !onSelect) {
+      return;
+    }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onSelect();
@@ -37,39 +41,52 @@ export const ShopItemCard = ({
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      aria-pressed={isActive}
-      aria-label={`Seleccionar ${name}`}
-      onClick={onSelect}
+      role={isInteractive ? 'button' : 'group'}
+      tabIndex={isInteractive ? 0 : -1}
+      aria-pressed={isInteractive ? isActive : undefined}
+      aria-disabled={isDisabled || isLocked}
+      aria-label={
+        isLocked
+          ? `${technicalName} bloqueado`
+          : isTerrainCurrent
+            ? `${technicalName} en terreno`
+            : `Seleccionar ${technicalName}`
+      }
+      onClick={isInteractive ? onSelect : undefined}
       onKeyDown={handleKeyDown}
-      className={`bym-card-wood relative flex cursor-pointer flex-col items-center gap-2 p-3 text-left transition ${stateClass}`}
+      className={`bym-shop-item-card flex flex-col overflow-hidden transition ${
+        compact ? 'bym-shop-item-card--compact' : ''
+      } ${isActive ? 'bym-shop-item-card--active' : ''} ${
+        isTerrainCurrent ? 'bym-shop-item-card--terrain' : ''
+      } ${isDisabled ? 'bym-shop-item-card--disabled' : ''} ${
+        isLocked ? 'bym-shop-item-card--locked' : ''
+      } ${isInteractive ? 'cursor-pointer' : ''}`}
     >
-      <p className="bym-cartoon-text w-full text-center text-[14px] leading-tight">{name}</p>
-      <p className="line-clamp-2 min-h-[28px] w-full text-center text-[11px] leading-tight text-amber-100/90">
-        {description}
-      </p>
+      <div className="border-b border-black/80 px-1 py-1">
+        <p className="truncate text-center font-mono text-[10px] font-semibold uppercase tracking-tight text-[#1e1b18]">
+          {technicalName}
+        </p>
+      </div>
       <div
-        className={`flex w-full items-center justify-center rounded-md border-2 border-[#1e1b18] bg-gradient-to-b from-[#3b2412] to-[#1e1308] shadow-[inset_0_3px_0_rgba(255,210,150,0.18)] ${
-          isSingleRow ? 'h-[88px]' : 'h-[110px]'
+        className={`relative flex flex-1 items-center justify-center bg-white px-1 py-1 ${
+          compact ? 'min-h-[64px]' : 'min-h-[92px]'
         }`}
       >
-        {previewSlot ?? <span className="bym-cartoon-text-sm text-[10px] text-amber-200/80">PREVIEW</span>}
+        {previewSlot}
+        {isLocked ? (
+          <div className="bym-shop-item-card__lock-overlay" aria-hidden>
+            <span className="bym-shop-item-card__lock-icon">🔒</span>
+          </div>
+        ) : null}
       </div>
-      <div className="flex w-full items-center justify-between gap-2">
-        <span className="bym-cartoon-text-sm text-[11px]">{sizeLabel}</span>
-        <span
-          className={`bym-cartoon-text-sm rounded-md border-2 border-[#1e1b18] px-2 py-0.5 text-[12px] leading-none ${
-            isLocked
-              ? 'bg-stone-700 text-stone-300'
-              : isAtCap
-                ? 'bg-emerald-600 text-emerald-50'
-                : 'bg-[#1d120a] text-amber-100'
+      <div className="border-t border-black/80 px-1 py-2">
+        <p
+          className={`text-center font-mono font-bold leading-none text-[#1e1b18] ${
+            compact ? 'text-[12px]' : 'text-[15px]'
           }`}
         >
-          {currentCount}/{maxAllowed}
-          {isAtCap && !isLocked ? ' ✓' : null}
-        </span>
+          {resolvedFooterLabel}
+        </p>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { BUILDING_TYPES } from '../../core/types/building';
 import { ENHANCED_BUILDING_CATALOG } from '../../core/constants/catalog';
 import { acquireTurretShotEvents, runCombatTickSystem } from '../../ecs/systems/combat-tick-system';
 import { findPathAStar, getRectangleBorderCells } from '../../utils/pathfinding';
-import { getWalkableGridFromState } from './helpers';
+import { getWalkableGridFromState, rollObstacleClearShinyReward } from './helpers';
 import type { GameStore, GameStoreGet, GameStoreSet, Projectile, Worker } from './types';
 
 type CombatActions = Pick<GameStore, 'tickCombat' | 'tickConstruction' | 'tickProjectiles' | 'tickEffects'>;
@@ -143,6 +143,7 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
     const walkable = getWalkableGridFromState(state.buildings, state.gridSize);
     const nextWorkers: Worker[] = current.workers.map((worker) => ({ ...worker, path: [...worker.path] }));
     const nextQueuedMonsters = [...current.queuedMonsters];
+    let nextShiny = current.shiny;
     const updatedBuildingIds = new Set<string>();
     const workerStateBefore = current.workers.map((worker) => `${worker.state}|${worker.x.toFixed(3)}|${worker.y.toFixed(3)}|${worker.path.length}`).join(';');
 
@@ -189,6 +190,7 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
           if (assigned) {
             if (worker.taskType === 'CLEAR_OBSTACLE') {
               current.engine.removeBuilding(assignedBuildingId);
+              nextShiny += rollObstacleClearShinyReward();
             } else {
               current.engine.updateBuilding(assignedBuildingId, (building) => ({
                 ...building,
@@ -196,6 +198,12 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
                 assignedWorkerId: undefined,
                 buildEndsAt: undefined,
                 buildStartedAt: undefined,
+                lastHarvested:
+                  building.type === BUILDING_TYPES.RESOURCE_GOO_COLLECTOR ||
+                  building.type === BUILDING_TYPES.RESOURCE_PEBBLE_COLLECTOR ||
+                  building.type === BUILDING_TYPES.RESOURCE_PUTTY_COLLECTOR
+                    ? now
+                    : building.lastHarvested,
               }));
               updatedBuildingIds.add(assignedBuildingId);
               if (assigned.type === BUILDING_TYPES.ARMY_HATCHERY) {
@@ -267,6 +275,7 @@ export const createCombatActions = (set: GameStoreSet, get: GameStoreGet): Comba
     set({
       workers: workersChanged ? nextWorkers : current.workers,
       queuedMonsters: queuedMonstersChanged ? nextQueuedMonsters : current.queuedMonsters,
+      shiny: nextShiny,
       lastConstructionTick: now,
     });
     if (buildingsChanged) {

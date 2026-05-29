@@ -1,3 +1,4 @@
+import type { Building } from '../types/building';
 import type { ResourceType } from '../types/resources';
 
 type ResourceCost = Record<ResourceType, number>;
@@ -47,3 +48,23 @@ export const getPebbleShinerLevelSpec = (level: number): PebbleShinerLevelSpec =
 
 export const getPebbleShinerProductionPerMs = (level: number): number =>
   getPebbleShinerLevelSpec(level).productionPerHour / HOUR_MS;
+
+export type PebbleShinerBuffer = {
+  amount: number;
+  capacity: number;
+  ratio: number;
+};
+
+export const computePebbleShinerBuffer = (
+  building: Pick<Building, 'level' | 'lastHarvested' | 'productionPerMs'>,
+  now: number,
+): PebbleShinerBuffer => {
+  const spec = getPebbleShinerLevelSpec(building.level);
+  const capacity = spec.capacity;
+  const lastHarvested = building.lastHarvested ?? now;
+  const productionPerMs = building.productionPerMs ?? getPebbleShinerProductionPerMs(building.level);
+  const elapsed = Math.max(0, now - lastHarvested);
+  const amount = Math.min(capacity, elapsed * productionPerMs);
+  const ratio = capacity > 0 ? Math.max(0, Math.min(1, amount / capacity)) : 0;
+  return { amount, capacity, ratio };
+};

@@ -1,3 +1,4 @@
+import type { Building } from '../types/building';
 import type { ResourceType } from '../types/resources';
 
 type ResourceCost = Record<ResourceType, number>;
@@ -47,3 +48,23 @@ export const getPuttySquisherLevelSpec = (level: number): PuttySquisherLevelSpec
 
 export const getPuttySquisherProductionPerMs = (level: number): number =>
   getPuttySquisherLevelSpec(level).productionPerHour / HOUR_MS;
+
+export type PuttySquisherBuffer = {
+  amount: number;
+  capacity: number;
+  ratio: number;
+};
+
+export const computePuttySquisherBuffer = (
+  building: Pick<Building, 'level' | 'lastHarvested' | 'productionPerMs'>,
+  now: number,
+): PuttySquisherBuffer => {
+  const spec = getPuttySquisherLevelSpec(building.level);
+  const capacity = spec.capacity;
+  const lastHarvested = building.lastHarvested ?? now;
+  const productionPerMs = building.productionPerMs ?? getPuttySquisherProductionPerMs(building.level);
+  const elapsed = Math.max(0, now - lastHarvested);
+  const amount = Math.min(capacity, elapsed * productionPerMs);
+  const ratio = capacity > 0 ? Math.max(0, Math.min(1, amount / capacity)) : 0;
+  return { amount, capacity, ratio };
+};

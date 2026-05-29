@@ -21,6 +21,7 @@ import { LandExpansionPreview } from './land-expansion-preview';
 import { PenResidentsLayer } from './pen-residents-layer';
 import { MoveBuildingGuides } from './move-building-guides';
 import { RangeRing } from './range-ring';
+import { ResourceCollectionLayer } from './resource-collection-layer';
 import { Terrain } from './terrain';
 import { WorkersLayer } from './workers-layer';
 
@@ -33,22 +34,23 @@ export const GameScene = () => {
   return (
     <>
       <IsometricCamera />
-      <color attach="background" args={['#cfe7a4']} />
-      <hemisphereLight intensity={0.9} groundColor="#5f4b2f" color="#fef3c7" />
-      <ambientLight intensity={0.62} />
+      <color attach="background" args={['#86c43e']} />
+      <hemisphereLight intensity={0.58} groundColor="#23420f" color="#f4ffd7" />
+      <ambientLight intensity={0.34} color="#d8efbc" />
       <directionalLight
         castShadow
-        position={[30, 38, 24]}
-        intensity={1.35}
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
+        position={[-28, 42, -24]}
+        intensity={1.2}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
         shadow-camera-near={1}
         shadow-camera-far={120}
-        shadow-camera-left={-40}
-        shadow-camera-right={40}
-        shadow-camera-top={40}
-        shadow-camera-bottom={-40}
-        shadow-bias={-0.001}
+        shadow-camera-left={-44}
+        shadow-camera-right={44}
+        shadow-camera-top={44}
+        shadow-camera-bottom={-44}
+        shadow-bias={-0.0003}
+        shadow-normalBias={0.02}
       />
       {placementEnabled ? (
         <Grid
@@ -115,6 +117,7 @@ export const GameScene = () => {
       <PenResidentsLayer />
       <BuildingContextMenu />
       <CombatJuiceLayer />
+      <ResourceCollectionLayer />
       <OrbitControls
         target={[0, 0, 0]}
         enablePan={true}

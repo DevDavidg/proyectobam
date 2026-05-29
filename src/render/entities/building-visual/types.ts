@@ -1,8 +1,9 @@
 import type { BuildingStatus, BuildingType } from '../../../core/types/building';
 
+export type { MaterialToken } from '../shared/types';
+
 export type BuildingVisualMaterialMode = 'default' | 'highlight' | 'ghost-valid' | 'ghost-invalid';
 export type PreviewableBuildingType = Exclude<BuildingType, 'PREVIEW'>;
-export type MaterialToken = 'gold' | 'iron' | 'wood' | 'goo' | 'stone';
 export type BuildingVisualFamily = 'town-hall' | 'wall' | 'turret' | 'mortar' | 'pen' | 'collector' | 'hatchery' | 'decor';
 
 export type BuildingVisualProps = {
@@ -17,4 +18,5 @@ export type BuildingVisualProps = {
   hp?: number;
   maxHp?: number;
   storageFillRatio?: number;
+  constructionProgress?: number;
 };

@@ -7,8 +7,11 @@ import { syncGridSystem } from '../../ecs/systems/sync-grid-system';
 import { savePersistedGameData } from '../persistence';
 import {
   ensureStarterResources,
+  getRandomObstacleRespawnDelayMs,
   getPenInteriorCells,
   getResidentWalkableGrid,
+  OBSTACLE_RESPAWN_TARGET_COUNT,
+  trySpawnRandomObstacle,
   getWalkableGridFromState,
   resolveResidentSpeed,
   toCellCenter,
@@ -136,7 +139,9 @@ export const createLifecycleActions = (set: GameStoreSet, get: GameStoreGet): Li
   tickHatcheries: () => {
     const current = get();
     const state = current.engine.getState();
-    const hatcheries = state.buildings.filter((building) => building.type === BUILDING_TYPES.ARMY_HATCHERY && building.status === 'ACTIVE');
+    const hatcheries = state.buildings.filter(
+      (building) => building.type === BUILDING_TYPES.ARMY_HATCHERY && building.status === 'ACTIVE' && building.hp > 0
+    );
     if (!hatcheries.length) {
       return;
     }
@@ -468,6 +473,14 @@ export const createLifecycleActions = (set: GameStoreSet, get: GameStoreGet): Li
       if (hpRatio < 0.5) {
         continue;
       }
+      if (
+        building.type === BUILDING_TYPES.RESOURCE_GOO_COLLECTOR ||
+        building.type === BUILDING_TYPES.RESOURCE_PEBBLE_COLLECTOR ||
+        building.type === BUILDING_TYPES.RESOURCE_PUTTY_COLLECTOR ||
+        building.type === BUILDING_TYPES.RESOURCE_TWIG_COLLECTOR
+      ) {
+        continue;
+      }
       const resourceType = def.production.type;
       const last = building.lastHarvested ?? current.lastResourceTick;
       const deltaTime = Math.max(0, now - last);
@@ -480,10 +493,23 @@ export const createLifecycleActions = (set: GameStoreSet, get: GameStoreGet): Li
       current.engine.updateBuildingLastHarvested(building.id, now);
     }
     current.engine.setResources(nextResources);
+    const hasObstacleCapacity =
+      state.buildings.filter((building) => building.tags?.includes('obstacle')).length < OBSTACLE_RESPAWN_TARGET_COUNT;
+    let didSpawnObstacle = false;
+    let nextObstacleRespawnAt = current.nextObstacleRespawnAt;
+    if (hasObstacleCapacity && now >= current.nextObstacleRespawnAt) {
+      didSpawnObstacle = trySpawnRandomObstacle(current.unlockedLandCells);
+      nextObstacleRespawnAt = now + getRandomObstacleRespawnDelayMs();
+    }
 
     set({
       resources: nextResources,
       lastResourceTick: now,
+      nextObstacleRespawnAt,
     });
+
+    if (didSpawnObstacle) {
+      current.refreshEcs();
+    }
   },
 });

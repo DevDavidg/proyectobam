@@ -21,7 +21,7 @@ const BUILDING_REQUIREMENTS: Record<BuildableType, { requiredTownHallLevel: numb
   DEFENSE_TURRET_RAPID: { requiredTownHallLevel: 1 },
   DEFENSE_MORTAR: { requiredTownHallLevel: 1 },
   DEFENSE_LASER_TOWER: { requiredTownHallLevel: 4 },
-  ARMY_HATCHERY: { requiredTownHallLevel: 2 },
+  ARMY_HATCHERY: { requiredTownHallLevel: 3 },
   ARMY_MONSTER_PEN: { requiredTownHallLevel: 2 },
   DECOR_MUSHROOM_TOTEM: { requiredTownHallLevel: 1 },
 };
@@ -39,7 +39,7 @@ const BUILDING_CAPS_BY_TOWN_HALL: Record<BuildableType, Partial<Record<number, n
   DEFENSE_TURRET_RAPID: { 2: 1, 3: 2, 5: 3, 7: 4, 9: 5 },
   DEFENSE_MORTAR: { 1: 1, 2: 2, 3: 3, 5: 4, 7: 5, 9: 6 },
   DEFENSE_LASER_TOWER: { 4: 1, 5: 2, 7: 3, 9: 4 },
-  ARMY_HATCHERY: { 2: 1, 5: 2, 8: 3 },
+  ARMY_HATCHERY: { 3: 1, 5: 2 },
   ARMY_MONSTER_PEN: { 2: 1, 3: 2, 5: 3, 7: 4, 9: 5 },
   DECOR_MUSHROOM_TOTEM: { 1: 10, 4: 20, 7: 35, 10: 50 },
 };
@@ -61,8 +61,34 @@ export const getBuildingRequiredTownHallLevel = (buildingType: BuildableType): n
 export const getBuildingCapForTownHallLevel = (buildingType: BuildableType, townHallLevel: number): number =>
   resolveMaxByLevel(BUILDING_CAPS_BY_TOWN_HALL[buildingType] ?? {}, townHallLevel);
 
-export const getBuildingCount = (buildings: Building[], buildingType: BuildableType): number =>
-  buildings.filter((building) => building.type === buildingType && !building.tags?.includes('obstacle')).length;
+const STORAGE_SILO_TYPES: ReadonlySet<BuildableType> = new Set([
+  BUILDING_TYPES.RESOURCE_WOOD_SILO,
+  BUILDING_TYPES.RESOURCE_STONE_SILO,
+]);
+
+/** Legacy wood silo is kept for saves/upgrades but hidden from the shop catalog. */
+export const SHOP_HIDDEN_BUILDING_TYPES: ReadonlySet<BuildingType> = new Set([
+  BUILDING_TYPES.RESOURCE_WOOD_SILO,
+]);
+
+export const isShopVisibleBuilding = (buildingType: BuildingType): boolean =>
+  !SHOP_HIDDEN_BUILDING_TYPES.has(buildingType);
+
+export const isStorageSiloType = (buildingType: BuildingType): buildingType is BuildableType =>
+  STORAGE_SILO_TYPES.has(buildingType as BuildableType);
+
+export const getStorageSiloCount = (buildings: Building[]): number =>
+  buildings.filter(
+    (building) => isStorageSiloType(building.type) && !building.tags?.includes('obstacle'),
+  ).length;
+
+export const getBuildingCount = (buildings: Building[], buildingType: BuildableType): number => {
+  if (isStorageSiloType(buildingType)) {
+    return getStorageSiloCount(buildings);
+  }
+  return buildings.filter((building) => building.type === buildingType && !building.tags?.includes('obstacle'))
+    .length;
+};
 
 export const hasMetResourceCost = (
   resources: ResourceCost,

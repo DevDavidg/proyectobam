@@ -1,5 +1,6 @@
 import { canPlaceBuilding } from '../grid/placement';
 import { createGrid } from '../grid/grid';
+import { BUILDING_TYPES } from '../types/building';
 import type { Building } from '../types/building';
 import type { GameState } from '../types/game-state';
 import type { Enemy } from '../types/enemy';
@@ -130,6 +131,13 @@ export class GameEngine {
     };
 
     if (nextHp > 0) {
+      return { ...this.state.buildings[buildingIndex] };
+    }
+    if (building.type === BUILDING_TYPES.ARMY_HATCHERY) {
+      this.state.buildings[buildingIndex] = {
+        ...building,
+        hp: 0,
+      };
       return { ...this.state.buildings[buildingIndex] };
     }
 

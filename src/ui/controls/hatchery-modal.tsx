@@ -24,6 +24,7 @@ export const HatcheryModal = () => {
   const activeResearch = useGameStore((state) => state.activeResearch);
   const shiny = useGameStore((state) => state.shiny);
   const developerModeEnabled = useGameStore((state) => state.developerModeEnabled);
+  const freeBuildMode = useGameStore((state) => state.freeBuildMode);
   const resources = useGameStore((state) => state.resources);
   const armySpaceUsed = useGameStore((state) => state.armySpaceUsed);
   const maxArmySpace = useGameStore((state) => state.maxArmySpace);
@@ -41,7 +42,7 @@ export const HatcheryModal = () => {
   const queue = hatcheryTrainingQueues[hatcheryModalBuildingId] ?? [];
   const researchRemainingMs = activeResearch.endTime ? Math.max(0, activeResearch.endTime - Date.now()) : 0;
   const instantResearchCost = getInstantFinishShinyCost(researchRemainingMs);
-  const hasUnlimitedShiny = developerModeEnabled;
+  const hasUnlimitedShiny = developerModeEnabled || freeBuildMode;
   const hpCap = getMonsterStatCap('hp');
   const damageCap = getMonsterStatCap('damage');
   const speedCap = getMonsterStatCap('speed');
@@ -50,7 +51,7 @@ export const HatcheryModal = () => {
     <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55">
       <div className="bym-wood-frame max-h-[90vh] w-[1120px] overflow-y-auto p-4 text-slate-100">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="bym-cartoon-text text-2xl">Arquitectura de Monstruos</h3>
+          <h3 className="bym-cartoon-text text-2xl">Monster Academy</h3>
           <button
             type="button"
             aria-label="Cerrar modal"
@@ -72,19 +73,21 @@ export const HatcheryModal = () => {
             const unlocked = currentLevel > 0;
             const shownCurrentLevel = Math.max(1, currentLevel);
             const levelSpec = getMonsterLevelSpec(monsterType, shownCurrentLevel);
-            const canTrain = unlocked && resources.goo.current >= levelSpec.gooCost;
+            const canTrain = unlocked && (hasUnlimitedShiny || resources.goo.current >= levelSpec.gooCost);
             const nextResearchLevel = unlocked ? currentLevel + 1 : 1;
             const maxLevel = getMonsterMaxLevel(monsterType);
-            const canResearch = nextResearchLevel <= maxLevel;
-            const nextLevelPreview = canResearch ? monsterDef.levels[nextResearchLevel] : null;
-            const canMeetTownHall = nextLevelPreview ? townHallLevel >= nextLevelPreview.requiredTownHallLevel : false;
-            const canMeetLab = nextLevelPreview ? labLevel >= nextLevelPreview.requiredLaboratoryLevel : false;
-            const hasResearchResources = nextLevelPreview
-              ? resources.pebbles.current >= nextLevelPreview.researchCost.pebbles &&
-                resources.putty.current >= nextLevelPreview.researchCost.putty
-              : false;
+            const canResearch = hasUnlimitedShiny || nextResearchLevel <= maxLevel;
+            const nextLevelPreview = canResearch ? monsterDef.levels[nextResearchLevel] ?? null : null;
+            const canMeetTownHall = hasUnlimitedShiny || (nextLevelPreview ? townHallLevel >= nextLevelPreview.requiredTownHallLevel : false);
+            const canMeetLab = hasUnlimitedShiny || (nextLevelPreview ? labLevel >= nextLevelPreview.requiredLaboratoryLevel : false);
+            const hasResearchResources = hasUnlimitedShiny ||
+              (nextLevelPreview
+                ? resources.pebbles.current >= nextLevelPreview.researchCost.pebbles &&
+                  resources.putty.current >= nextLevelPreview.researchCost.putty
+                : false);
             const isResearchingThisMonster = activeResearch.monsterType === monsterType;
-            const researchButtonEnabled = !activeResearch.monsterType && canResearch && canMeetTownHall && canMeetLab && hasResearchResources;
+            const researchButtonEnabled =
+              !activeResearch.monsterType && !!nextLevelPreview && canResearch && canMeetTownHall && canMeetLab && hasResearchResources;
             return (
               <div key={monsterType} className="bym-card-wood p-3 text-left text-amber-50">
                 <div className="grid grid-cols-[300px_1fr] gap-4">
@@ -168,7 +171,7 @@ export const HatcheryModal = () => {
         {activeResearch.monsterType ? (
           <div className="bym-card-wood mt-3 p-3 text-amber-50">
             <p className="bym-cartoon-text-sm text-[12px]">
-              Laboratorio investigando {activeResearch.monsterType} a Nv.{activeResearch.targetLevel}
+              Monster Academy investigando {activeResearch.monsterType} a Nv.{activeResearch.targetLevel}
             </p>
             <p className="text-[11px] text-amber-100/95">Tiempo restante: {formatDurationMs(researchRemainingMs)}</p>
             <button

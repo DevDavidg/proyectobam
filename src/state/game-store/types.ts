@@ -60,6 +60,24 @@ export type FloatingText = {
   maxLife: number;
 };
 
+export type ResourceOrbResourceType = 'twigs' | 'pebbles' | 'putty' | 'goo';
+
+export type ResourceOrb = {
+  id: string;
+  resourceType: ResourceOrbResourceType;
+  amount: number;
+  sizeFactor: number;
+  startX: number;
+  startY: number;
+  startZ: number;
+  targetX: number;
+  targetY: number;
+  targetZ: number;
+  startedAt: number;
+  durationMs: number;
+  delayMs: number;
+};
+
 export type TrainingQueueItem = {
   monsterType: MonsterType;
   timeRemainingMs: number;
@@ -142,6 +160,7 @@ export type GameStore = {
   projectiles: Projectile[];
   impacts: ImpactVfx[];
   floatingTexts: FloatingText[];
+  resourceOrbs: ResourceOrb[];
   resources: GameResources;
   shiny: number;
   workers: Worker[];
@@ -195,6 +214,7 @@ export type GameStore = {
   lastCombatTick: number;
   lastConstructionTick: number;
   lastHatcheryTick: number;
+  nextObstacleRespawnAt: number;
   refreshEcs: () => void;
   recalculateMaxCapacities: () => void;
   tickResources: () => void;
@@ -230,6 +250,7 @@ export type GameStore = {
   upgradeSelectedBuilding: () => void;
   repairSelectedBuilding: () => void;
   fortifySelectedBuilding: () => void;
+  recycleSelectedBuilding: () => void;
   setSelectedArmyMonster: (monsterType: MonsterType | null) => void;
   openHatcheryModal: (buildingId: string) => void;
   closeHatcheryModal: () => void;
@@ -251,6 +272,8 @@ export type GameStore = {
   refreshLandExpansionPreview: () => void;
   spawnEnemy: () => void;
   collectFromCollector: (collectorId: string) => void;
+  collectAllCollectors: () => void;
+  pruneExpiredResourceOrbs: () => void;
   clearObstacle: (obstacleId: string) => void;
 };
 

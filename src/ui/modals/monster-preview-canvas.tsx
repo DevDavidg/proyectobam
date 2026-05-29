@@ -1,7 +1,8 @@
 import { PerspectiveCamera } from '@react-three/drei';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Suspense, useMemo, useRef } from 'react';
 import type { Group } from 'three';
+import { PerfCanvas } from '../../app/perf-canvas';
 import type { MonsterType } from '../../core/constants/monster-catalog';
 
 type PreviewProps = {
@@ -69,7 +70,7 @@ const MonsterMeshSelector = ({ type, animation }: { type: MonsterType; animation
 export const MonsterPreviewCanvas = ({ monsterType, animationState }: PreviewProps) => {
   return (
     <div className="h-[220px] w-[280px] overflow-hidden rounded-lg border-4 border-stone-600 bg-stone-300 shadow-md">
-      <Canvas
+      <PerfCanvas
         shadows={false}
         dpr={[1, 1.25]}
         frameloop="demand"
@@ -85,7 +86,7 @@ export const MonsterPreviewCanvas = ({ monsterType, animationState }: PreviewPro
           <circleGeometry args={[2.6, 24]} />
           <meshStandardMaterial color="#1f1a14" roughness={0.95} metalness={0} />
         </mesh>
-      </Canvas>
+      </PerfCanvas>
     </div>
   );
 };

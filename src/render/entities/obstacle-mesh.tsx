@@ -26,7 +26,7 @@ const mapSeeded = (seed: number, offset: number, min: number, max: number): numb
   min + seeded(seed, offset) * (max - min);
 
 export const ObstacleMesh = ({ entity }: ObstacleMeshProps) => {
-  const clearObstacle = useGameStore((state) => state.clearObstacle);
+  const openBuildingContextMenu = useGameStore((state) => state.openBuildingContextMenu);
   const position = useMemo(
     () => gridToWorldCenter(entity.x, entity.y, entity.sizeX, entity.sizeY, GRID_SIZE, CELL_SIZE),
     [entity.x, entity.y, entity.sizeX, entity.sizeY],
@@ -41,7 +41,22 @@ export const ObstacleMesh = ({ entity }: ObstacleMeshProps) => {
     if (!entity.sourceId) {
       return;
     }
-    clearObstacle(entity.sourceId);
+    openBuildingContextMenu(entity.sourceId, {
+      x: event.nativeEvent.clientX,
+      y: event.nativeEvent.clientY,
+    });
+  };
+
+  const handleContextMenu = (event: ThreeEvent<MouseEvent>): void => {
+    event.stopPropagation();
+    event.nativeEvent.preventDefault();
+    if (!entity.sourceId) {
+      return;
+    }
+    openBuildingContextMenu(entity.sourceId, {
+      x: event.nativeEvent.clientX,
+      y: event.nativeEvent.clientY,
+    });
   };
 
   const isRock = entity.sourceType === "OBSTACLE_ROCK";
@@ -53,7 +68,7 @@ export const ObstacleMesh = ({ entity }: ObstacleMeshProps) => {
   if (isRock) {
     const shardCount = 4 + Math.floor(mapSeeded(obstacleSeed, 2, 0, 4));
     return (
-      <group position={[position[0], 0, position[2]]} onClick={handleClick} scale={[obstacleScale, obstacleScale, obstacleScale]}>
+      <group position={[position[0], 0, position[2]]} onClick={handleClick} onContextMenu={handleContextMenu} scale={[obstacleScale, obstacleScale, obstacleScale]}>
         <mesh castShadow receiveShadow position={[0, 0.48, 0]}>
           <dodecahedronGeometry args={[0.88, 0]} />
           <meshStandardMaterial color="#5f6673" roughness={0.95} metalness={0.05} flatShading={true} />
@@ -96,7 +111,7 @@ export const ObstacleMesh = ({ entity }: ObstacleMeshProps) => {
     const capRadius = mapSeeded(obstacleSeed, 4, 0.8, 1.05);
     const stemHeight = mapSeeded(obstacleSeed, 5, 1.15, 1.45);
     return (
-      <group position={[position[0], 0, position[2]]} onClick={handleClick} scale={[obstacleScale, obstacleScale, obstacleScale]}>
+      <group position={[position[0], 0, position[2]]} onClick={handleClick} onContextMenu={handleContextMenu} scale={[obstacleScale, obstacleScale, obstacleScale]}>
         <mesh castShadow receiveShadow position={[0, stemHeight * 0.5, 0]}>
           <cylinderGeometry args={[0.22, 0.3, stemHeight, 12]} />
           <meshStandardMaterial color="#f6d4a8" roughness={0.86} metalness={0.03} flatShading={true} />
@@ -153,7 +168,7 @@ export const ObstacleMesh = ({ entity }: ObstacleMeshProps) => {
   const canopyLayers = 3 + Math.floor(mapSeeded(obstacleSeed, 8, 0, 3));
 
   return (
-    <group position={[position[0], 0, position[2]]} onClick={handleClick} scale={[obstacleScale, obstacleScale, obstacleScale]}>
+    <group position={[position[0], 0, position[2]]} onClick={handleClick} onContextMenu={handleContextMenu} scale={[obstacleScale, obstacleScale, obstacleScale]}>
       <mesh castShadow receiveShadow position={[0, trunkHeight * 0.5, 0]}>
         <cylinderGeometry args={[trunkRadius * 0.85, trunkRadius * 1.18, trunkHeight, 10]} />
         <meshStandardMaterial color="#6f4524" roughness={0.9} metalness={0.02} flatShading={true} />

@@ -15,6 +15,7 @@ export const GridPointer = () => {
   const battleMode = useGameStore((state) => state.battleMode);
   const placeSelectedBuilding = useGameStore((state) => state.placeSelectedBuilding);
   const confirmLandExpansionAtActiveCell = useGameStore((state) => state.confirmLandExpansionAtActiveCell);
+  const confirmMovingBuilding = useGameStore((state) => state.confirmMovingBuilding);
   const deploySelectedMonster = useGameStore((state) => state.deploySelectedMonster);
 
   const halfWorldSize = getGridWorldSize(GRID_SIZE, CELL_SIZE) / 2;
@@ -44,16 +45,17 @@ export const GridPointer = () => {
       return;
     }
     if (movingBuildingId) {
+      confirmMovingBuilding();
       return;
     }
     if (battleMode) {
       deploySelectedMonster();
-    } else {
-      if (!placementEnabled) {
-        return;
-      }
-      placeSelectedBuilding();
+      return;
     }
+    if (!placementEnabled) {
+      return;
+    }
+    placeSelectedBuilding();
   };
 
   return (

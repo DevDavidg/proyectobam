@@ -1,7 +1,12 @@
-import { Bloom, BrightnessContrast, EffectComposer, Outline } from '@react-three/postprocessing';
-import { useFrame, useThree } from '@react-three/fiber';
-import { useMemo, useState } from 'react';
-import { Mesh, Object3D } from 'three';
+import {
+  Bloom,
+  BrightnessContrast,
+  EffectComposer,
+  Outline,
+} from "@react-three/postprocessing";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useMemo, useState } from "react";
+import { Mesh, Object3D } from "three";
 
 const collectOutlinedObjects = (root: Object3D): Object3D[] => {
   const result: Object3D[] = [];
@@ -48,7 +53,12 @@ export const PostEffects = () => {
 
   return (
     <EffectComposer multisampling={4}>
-      <Bloom intensity={0.25} luminanceThreshold={0.55} luminanceSmoothing={0.25} mipmapBlur={true} />
+      <Bloom
+        intensity={0.25}
+        luminanceThreshold={0.55}
+        luminanceSmoothing={0.25}
+        mipmapBlur={true}
+      />
       <BrightnessContrast brightness={-0.01} contrast={0.11} />
       <Outline
         selection={selection}

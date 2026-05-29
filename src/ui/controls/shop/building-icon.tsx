@@ -25,7 +25,7 @@ const ICON_SPECS: Partial<Record<Exclude<BuildingType, 'PREVIEW'>, IconSpec>> = 
   DEFENSE_TURRET_RAPID: { emoji: '🔫', gradientFrom: '#8aa3c1', gradientTo: '#374a64' },
   DEFENSE_MORTAR: { emoji: '💣', gradientFrom: '#7e8a9e', gradientTo: '#2c3543' },
   DEFENSE_LASER_TOWER: { emoji: '⚡', gradientFrom: '#a5e1ff', gradientTo: '#1d4e8a' },
-  ARMY_HATCHERY: { emoji: '🥚', gradientFrom: '#f1cca0', gradientTo: '#7e5331' },
+  ARMY_HATCHERY: { emoji: '🏫', gradientFrom: '#f1cca0', gradientTo: '#7e5331' },
   ARMY_MONSTER_PEN: { emoji: '🐾', gradientFrom: '#d4a373', gradientTo: '#5e3f1e' },
   DECOR_MUSHROOM_TOTEM: { emoji: '🍄', gradientFrom: '#f8a3a3', gradientTo: '#7e2424' },
 };
